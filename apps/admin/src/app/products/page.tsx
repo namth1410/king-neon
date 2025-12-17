@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Search, Filter, Edit, Trash2 } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Package } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import api from "@/utils/api";
 
@@ -10,11 +10,12 @@ interface Product {
   id: string;
   name: string;
   slug: string;
-  price: number;
-  quantity: number;
+  basePrice: string;
   category: string;
-  isActive: boolean;
+  active: boolean;
   images: string[];
+  featuredImage: string | null;
+  isCustom: boolean;
 }
 
 export default function ProductsPage() {
@@ -29,15 +30,13 @@ export default function ProductsPage() {
   const fetchProducts = async () => {
     try {
       const response = await api.get("/products");
-      // Use mock data for now if empty or error
-      if (response.data && response.data.length > 0) {
-        setProducts(response.data);
-      } else {
-        // Fallback or empty state
-        setProducts([]);
-      }
+      const productsData = Array.isArray(response.data)
+        ? response.data
+        : response.data.data || [];
+      setProducts(productsData);
     } catch (error) {
       console.error("Failed to fetch products", error);
+      setProducts([]);
     } finally {
       setIsLoading(false);
     }
@@ -60,157 +59,290 @@ export default function ProductsPage() {
   );
 
   return (
-    <DashboardLayout title="Product Management">
-      {/* Actions Bar */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between mb-8">
-        <div className="flex gap-4 flex-1">
-          <div className="relative flex-1 max-w-md group">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#ff3366] transition-colors"
-              size={20}
-            />
-            <input
-              type="text"
-              placeholder="Search products..."
-              className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white focus:border-[#ff3366]/50 focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-[#ff3366]/50 transition-all placeholder:text-gray-600"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-300 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all">
-            <Filter size={18} />
-            <span>Filter</span>
-          </button>
-        </div>
-        <Link
-          href="/products/create"
-          className="flex items-center gap-2 px-6 py-3 bg-[#ff3366] hover:bg-[#ff3366]/90 text-white rounded-xl font-medium transition-all shadow-[0_0_20px_rgba(255,51,102,0.3)] hover:shadow-[0_0_30px_rgba(255,51,102,0.5)] active:scale-95"
+    <DashboardLayout title="Products">
+      <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+        {/* Header */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
         >
-          <Plus size={20} />
-          <span>Add Product</span>
-        </Link>
-      </div>
-
-      {/* Products Table */}
-      <div className="glass-card rounded-2xl overflow-hidden">
-        {isLoading ? (
-          <div className="p-12 text-center text-gray-500 animate-pulse">
-            Loading products...
-          </div>
-        ) : filteredProducts.length === 0 ? (
-          <div className="p-16 text-center">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/5 mb-6 animate-bounce">
-              <Search size={32} className="text-gray-500" />
-            </div>
-            <h3 className="text-xl font-semibold text-white mb-2">
-              No products found
-            </h3>
-            <p className="text-gray-500 max-w-sm mx-auto mb-8">
-              {searchTerm
-                ? "Try adjusting your search terms."
-                : "Get started by creating your first product."}
+          <div>
+            <h1
+              style={{
+                fontSize: "24px",
+                fontWeight: 700,
+                color: "white",
+                marginBottom: "4px",
+              }}
+            >
+              Product Management
+            </h1>
+            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "14px" }}>
+              {products.length} products in catalog
             </p>
-            {!searchTerm && (
-              <Link
-                href="/products/create"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-[#ff3366] hover:bg-[#ff3366]/90 text-white rounded-xl font-medium transition-all shadow-lg shadow-[#ff3366]/20"
-              >
-                <Plus size={20} />
-                <span>Add Product</span>
-              </Link>
-            )}
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+          <Link
+            href="/products/create"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "12px 20px",
+              background: "linear-gradient(135deg, #ff3366 0%, #ff3366cc 100%)",
+              borderRadius: "12px",
+              color: "white",
+              fontWeight: 600,
+              textDecoration: "none",
+              boxShadow: "0 4px 20px rgba(255,51,102,0.3)",
+            }}
+          >
+            <Plus size={20} />
+            Add Product
+          </Link>
+        </div>
+
+        {/* Search */}
+        <div style={{ position: "relative", maxWidth: "400px" }}>
+          <Search
+            size={20}
+            style={{
+              position: "absolute",
+              left: "16px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "rgba(255,255,255,0.4)",
+            }}
+          />
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "12px 16px 12px 48px",
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: "12px",
+              color: "white",
+              fontSize: "14px",
+              outline: "none",
+            }}
+          />
+        </div>
+
+        {/* Products Table */}
+        <div
+          style={{
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: "16px",
+            overflow: "hidden",
+          }}
+        >
+          {isLoading ? (
+            <div
+              style={{
+                padding: "60px",
+                textAlign: "center",
+                color: "rgba(255,255,255,0.4)",
+              }}
+            >
+              <div
+                style={{
+                  width: "40px",
+                  height: "40px",
+                  border: "3px solid rgba(255,51,102,0.2)",
+                  borderTopColor: "#ff3366",
+                  borderRadius: "50%",
+                  margin: "0 auto 16px",
+                  animation: "spin 1s linear infinite",
+                }}
+              />
+              Loading products...
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div style={{ padding: "60px", textAlign: "center" }}>
+              <Package
+                size={48}
+                style={{ color: "rgba(255,255,255,0.2)", marginBottom: "16px" }}
+              />
+              <p style={{ color: "rgba(255,255,255,0.5)" }}>
+                No products found
+              </p>
+            </div>
+          ) : (
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
-                <tr className="border-b border-white/10 bg-white/5">
-                  <th className="px-6 py-5 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                    Product
-                  </th>
-                  <th className="px-6 py-5 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                    Category
-                  </th>
-                  <th className="px-6 py-5 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-5 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                    Price
-                  </th>
-                  <th className="px-6 py-5 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                    Stock
-                  </th>
-                  <th className="px-6 py-5 text-xs font-semibold text-gray-400 uppercase tracking-wider text-right">
-                    Actions
-                  </th>
+                <tr
+                  style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
+                >
+                  <th style={thStyle}>Product</th>
+                  <th style={thStyle}>Category</th>
+                  <th style={thStyle}>Price</th>
+                  <th style={thStyle}>Status</th>
+                  <th style={thStyle}>Type</th>
+                  <th style={{ ...thStyle, textAlign: "right" }}>Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody>
                 {filteredProducts.map((product) => (
                   <tr
                     key={product.id}
-                    className="hover:bg-white/[0.02] transition-colors group"
+                    style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
                   >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-xl bg-white/5 flex-shrink-0 overflow-hidden border border-white/10 group-hover:border-[#ff3366]/30 transition-colors">
-                          {product.images[0] && (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={product.images[0]}
-                              alt={product.name}
-                              className="w-full h-full object-cover"
-                            />
-                          )}
+                    <td style={tdStyle}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "12px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: "48px",
+                            height: "48px",
+                            borderRadius: "8px",
+                            background:
+                              "linear-gradient(135deg, rgba(255,51,102,0.2) 0%, rgba(147,51,234,0.2) 100%)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "#ff3366",
+                            fontWeight: 700,
+                            fontSize: "14px",
+                          }}
+                        >
+                          {product.name.slice(0, 2).toUpperCase()}
                         </div>
                         <div>
-                          <div className="font-semibold text-white text-base mb-0.5 group-hover:text-[#ff3366] transition-colors">
+                          <div
+                            style={{
+                              color: "white",
+                              fontWeight: 600,
+                              marginBottom: "2px",
+                            }}
+                          >
                             {product.name}
                           </div>
-                          <div className="text-xs text-gray-500 font-mono">
+                          <div
+                            style={{
+                              color: "rgba(255,255,255,0.4)",
+                              fontSize: "12px",
+                            }}
+                          >
                             /{product.slug}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-white/5 text-gray-300 border border-white/10">
-                        {product.category || "N/A"}
+                    <td style={tdStyle}>
+                      <span
+                        style={{
+                          padding: "4px 12px",
+                          borderRadius: "20px",
+                          background: "rgba(255,255,255,0.05)",
+                          border: "1px solid rgba(255,255,255,0.1)",
+                          color: "rgba(255,255,255,0.7)",
+                          fontSize: "12px",
+                          textTransform: "capitalize",
+                        }}
+                      >
+                        {product.category.replace(/-/g, " ")}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td style={tdStyle}>
                       <span
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${
-                          product.isActive
-                            ? "bg-green-500/10 text-green-500 border-green-500/20"
-                            : "bg-red-500/10 text-red-500 border-red-500/20"
-                        }`}
+                        style={{
+                          color: "#22c55e",
+                          fontWeight: 700,
+                          fontSize: "16px",
+                        }}
+                      >
+                        ${Number(product.basePrice).toFixed(2)}
+                      </span>
+                    </td>
+                    <td style={tdStyle}>
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          padding: "4px 12px",
+                          borderRadius: "20px",
+                          background: product.active
+                            ? "rgba(34,197,94,0.1)"
+                            : "rgba(239,68,68,0.1)",
+                          border: `1px solid ${product.active ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)"}`,
+                          color: product.active ? "#22c55e" : "#ef4444",
+                          fontSize: "12px",
+                          fontWeight: 500,
+                        }}
                       >
                         <span
-                          className={`w-1.5 h-1.5 rounded-full ${product.isActive ? "bg-green-500" : "bg-red-500"}`}
-                        ></span>
-                        {product.isActive ? "Active" : "Inactive"}
+                          style={{
+                            width: "6px",
+                            height: "6px",
+                            borderRadius: "50%",
+                            background: product.active ? "#22c55e" : "#ef4444",
+                          }}
+                        />
+                        {product.active ? "Active" : "Inactive"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-white font-bold font-mono">
-                      ${product.price}
+                    <td style={tdStyle}>
+                      <span
+                        style={{
+                          padding: "4px 12px",
+                          borderRadius: "20px",
+                          background: product.isCustom
+                            ? "rgba(168,85,247,0.1)"
+                            : "rgba(59,130,246,0.1)",
+                          border: `1px solid ${product.isCustom ? "rgba(168,85,247,0.3)" : "rgba(59,130,246,0.3)"}`,
+                          color: product.isCustom ? "#a855f7" : "#3b82f6",
+                          fontSize: "12px",
+                        }}
+                      >
+                        {product.isCustom ? "Custom" : "Standard"}
+                      </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-400">
-                      {product.quantity} units
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <td style={{ ...tdStyle, textAlign: "right" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "8px",
+                          justifyContent: "flex-end",
+                        }}
+                      >
                         <Link
                           href={`/products/edit/${product.id}`}
-                          className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                          style={{
+                            padding: "8px",
+                            borderRadius: "8px",
+                            background: "rgba(255,255,255,0.05)",
+                            color: "rgba(255,255,255,0.6)",
+                            display: "flex",
+                          }}
                         >
-                          <Edit size={18} />
+                          <Edit size={16} />
                         </Link>
                         <button
                           onClick={() => handleDelete(product.id)}
-                          className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                          style={{
+                            padding: "8px",
+                            borderRadius: "8px",
+                            background: "rgba(239,68,68,0.1)",
+                            color: "#ef4444",
+                            border: "none",
+                            cursor: "pointer",
+                            display: "flex",
+                          }}
                         >
-                          <Trash2 size={18} />
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </td>
@@ -218,9 +350,23 @@ export default function ProductsPage() {
                 ))}
               </tbody>
             </table>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </DashboardLayout>
   );
 }
+
+const thStyle: React.CSSProperties = {
+  padding: "16px 20px",
+  textAlign: "left",
+  fontSize: "12px",
+  fontWeight: 600,
+  color: "rgba(255,255,255,0.5)",
+  textTransform: "uppercase",
+  letterSpacing: "0.5px",
+};
+
+const tdStyle: React.CSSProperties = {
+  padding: "16px 20px",
+};
