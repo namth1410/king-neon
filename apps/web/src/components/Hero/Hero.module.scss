@@ -1,0 +1,208 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.hero {
+  position: relative;
+  min-height: 100vh;
+  @include flex-center;
+  overflow: hidden;
+  background: $bg-dark;
+
+  &__background {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        circle at 50% 50%,
+        rgba($neon-pink, 0.15) 0%,
+        transparent 50%
+      );
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        circle at 80% 20%,
+        rgba($neon-blue, 0.1) 0%,
+        transparent 40%
+      );
+    }
+  }
+
+  &__grid-lines {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    opacity: 0.5;
+  }
+
+  &__content {
+    position: relative;
+    z-index: 1;
+    @include container;
+    text-align: center;
+    padding: $spacing-20 0;
+  }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-2;
+    padding: $spacing-2 $spacing-4;
+    background: rgba($neon-pink, 0.1);
+    border: 1px solid rgba($neon-pink, 0.3);
+    border-radius: $radius-full;
+    font-size: $font-size-sm;
+    color: $neon-pink;
+    margin-bottom: $spacing-6;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &__title {
+    @include heading-xl;
+    color: $text-light;
+    margin-bottom: $spacing-6;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+
+    .highlight {
+      @include gradient-text;
+      position: relative;
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: $gradient-primary;
+        border-radius: $radius-full;
+      }
+    }
+  }
+
+  &__subtitle {
+    font-size: $font-size-lg;
+    color: $text-light-secondary;
+    max-width: 600px;
+    margin: 0 auto $spacing-10;
+    line-height: 1.7;
+
+    @include min-width($breakpoint-md) {
+      font-size: $font-size-xl;
+    }
+  }
+
+  &__cta {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-4;
+    justify-content: center;
+
+    @include min-width($breakpoint-sm) {
+      flex-direction: row;
+    }
+  }
+
+  &__preview {
+    margin-top: $spacing-16;
+    position: relative;
+
+    &-wrapper {
+      position: relative;
+      max-width: 700px;
+      margin: 0 auto;
+      aspect-ratio: 16 / 9;
+      @include glass;
+      border-radius: $radius-2xl;
+      overflow: hidden;
+    }
+
+    &-neon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: $font-display;
+      font-size: $font-size-5xl;
+      font-weight: $font-weight-bold;
+      color: $neon-pink;
+      @include neon-glow($neon-pink);
+      animation: pulse-glow 2s ease-in-out infinite;
+
+      @include min-width($breakpoint-md) {
+        font-size: $font-size-7xl;
+      }
+    }
+  }
+
+  &__stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-6;
+    margin-top: $spacing-16;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+
+    @include min-width($breakpoint-md) {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  &__stat {
+    text-align: center;
+
+    &-value {
+      font-family: $font-display;
+      font-size: $font-size-3xl;
+      font-weight: $font-weight-bold;
+      @include gradient-text;
+
+      @include min-width($breakpoint-md) {
+        font-size: $font-size-4xl;
+      }
+    }
+
+    &-label {
+      font-size: $font-size-sm;
+      color: $text-light-secondary;
+      margin-top: $spacing-1;
+    }
+  }
+
+  // Scroll indicator
+  &__scroll {
+    position: absolute;
+    bottom: $spacing-8;
+    left: 50%;
+    transform: translateX(-50%);
+    @include flex-column;
+    align-items: center;
+    gap: $spacing-2;
+    color: $text-light-secondary;
+    font-size: $font-size-sm;
+    animation: float 2s ease-in-out infinite;
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+}

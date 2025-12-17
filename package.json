@@ -1,0 +1,29 @@
+{
+  "name": "king-neon",
+  "version": "0.0.1",
+  "private": true,
+  "description": "King Neon - Custom Neon Sign E-commerce Platform",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "start": "turbo run start",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "dev:web": "pnpm --filter @king-neon/web dev",
+    "dev:admin": "pnpm --filter @king-neon/admin dev",
+    "dev:api": "pnpm --filter @king-neon/api dev",
+    "dev:cms": "pnpm --filter @king-neon/cms dev",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.3"
+  },
+  "packageManager": "pnpm@9.15.1",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}

@@ -1,0 +1,108 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.featured {
+  padding: $spacing-16 0;
+  background: $bg-dark-secondary;
+
+  @include min-width($breakpoint-lg) {
+    padding: $spacing-24 0;
+  }
+
+  &__container {
+    @include container;
+  }
+
+  &__header {
+    @include flex-between;
+    margin-bottom: $spacing-10;
+    flex-wrap: wrap;
+    gap: $spacing-4;
+  }
+
+  &__title {
+    @include heading-lg;
+    color: $text-light;
+  }
+
+  &__link {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-2;
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+
+    svg {
+      width: 20px;
+      height: 20px;
+      transition: transform $transition-fast;
+    }
+
+    &:hover {
+      color: $color-primary-light;
+
+      svg {
+        transform: translateX(4px);
+      }
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-4;
+
+    @include min-width($breakpoint-md) {
+      grid-template-columns: repeat(3, 1fr);
+      gap: $spacing-6;
+    }
+
+    @include min-width($breakpoint-lg) {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  &__skeleton {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    overflow: hidden;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  &__skeleton-image {
+    aspect-ratio: 1;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  &__skeleton-text {
+    height: 24px;
+    margin: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+
+  &__skeleton-price {
+    height: 20px;
+    width: 60%;
+    margin: 0 1rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+
+  &__empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 2rem;
+    color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

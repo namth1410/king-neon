@@ -1,0 +1,148 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.categories {
+  padding: $spacing-16 0;
+  background: $bg-dark;
+
+  &__container {
+    @include container;
+  }
+
+  &__header {
+    text-align: center;
+    margin-bottom: $spacing-12;
+  }
+
+  &__title {
+    @include heading-lg;
+    color: $text-light;
+    margin-bottom: $spacing-4;
+  }
+
+  &__subtitle {
+    color: $text-light-secondary;
+    font-size: $font-size-lg;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $spacing-6;
+
+    @include min-width($breakpoint-sm) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @include min-width($breakpoint-lg) {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  &__card {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    border-radius: $radius-xl;
+    overflow: hidden;
+    cursor: pointer;
+    @include glass;
+
+    &:hover {
+      .categories__card-image {
+        transform: scale(1.1);
+      }
+
+      .categories__card-overlay {
+        background: rgba($bg-dark, 0.5);
+      }
+
+      .categories__card-cta {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    &-image {
+      position: absolute;
+      inset: 0;
+      transition: transform $transition-slow;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    &-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        180deg,
+        transparent 0%,
+        rgba($bg-dark, 0.8) 100%
+      );
+      transition: background $transition-base;
+    }
+
+    &-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: $spacing-6;
+    }
+
+    &-icon {
+      width: 48px;
+      height: 48px;
+      @include flex-center;
+      background: rgba($color-primary, 0.2);
+      border-radius: $radius-full;
+      margin-bottom: $spacing-4;
+
+      svg {
+        width: 24px;
+        height: 24px;
+        color: $color-primary;
+      }
+    }
+
+    &-title {
+      font-size: $font-size-xl;
+      font-weight: $font-weight-semibold;
+      color: $text-light;
+      margin-bottom: $spacing-2;
+    }
+
+    &-count {
+      font-size: $font-size-sm;
+      color: $text-light-secondary;
+    }
+
+    &-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: $spacing-2;
+      margin-top: $spacing-4;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+      color: $color-primary;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all $transition-base;
+
+      svg {
+        width: 16px;
+        height: 16px;
+        transition: transform $transition-fast;
+      }
+
+      &:hover svg {
+        transform: translateX(4px);
+      }
+    }
+  }
+}

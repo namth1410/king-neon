@@ -1,0 +1,124 @@
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
+
+.login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $bg-dark;
+  background-image:
+    radial-gradient(
+      circle at 10% 20%,
+      rgba($neon-pink, 0.1) 0%,
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 90% 80%,
+      rgba($neon-purple, 0.1) 0%,
+      transparent 40%
+    );
+  padding: $spacing-4;
+
+  &__card {
+    width: 100%;
+    max-width: 400px;
+    @include glass;
+    padding: $spacing-8;
+    border-radius: $radius-2xl;
+    box-shadow: $shadow-xl;
+  }
+
+  &__logo {
+    text-align: center;
+    margin-bottom: $spacing-8;
+
+    h1 {
+      @include gradient-text;
+      font-size: $font-size-3xl;
+      letter-spacing: -0.02em;
+    }
+
+    span {
+      display: block;
+      font-size: $font-size-xs;
+      color: $text-light-secondary;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-top: $spacing-1;
+    }
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-5;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-2;
+
+    label {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+      color: $text-light-secondary;
+    }
+
+    input {
+      padding: $spacing-3 $spacing-4;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: $radius-lg;
+      color: $text-light;
+      font-family: inherit;
+      transition: all $transition-fast;
+
+      &:focus {
+        outline: none;
+        border-color: $color-primary;
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+      }
+    }
+  }
+
+  &__error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    padding: $spacing-3;
+    border-radius: $radius-md;
+    font-size: $font-size-sm;
+    text-align: center;
+  }
+
+  &__submit {
+    margin-top: $spacing-2;
+    width: 100%;
+
+    // Custom button style for login
+    background: $color-primary;
+    color: white;
+    padding: $spacing-3;
+    border-radius: $radius-lg;
+    font-weight: $font-weight-semibold;
+    border: none;
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    &:hover:not(:disabled) {
+      background: $color-primary-dark;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba($color-primary, 0.3);
+    }
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  }
+}

@@ -1,0 +1,304 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.designer {
+  min-height: 100vh;
+  padding-top: 80px;
+  background: $bg-dark;
+
+  &__container {
+    @include container;
+    padding-top: $spacing-8;
+    padding-bottom: $spacing-8;
+  }
+
+  &__header {
+    text-align: center;
+    margin-bottom: $spacing-10;
+  }
+
+  &__title {
+    @include heading-lg;
+    color: $text-light;
+    margin-bottom: $spacing-3;
+  }
+
+  &__subtitle {
+    color: $text-light-secondary;
+    font-size: $font-size-lg;
+  }
+
+  &__layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $spacing-8;
+
+    @include min-width($breakpoint-lg) {
+      grid-template-columns: 1fr 400px;
+    }
+  }
+
+  // Preview Panel
+  &__preview {
+    @include glass;
+    border-radius: $radius-2xl;
+    padding: $spacing-8;
+    position: sticky;
+    top: 100px;
+    order: -1;
+
+    @include min-width($breakpoint-lg) {
+      order: 1;
+    }
+
+    &-label {
+      font-size: $font-size-sm;
+      color: $text-light-secondary;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: $spacing-4;
+    }
+
+    &-canvas {
+      aspect-ratio: 16 / 9;
+      background: $bg-dark-secondary;
+      border-radius: $radius-xl;
+      @include flex-center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    &-text {
+      font-size: $font-size-4xl;
+      font-weight: $font-weight-bold;
+      text-align: center;
+      padding: $spacing-4;
+      word-break: break-word;
+      transition: all $transition-base;
+
+      @include min-width($breakpoint-md) {
+        font-size: $font-size-5xl;
+      }
+    }
+
+    &-price {
+      margin-top: $spacing-6;
+      padding: $spacing-4;
+      background: rgba($color-primary, 0.1);
+      border-radius: $radius-lg;
+      text-align: center;
+
+      &-label {
+        font-size: $font-size-sm;
+        color: $text-light-secondary;
+        margin-bottom: $spacing-1;
+      }
+
+      &-value {
+        font-family: $font-display;
+        font-size: $font-size-3xl;
+        font-weight: $font-weight-bold;
+        @include gradient-text;
+      }
+    }
+  }
+
+  // Steps Panel
+  &__steps {
+    @include flex-column;
+    gap: $spacing-6;
+  }
+
+  // Progress
+  &__progress {
+    display: flex;
+    gap: $spacing-2;
+    margin-bottom: $spacing-4;
+
+    &-step {
+      flex: 1;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: $radius-full;
+      transition: background $transition-base;
+
+      &.active,
+      &.completed {
+        background: $gradient-primary;
+      }
+    }
+  }
+
+  // Step Card
+  &__step {
+    @include glass;
+    border-radius: $radius-xl;
+    padding: $spacing-6;
+
+    &-header {
+      @include flex-between;
+      margin-bottom: $spacing-5;
+      cursor: pointer;
+    }
+
+    &-number {
+      width: 32px;
+      height: 32px;
+      @include flex-center;
+      background: rgba($color-primary, 0.2);
+      border-radius: $radius-full;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-bold;
+      color: $color-primary;
+    }
+
+    &-title {
+      flex: 1;
+      margin-left: $spacing-3;
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+      color: $text-light;
+    }
+
+    &-toggle {
+      color: $text-light-secondary;
+      transition: transform $transition-fast;
+
+      &.open {
+        transform: rotate(180deg);
+      }
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    &-content {
+      overflow: hidden;
+    }
+  }
+
+  // Text Input
+  &__text-input {
+    width: 100%;
+    padding: $spacing-4;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: $radius-lg;
+    color: $text-light;
+    font-size: $font-size-lg;
+    font-family: $font-primary;
+    transition: border-color $transition-fast;
+
+    &::placeholder {
+      color: $text-light-secondary;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+    }
+  }
+
+  &__text-hint {
+    font-size: $font-size-sm;
+    color: $text-light-secondary;
+    margin-top: $spacing-2;
+  }
+
+  // Options Grid
+  &__options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-3;
+
+    @include min-width($breakpoint-sm) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    &--colors {
+      grid-template-columns: repeat(4, 1fr);
+
+      @include min-width($breakpoint-sm) {
+        grid-template-columns: repeat(6, 1fr);
+      }
+    }
+  }
+
+  // Option Card
+  &__option {
+    padding: $spacing-3;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid transparent;
+    border-radius: $radius-lg;
+    cursor: pointer;
+    text-align: center;
+    transition: all $transition-fast;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    &.selected {
+      border-color: $color-primary;
+      background: rgba($color-primary, 0.1);
+    }
+
+    &-name {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+      color: $text-light;
+      margin-top: $spacing-2;
+    }
+
+    &-price {
+      font-size: $font-size-xs;
+      color: $text-light-secondary;
+      margin-top: $spacing-1;
+    }
+  }
+
+  // Color Swatch
+  &__color {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: $radius-lg;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: all $transition-fast;
+    position: relative;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
+    &.selected {
+      border-color: $text-light;
+      box-shadow: 0 0 20px currentColor;
+
+      &::after {
+        content: "✓";
+        position: absolute;
+        inset: 0;
+        @include flex-center;
+        color: $text-light;
+        font-weight: $font-weight-bold;
+        text-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+      }
+    }
+  }
+
+  // Font Preview
+  &__font-preview {
+    font-size: $font-size-lg;
+    padding: $spacing-2 0;
+  }
+
+  // Actions
+  &__actions {
+    display: flex;
+    gap: $spacing-4;
+    margin-top: $spacing-8;
+  }
+}

@@ -1,0 +1,250 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.checkout {
+  min-height: 100vh;
+  padding-top: 100px;
+  padding-bottom: $spacing-16;
+  background: $bg-dark;
+
+  &__container {
+    @include container;
+  }
+
+  &__header {
+    margin-bottom: $spacing-10;
+  }
+
+  &__title {
+    @include heading-lg;
+    color: $text-light;
+    margin-bottom: $spacing-2;
+  }
+
+  &__steps {
+    display: flex;
+    gap: $spacing-6;
+    color: $text-light-secondary;
+    font-size: $font-size-sm;
+
+    span {
+      display: flex;
+      align-items: center;
+      gap: $spacing-2;
+
+      &.active {
+        color: $color-primary;
+      }
+
+      &.completed {
+        color: $neon-green;
+      }
+    }
+  }
+
+  &__layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $spacing-8;
+
+    @include min-width($breakpoint-lg) {
+      grid-template-columns: 1fr 400px;
+    }
+  }
+
+  &__main {
+    @include flex-column;
+    gap: $spacing-6;
+  }
+
+  // Section Card
+  &__section {
+    @include glass;
+    border-radius: $radius-xl;
+    padding: $spacing-6;
+
+    &-title {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+      color: $text-light;
+      margin-bottom: $spacing-5;
+      display: flex;
+      align-items: center;
+      gap: $spacing-3;
+
+      svg {
+        width: 24px;
+        height: 24px;
+        color: $color-primary;
+      }
+    }
+  }
+
+  // Form styles
+  &__form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $spacing-4;
+
+    @include min-width($breakpoint-sm) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    &--full {
+      grid-column: 1 / -1;
+    }
+  }
+
+  &__field {
+    @include flex-column;
+    gap: $spacing-2;
+
+    label {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+      color: $text-light-secondary;
+    }
+
+    input,
+    select,
+    textarea {
+      padding: $spacing-3 $spacing-4;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: $radius-lg;
+      color: $text-light;
+      font-size: $font-size-base;
+      font-family: $font-primary;
+      transition: border-color $transition-fast;
+
+      &::placeholder {
+        color: $text-light-secondary;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: $color-primary;
+      }
+    }
+
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+      padding-right: $spacing-10;
+    }
+  }
+
+  // Order Summary
+  &__summary {
+    @include glass;
+    border-radius: $radius-xl;
+    padding: $spacing-6;
+    position: sticky;
+    top: 100px;
+    height: fit-content;
+
+    &-title {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+      color: $text-light;
+      margin-bottom: $spacing-5;
+      padding-bottom: $spacing-4;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  &__items {
+    @include flex-column;
+    gap: $spacing-4;
+    margin-bottom: $spacing-6;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  &__item {
+    display: flex;
+    gap: $spacing-3;
+
+    &-image {
+      width: 60px;
+      height: 60px;
+      border-radius: $radius-md;
+      background: $bg-dark-secondary;
+      @include flex-center;
+      flex-shrink: 0;
+
+      span {
+        font-size: $font-size-lg;
+        font-weight: $font-weight-bold;
+        @include neon-glow($neon-pink);
+      }
+    }
+
+    &-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    &-name {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+      color: $text-light;
+      @include truncate;
+    }
+
+    &-quantity {
+      font-size: $font-size-xs;
+      color: $text-light-secondary;
+    }
+
+    &-price {
+      font-weight: $font-weight-semibold;
+      color: $text-light;
+    }
+  }
+
+  &__totals {
+    @include flex-column;
+    gap: $spacing-3;
+    padding-top: $spacing-4;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  &__row {
+    @include flex-between;
+    font-size: $font-size-sm;
+    color: $text-light-secondary;
+
+    &--total {
+      font-size: $font-size-xl;
+      font-weight: $font-weight-bold;
+      color: $text-light;
+      padding-top: $spacing-4;
+      margin-top: $spacing-2;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  &__submit {
+    width: 100%;
+    margin-top: $spacing-6;
+  }
+
+  &__secure {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-2;
+    margin-top: $spacing-4;
+    font-size: $font-size-xs;
+    color: $text-light-secondary;
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+}

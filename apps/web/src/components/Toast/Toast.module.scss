@@ -1,0 +1,125 @@
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
+
+.toastContainer {
+  position: fixed;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+  padding: $spacing-4;
+  pointer-events: none; // Allow clicking through container
+
+  &--top-right {
+    top: 0;
+    right: 0;
+  }
+  &--top-left {
+    top: 0;
+    left: 0;
+  }
+  &--bottom-right {
+    bottom: 0;
+    right: 0;
+    flex-direction: column-reverse;
+  }
+  &--bottom-left {
+    bottom: 0;
+    left: 0;
+    flex-direction: column-reverse;
+  }
+  &--top-center {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    alignitems: center;
+  }
+  &--bottom-center {
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    flex-direction: column-reverse;
+    alignitems: center;
+  }
+}
+
+.toast {
+  pointer-events: auto;
+  min-width: 300px;
+  max-width: 400px;
+  background: rgba(20, 20, 20, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: $radius-lg;
+  padding: $spacing-4;
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-3;
+  box-shadow: $shadow-lg;
+  position: relative;
+  overflow: hidden;
+  color: $text-light;
+  font-size: $font-size-sm;
+
+  &--success {
+    border-left: 3px solid $neon-green;
+    .toast__icon {
+      color: $neon-green;
+    }
+  }
+
+  &--error {
+    border-left: 3px solid #ef4444;
+    .toast__icon {
+      color: #ef4444;
+    }
+  }
+
+  &--warning {
+    border-left: 3px solid $neon-orange;
+    .toast__icon {
+      color: $neon-orange;
+    }
+  }
+
+  &--info {
+    border-left: 3px solid $neon-blue;
+    .toast__icon {
+      color: $neon-blue;
+    }
+  }
+
+  &__icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    margin-top: 2px;
+  }
+
+  &__content {
+    flex: 1;
+    line-height: 1.4;
+  }
+
+  &__close {
+    padding: 2px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    color: inherit;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  &__progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.2);
+  }
+}

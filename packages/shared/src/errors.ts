@@ -1,0 +1,30 @@
+export enum ErrorCode {
+  // Auth
+  UNAUTHORIZED = "UNAUTHORIZED",
+  FORBIDDEN = "FORBIDDEN",
+  USER_NOT_FOUND = "USER_NOT_FOUND",
+  INVALID_CREDENTIALS = "INVALID_CREDENTIALS",
+  EMAIL_ALREADY_EXISTS = "EMAIL_ALREADY_EXISTS",
+
+  // Validation
+  VALIDATION_ERROR = "VALIDATION_ERROR",
+  INVALID_INPUT = "INVALID_INPUT",
+
+  // Resources
+  RESOURCE_NOT_FOUND = "RESOURCE_NOT_FOUND",
+  RESOURCE_ALREADY_EXISTS = "RESOURCE_ALREADY_EXISTS",
+
+  // Server
+  INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR",
+
+  // Business Logic
+  ORDER_PROCESSING_FAILED = "ORDER_PROCESSING_FAILED",
+  PAYMENT_FAILED = "PAYMENT_FAILED",
+}
+
+export interface ApiErrorResponse {
+  statusCode: number;
+  message: string;
+  code: ErrorCode;
+  details?: unknown;
+}

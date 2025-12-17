@@ -1,0 +1,31 @@
+{
+  "common": {
+    "welcome": "Welcome to King Neon",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close"
+  },
+  "errors": {
+    "UNAUTHORIZED": "You must be logged in to perform this action.",
+    "FORBIDDEN": "You do not have permission to perform this action.",
+    "USER_NOT_FOUND": "User account not found.",
+    "INVALID_CREDENTIALS": "Invalid email or password.",
+    "EMAIL_ALREADY_EXISTS": "This email address is already registered.",
+    "VALIDATION_ERROR": "Please check your input and try again.",
+    "INVALID_INPUT": "Invalid input data.",
+    "RESOURCE_NOT_FOUND": "The requested resource was not found.",
+    "RESOURCE_ALREADY_EXISTS": "This item already exists.",
+    "INTERNAL_SERVER_ERROR": "Something went wrong. Please try again later.",
+    "ORDER_PROCESSING_FAILED": "Failed to process your order. Please contact support.",
+    "PAYMENT_FAILED": "Payment failed. please check your payment details."
+  },
+  "toast": {
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Info"
+  }
+}

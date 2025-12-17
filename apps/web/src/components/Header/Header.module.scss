@@ -1,0 +1,166 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: $z-fixed;
+  padding: $spacing-4 0;
+  transition: all $transition-base;
+
+  &.scrolled {
+    @include glass-dark;
+    padding: $spacing-3 0;
+  }
+
+  &__container {
+    @include container;
+    @include flex-between;
+  }
+
+  &__logo {
+    display: flex;
+    align-items: center;
+    gap: $spacing-2;
+
+    &-icon {
+      width: 40px;
+      height: 40px;
+      @include neon-glow($neon-pink);
+    }
+
+    &-text {
+      font-family: $font-display;
+      font-size: $font-size-xl;
+      font-weight: $font-weight-bold;
+      @include gradient-text;
+    }
+  }
+
+  &__nav {
+    display: none;
+    gap: $spacing-8;
+
+    @include desktop {
+      display: flex;
+    }
+
+    &-link {
+      font-weight: $font-weight-medium;
+      color: $text-light-secondary;
+      transition: color $transition-fast;
+      position: relative;
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: -4px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: $gradient-primary;
+        transition: width $transition-base;
+      }
+
+      &:hover,
+      &.active {
+        color: $text-light;
+
+        &::after {
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: $spacing-4;
+  }
+
+  &__cart {
+    position: relative;
+
+    &-icon {
+      width: 24px;
+      height: 24px;
+      color: $text-light;
+    }
+
+    &-count {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 18px;
+      height: 18px;
+      background: $color-primary;
+      color: $text-light;
+      font-size: $font-size-xs;
+      font-weight: $font-weight-bold;
+      border-radius: $radius-full;
+      @include flex-center;
+    }
+  }
+
+  &__menu-btn {
+    display: flex;
+    padding: $spacing-2;
+    color: $text-light;
+
+    @include desktop {
+      display: none;
+    }
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+}
+
+// Mobile menu
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: $z-modal;
+  background: rgba($bg-dark, 0.98);
+  @include flex-column;
+  padding: $spacing-20 $spacing-6;
+  transform: translateX(100%);
+  transition: transform $transition-slow;
+
+  &.open {
+    transform: translateX(0);
+  }
+
+  &__close {
+    position: absolute;
+    top: $spacing-4;
+    right: $spacing-4;
+    padding: $spacing-2;
+    color: $text-light;
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  &__nav {
+    @include flex-column;
+    gap: $spacing-6;
+    text-align: center;
+  }
+
+  &__link {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-semibold;
+    color: $text-light;
+  }
+}

@@ -1,0 +1,309 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.account {
+  min-height: 100vh;
+  padding-top: 100px;
+  padding-bottom: $spacing-16;
+  background: $bg-dark;
+
+  &__container {
+    @include container;
+  }
+
+  &__layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $spacing-8;
+
+    @include min-width($breakpoint-lg) {
+      grid-template-columns: 280px 1fr;
+    }
+  }
+
+  // Sidebar
+  &__sidebar {
+    @include glass;
+    border-radius: $radius-xl;
+    padding: $spacing-6;
+    height: fit-content;
+    position: sticky;
+    top: 100px;
+  }
+
+  &__user {
+    text-align: center;
+    padding-bottom: $spacing-6;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: $spacing-6;
+
+    &-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: $radius-full;
+      background: $gradient-primary;
+      @include flex-center;
+      margin: 0 auto $spacing-4;
+      font-size: $font-size-2xl;
+      font-weight: $font-weight-bold;
+      color: $text-light;
+    }
+
+    &-name {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+      color: $text-light;
+      margin-bottom: $spacing-1;
+    }
+
+    &-email {
+      font-size: $font-size-sm;
+      color: $text-light-secondary;
+    }
+  }
+
+  &__nav {
+    @include flex-column;
+    gap: $spacing-2;
+
+    &-link {
+      display: flex;
+      align-items: center;
+      gap: $spacing-3;
+      padding: $spacing-3 $spacing-4;
+      border-radius: $radius-lg;
+      color: $text-light-secondary;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+      transition: all $transition-fast;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: $text-light;
+      }
+
+      &.active {
+        background: rgba($color-primary, 0.1);
+        color: $color-primary;
+      }
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    &-logout {
+      margin-top: $spacing-4;
+      padding-top: $spacing-4;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      color: #ef4444;
+
+      &:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+      }
+    }
+  }
+
+  // Content
+  &__content {
+    @include flex-column;
+    gap: $spacing-6;
+  }
+
+  &__header {
+    margin-bottom: $spacing-2;
+  }
+
+  &__title {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $text-light;
+    margin-bottom: $spacing-2;
+  }
+
+  &__subtitle {
+    color: $text-light-secondary;
+  }
+
+  // Section
+  &__section {
+    @include glass;
+    border-radius: $radius-xl;
+    padding: $spacing-6;
+
+    &-title {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+      color: $text-light;
+      margin-bottom: $spacing-5;
+      padding-bottom: $spacing-4;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  // Form
+  &__form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $spacing-4;
+
+    @include min-width($breakpoint-sm) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    &-full {
+      grid-column: 1 / -1;
+    }
+  }
+
+  &__field {
+    @include flex-column;
+    gap: $spacing-2;
+
+    label {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+      color: $text-light-secondary;
+    }
+
+    input,
+    textarea {
+      padding: $spacing-3 $spacing-4;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: $radius-lg;
+      color: $text-light;
+      font-size: $font-size-base;
+      font-family: $font-primary;
+      transition: border-color $transition-fast;
+
+      &:focus {
+        outline: none;
+        border-color: $color-primary;
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: $spacing-4;
+    margin-top: $spacing-4;
+    grid-column: 1 / -1;
+  }
+
+  // Orders
+  &__orders {
+    @include flex-column;
+    gap: $spacing-4;
+  }
+
+  &__order {
+    display: flex;
+    align-items: center;
+    gap: $spacing-4;
+    padding: $spacing-4;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: $radius-lg;
+
+    @include max-width($breakpoint-sm) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    &-image {
+      width: 60px;
+      height: 60px;
+      border-radius: $radius-md;
+      background: $bg-dark-secondary;
+      @include flex-center;
+      flex-shrink: 0;
+
+      span {
+        font-weight: $font-weight-bold;
+        @include neon-glow($neon-pink);
+      }
+    }
+
+    &-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    &-number {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+      color: $text-light;
+    }
+
+    &-date {
+      font-size: $font-size-xs;
+      color: $text-light-secondary;
+    }
+
+    &-status {
+      padding: $spacing-1 $spacing-3;
+      border-radius: $radius-full;
+      font-size: $font-size-xs;
+      font-weight: $font-weight-medium;
+
+      &--pending {
+        background: rgba(251, 191, 36, 0.1);
+        color: #fbbf24;
+      }
+
+      &--processing {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+      }
+
+      &--shipped {
+        background: rgba(168, 85, 247, 0.1);
+        color: #a855f7;
+      }
+
+      &--delivered {
+        background: rgba(34, 197, 94, 0.1);
+        color: #22c55e;
+      }
+    }
+
+    &-total {
+      font-weight: $font-weight-semibold;
+      color: $text-light;
+    }
+
+    &-action {
+      font-size: $font-size-sm;
+      color: $color-primary;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  // Empty state
+  &__empty {
+    text-align: center;
+    padding: $spacing-10;
+    color: $text-light-secondary;
+
+    svg {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto $spacing-4;
+      opacity: 0.5;
+    }
+
+    p {
+      margin-bottom: $spacing-4;
+    }
+  }
+}

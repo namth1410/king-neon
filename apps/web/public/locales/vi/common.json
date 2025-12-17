@@ -1,0 +1,31 @@
+{
+  "common": {
+    "welcome": "Chào mừng đến với King Neon",
+    "loading": "Đang tải...",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "close": "Đóng"
+  },
+  "errors": {
+    "UNAUTHORIZED": "Bạn cần đăng nhập để thực hiện hành động này.",
+    "FORBIDDEN": "Bạn không có quyền thực hiện hành động này.",
+    "USER_NOT_FOUND": "Không tìm thấy tài khoản người dùng.",
+    "INVALID_CREDENTIALS": "Email hoặc mật khẩu không đúng.",
+    "EMAIL_ALREADY_EXISTS": "Email này đã được đăng ký.",
+    "VALIDATION_ERROR": "Vui lòng kiểm tra lại thông tin nhập.",
+    "INVALID_INPUT": "Dữ liệu đầu vào không hợp lệ.",
+    "RESOURCE_NOT_FOUND": "Không tìm thấy tài nguyên yêu cầu.",
+    "RESOURCE_ALREADY_EXISTS": "Mục này đã tồn tại.",
+    "INTERNAL_SERVER_ERROR": "Đã có lỗi xảy ra. Vui lòng thử lại sau.",
+    "ORDER_PROCESSING_FAILED": "Xử lý đơn hàng thất bại. Vui lòng liên hệ hỗ trợ.",
+    "PAYMENT_FAILED": "Thanh toán thất bại. Vui lòng kiểm tra thông tin thanh toán."
+  },
+  "toast": {
+    "success": "Thành công",
+    "error": "Lỗi",
+    "warning": "Cảnh báo",
+    "info": "Thông báo"
+  }
+}

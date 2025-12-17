@@ -1,0 +1,122 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.footer {
+  background: $bg-dark-secondary;
+  padding: $spacing-16 0 $spacing-8;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+  &__container {
+    @include container;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $spacing-10;
+    margin-bottom: $spacing-12;
+
+    @include min-width($breakpoint-md) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @include min-width($breakpoint-lg) {
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+    }
+  }
+
+  &__brand {
+    &-logo {
+      font-family: $font-display;
+      font-size: $font-size-2xl;
+      font-weight: $font-weight-bold;
+      @include gradient-text;
+      margin-bottom: $spacing-4;
+    }
+
+    &-description {
+      color: $text-light-secondary;
+      font-size: $font-size-sm;
+      line-height: 1.7;
+      max-width: 300px;
+    }
+
+    &-social {
+      display: flex;
+      gap: $spacing-4;
+      margin-top: $spacing-6;
+    }
+
+    &-social-link {
+      width: 40px;
+      height: 40px;
+      @include flex-center;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: $radius-full;
+      color: $text-light;
+      transition: all $transition-base;
+
+      &:hover {
+        background: $color-primary;
+        transform: translateY(-3px);
+      }
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+
+  &__column {
+    &-title {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+      margin-bottom: $spacing-5;
+      color: $text-light;
+    }
+
+    &-links {
+      @include flex-column;
+      gap: $spacing-3;
+    }
+
+    &-link {
+      color: $text-light-secondary;
+      font-size: $font-size-sm;
+      transition: color $transition-fast;
+
+      &:hover {
+        color: $color-primary;
+      }
+    }
+  }
+
+  &__divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin-bottom: $spacing-6;
+  }
+
+  &__bottom {
+    @include flex-between;
+    flex-wrap: wrap;
+    gap: $spacing-4;
+  }
+
+  &__copyright {
+    color: $text-light-secondary;
+    font-size: $font-size-sm;
+  }
+
+  &__payments {
+    display: flex;
+    align-items: center;
+    gap: $spacing-3;
+
+    img {
+      height: 24px;
+      opacity: 0.7;
+    }
+  }
+}

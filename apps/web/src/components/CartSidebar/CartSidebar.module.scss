@@ -1,0 +1,222 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.cart-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: 420px;
+  z-index: $z-modal;
+  background: $bg-dark-secondary;
+  @include flex-column;
+  transform: translateX(100%);
+  transition: transform $transition-slow;
+
+  &.open {
+    transform: translateX(0);
+  }
+
+  &__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: $z-modal-backdrop;
+    background: rgba(0, 0, 0, 0.7);
+    opacity: 0;
+    visibility: hidden;
+    transition: all $transition-base;
+
+    &.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+
+  &__header {
+    @include flex-between;
+    padding: $spacing-5 $spacing-6;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-semibold;
+    color: $text-light;
+  }
+
+  &__count {
+    font-size: $font-size-sm;
+    color: $text-light-secondary;
+    font-weight: $font-weight-normal;
+  }
+
+  &__close {
+    width: 40px;
+    height: 40px;
+    @include flex-center;
+    color: $text-light-secondary;
+    transition: color $transition-fast;
+
+    &:hover {
+      color: $text-light;
+    }
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  &__content {
+    flex: 1;
+    overflow-y: auto;
+    padding: $spacing-4;
+  }
+
+  &__empty {
+    @include flex-column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    color: $text-light-secondary;
+
+    svg {
+      width: 64px;
+      height: 64px;
+      margin-bottom: $spacing-4;
+      opacity: 0.5;
+    }
+
+    p {
+      margin-bottom: $spacing-6;
+    }
+  }
+
+  &__items {
+    @include flex-column;
+    gap: $spacing-4;
+  }
+
+  &__footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: $spacing-5 $spacing-6;
+  }
+
+  &__summary {
+    @include flex-column;
+    gap: $spacing-3;
+    margin-bottom: $spacing-5;
+  }
+
+  &__row {
+    @include flex-between;
+    font-size: $font-size-sm;
+    color: $text-light-secondary;
+
+    &--total {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-bold;
+      color: $text-light;
+      padding-top: $spacing-3;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  &__checkout-btn {
+    width: 100%;
+  }
+}
+
+// Cart Item
+.cart-item {
+  display: flex;
+  gap: $spacing-4;
+  padding: $spacing-4;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: $radius-lg;
+
+  &__image {
+    width: 80px;
+    height: 80px;
+    border-radius: $radius-md;
+    overflow: hidden;
+    background: $bg-dark;
+    @include flex-center;
+    flex-shrink: 0;
+
+    &-placeholder {
+      font-size: $font-size-xl;
+      font-weight: $font-weight-bold;
+      @include neon-glow($neon-pink);
+    }
+  }
+
+  &__content {
+    flex: 1;
+    @include flex-column;
+    gap: $spacing-1;
+    min-width: 0;
+  }
+
+  &__name {
+    font-weight: $font-weight-medium;
+    color: $text-light;
+    @include truncate;
+  }
+
+  &__options {
+    font-size: $font-size-xs;
+    color: $text-light-secondary;
+    @include truncate;
+  }
+
+  &__price {
+    font-weight: $font-weight-semibold;
+    color: $color-primary;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: $spacing-3;
+    margin-top: auto;
+  }
+
+  &__quantity {
+    display: flex;
+    align-items: center;
+    gap: $spacing-2;
+
+    button {
+      width: 28px;
+      height: 28px;
+      @include flex-center;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: $radius-sm;
+      color: $text-light;
+      font-size: $font-size-lg;
+      transition: background $transition-fast;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+    }
+
+    span {
+      min-width: 24px;
+      text-align: center;
+      font-weight: $font-weight-medium;
+    }
+  }
+
+  &__remove {
+    color: $text-light-secondary;
+    font-size: $font-size-xs;
+
+    &:hover {
+      color: #ef4444;
+    }
+  }
+}

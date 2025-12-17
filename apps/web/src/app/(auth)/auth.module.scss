@@ -1,0 +1,229 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.auth {
+  min-height: 100vh;
+  @include flex-center;
+  padding: $spacing-16 $spacing-4;
+  background: $bg-dark;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+      circle at 30% 30%,
+      rgba($neon-pink, 0.15) 0%,
+      transparent 40%
+    );
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+      circle at 70% 70%,
+      rgba($neon-blue, 0.1) 0%,
+      transparent 40%
+    );
+  }
+
+  &__container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 440px;
+  }
+
+  &__card {
+    @include glass;
+    border-radius: $radius-2xl;
+    padding: $spacing-8;
+
+    @include min-width($breakpoint-md) {
+      padding: $spacing-10;
+    }
+  }
+
+  &__logo {
+    text-align: center;
+    margin-bottom: $spacing-8;
+
+    a {
+      font-family: $font-display;
+      font-size: $font-size-2xl;
+      font-weight: $font-weight-bold;
+      @include gradient-text;
+    }
+  }
+
+  &__header {
+    text-align: center;
+    margin-bottom: $spacing-8;
+  }
+
+  &__title {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $text-light;
+    margin-bottom: $spacing-2;
+  }
+
+  &__subtitle {
+    color: $text-light-secondary;
+    font-size: $font-size-sm;
+  }
+
+  &__form {
+    @include flex-column;
+    gap: $spacing-5;
+  }
+
+  &__field {
+    @include flex-column;
+    gap: $spacing-2;
+
+    label {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+      color: $text-light-secondary;
+    }
+
+    input {
+      padding: $spacing-3 $spacing-4;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: $radius-lg;
+      color: $text-light;
+      font-size: $font-size-base;
+      font-family: $font-primary;
+      transition: border-color $transition-fast;
+
+      &::placeholder {
+        color: $text-light-secondary;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: $color-primary;
+      }
+    }
+  }
+
+  &__remember {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $spacing-4;
+    font-size: $font-size-sm;
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: $spacing-2;
+      color: $text-light-secondary;
+      cursor: pointer;
+
+      input {
+        width: 16px;
+        height: 16px;
+        accent-color: $color-primary;
+      }
+    }
+
+    a {
+      color: $color-primary;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  &__submit {
+    width: 100%;
+    margin-top: $spacing-2;
+  }
+
+  &__divider {
+    display: flex;
+    align-items: center;
+    gap: $spacing-4;
+    margin: $spacing-6 0;
+
+    &::before,
+    &::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    span {
+      font-size: $font-size-sm;
+      color: $text-light-secondary;
+    }
+  }
+
+  &__social {
+    display: flex;
+    gap: $spacing-3;
+
+    button {
+      flex: 1;
+      padding: $spacing-3;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: $radius-lg;
+      color: $text-light;
+      @include flex-center;
+      gap: $spacing-2;
+      font-size: $font-size-sm;
+      transition: all $transition-fast;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+
+  &__footer {
+    text-align: center;
+    margin-top: $spacing-6;
+    font-size: $font-size-sm;
+    color: $text-light-secondary;
+
+    a {
+      color: $color-primary;
+      font-weight: $font-weight-medium;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  &__error {
+    padding: $spacing-3 $spacing-4;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: $radius-lg;
+    color: #ef4444;
+    font-size: $font-size-sm;
+    text-align: center;
+  }
+}
