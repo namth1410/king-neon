@@ -22,7 +22,6 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../users/user.entity';
-import { ProductCategory } from './product.entity';
 
 @ApiTags('products')
 @Controller('products')
@@ -40,17 +39,38 @@ export class ProductsController {
 
   @Get()
   @ApiOperation({ summary: 'Get all products' })
-  @ApiQuery({ name: 'category', required: false, enum: ProductCategory })
+  @ApiQuery({
+    name: 'categoryId',
+    required: false,
+    description: 'Filter by category UUID',
+  })
   @ApiQuery({ name: 'search', required: false })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: ['price-asc', 'price-desc', 'name-asc', 'name-desc', 'newest'],
+    description: 'Sort order',
+  })
+  @ApiQuery({ name: 'activeOnly', required: false, type: Boolean })
   findAll(
-    @Query('category') category?: ProductCategory,
+    @Query('categoryId') categoryId?: string,
     @Query('search') search?: string,
     @Query('page') page?: number,
     @Query('limit') limit?: number,
+    @Query('sortBy')
+    sortBy?: 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc' | 'newest',
+    @Query('activeOnly') activeOnly?: boolean,
   ) {
-    return this.productsService.findAll({ category, search, page, limit });
+    return this.productsService.findAll({
+      categoryId,
+      search,
+      page,
+      limit,
+      sortBy,
+      activeOnly,
+    });
   }
 
   @Get('featured')
@@ -60,10 +80,10 @@ export class ProductsController {
     return this.productsService.findFeatured(limit);
   }
 
-  @Get('categories')
+  @Get('categories-with-counts')
   @ApiOperation({ summary: 'Get all categories with product count' })
-  getCategories() {
-    return this.productsService.getCategories();
+  getCategoriesWithCounts() {
+    return this.productsService.getCategoriesWithCounts();
   }
 
   @Get('slug/:slug')

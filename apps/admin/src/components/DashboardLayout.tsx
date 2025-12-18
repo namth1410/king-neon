@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Toaster } from "react-hot-toast";
 import Sidebar from "./Sidebar";
 
 export default function DashboardLayout({
@@ -18,7 +19,6 @@ export default function DashboardLayout({
   );
 
   useEffect(() => {
-    // Check for token
     const token = localStorage.getItem("admin_token");
     if (!token) {
       router.push("/login");
@@ -37,43 +37,132 @@ export default function DashboardLayout({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-black text-white">
-        Loading...
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+          background: "#0a0a0a",
+          color: "white",
+        }}
+      >
+        <div
+          style={{
+            width: "40px",
+            height: "40px",
+            border: "3px solid rgba(255,51,102,0.2)",
+            borderTopColor: "#ff3366",
+            borderRadius: "50%",
+            animation: "spin 1s linear infinite",
+          }}
+        />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-[#0a0a0a] text-white">
+    <div
+      style={{
+        display: "flex",
+        minHeight: "100vh",
+        background: "#0a0a0a",
+        color: "white",
+      }}
+    >
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: "#1a1a1a",
+            color: "#fff",
+            border: "1px solid rgba(255,255,255,0.1)",
+          },
+          success: {
+            iconTheme: { primary: "#22c55e", secondary: "#fff" },
+          },
+          error: {
+            iconTheme: { primary: "#ef4444", secondary: "#fff" },
+          },
+        }}
+      />
       <Sidebar />
 
-      {/* Main Content */}
-      <main className="flex-1 ml-64 flex flex-col min-h-screen relative z-10">
+      {/* Main Content - offset by sidebar width */}
+      <main
+        style={{
+          flex: 1,
+          marginLeft: "256px",
+          display: "flex",
+          flexDirection: "column",
+          minHeight: "100vh",
+        }}
+      >
         {/* Header */}
-        <header className="h-16 border-b border-white/10 bg-black/60 backdrop-blur-md flex items-center justify-between px-8 sticky top-0 z-30">
-          <div>
-            {title && (
-              <h2 className="text-lg font-semibold text-white">{title}</h2>
-            )}
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="text-sm text-right hidden sm:block">
-              <div className="font-medium text-white">
+        <header
+          style={{
+            height: "64px",
+            borderBottom: "1px solid rgba(255,255,255,0.08)",
+            background: "rgba(0,0,0,0.4)",
+            backdropFilter: "blur(10px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "0 32px",
+            position: "sticky",
+            top: 0,
+            zIndex: 40,
+          }}
+        >
+          <h2 style={{ fontSize: "18px", fontWeight: 600, color: "white" }}>
+            {title || "Dashboard"}
+          </h2>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <div style={{ textAlign: "right" }}>
+              <div
+                style={{ fontSize: "14px", fontWeight: 500, color: "white" }}
+              >
                 {user?.name || "Admin"}
               </div>
-              <div className="text-xs text-white/50">
+              <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>
                 {user?.email || "admin@kingneon.com"}
               </div>
             </div>
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#ff3366] to-[#ff3366]/50 flex items-center justify-center font-bold text-white text-sm shadow-[0_0_15px_rgba(255,51,102,0.3)]">
+            <div
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "50%",
+                background:
+                  "linear-gradient(135deg, #ff3366 0%, rgba(255,51,102,0.5) 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: 700,
+                color: "white",
+                fontSize: "16px",
+                boxShadow: "0 0 20px rgba(255,51,102,0.3)",
+              }}
+            >
               {user?.name?.[0] || "A"}
             </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <div className="p-6 flex-1">{children}</div>
+        <div style={{ padding: "24px 32px", flex: 1 }}>{children}</div>
       </main>
+
+      <style jsx global>{`
+        @keyframes spin {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
     </div>
   );
 }

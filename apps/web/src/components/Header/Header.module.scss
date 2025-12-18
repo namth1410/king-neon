@@ -162,5 +162,10 @@
     font-size: $font-size-2xl;
     font-weight: $font-weight-semibold;
     color: $text-light;
+    transition: color $transition-base;
+
+    &.active {
+      color: $color-primary;
+    }
   }
 }

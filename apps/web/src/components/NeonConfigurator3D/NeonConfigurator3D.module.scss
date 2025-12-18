@@ -1,0 +1,115 @@
+.container {
+  width: 100%;
+  height: calc(100vh - 80px); // Subtract header height
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background-color: #1a1a1a;
+}
+
+.canvasContainer {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+}
+
+.controls {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  padding: 20px;
+  border-radius: 12px;
+  display: flex;
+  gap: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+
+  .controlGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    label {
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    input[type="text"] {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #333;
+      background: #222;
+      color: #fff;
+      outline: none;
+
+      &:focus {
+        border-color: #ec4899;
+      }
+    }
+
+    input[type="color"] {
+      width: 50px;
+      height: 40px;
+      padding: 0;
+      border: none;
+      cursor: pointer;
+    }
+
+    select {
+      padding: 8px;
+      border-radius: 6px;
+      background: #222;
+      color: #fff;
+      border: 1px solid #333;
+    }
+  }
+
+  .bgOptions {
+    display: flex;
+    gap: 8px;
+
+    button {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+
+      &.active {
+        border-color: #ec4899;
+        transform: scale(1.1);
+      }
+    }
+  }
+}
+
+.zoomControls {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 10;
+
+  button {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 20px;
+    cursor: pointer;
+    backdrop-filter: blur(5px);
+    transition: all 0.2s;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+}

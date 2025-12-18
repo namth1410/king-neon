@@ -1,0 +1,285 @@
+@use "../../../styles/variables" as *;
+@use "../../../styles/mixins" as *;
+
+// Ensure we have some basic variables if not defined globally or use fallbacks
+$color-primary: #ec4899 !default; // Pink-500 fallback
+$text-light: #ffffff !default;
+$text-light-secondary: rgba(255, 255, 255, 0.7) !default;
+$radius-xl: 1rem !default;
+$radius-2xl: 1.5rem !default;
+$spacing-4: 1rem !default;
+$spacing-6: 1.5rem !default;
+$spacing-8: 2rem !default;
+
+.container {
+  max-width: 80rem; // max-w-7xl
+  margin: 0 auto;
+  padding: $spacing-6;
+}
+
+.header {
+  margin-bottom: $spacing-8;
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.5);
+    transition: color 0.2s;
+    margin-bottom: $spacing-6;
+
+    &:hover {
+      color: $text-light;
+    }
+  }
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-8;
+
+  @include min-width($breakpoint-lg) {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.card {
+  // Glassmorphism base
+  background: rgba(20, 20, 20, 0.4);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: $radius-2xl;
+  padding: $spacing-8;
+  box-shadow:
+    0 4px 24px -1px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: $spacing-6;
+
+  // Subtle gradient glow
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.1) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    opacity: 0.5;
+  }
+
+  &:hover {
+    background: rgba(30, 30, 30, 0.5);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow:
+      0 8px 32px -4px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    transform: translateY(-2px);
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: $text-light;
+    margin-bottom: $spacing-8;
+    padding-bottom: $spacing-4;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    &::before {
+      content: "";
+      display: block;
+      width: 4px;
+      height: 24px;
+      background: $color-primary;
+      border-radius: 2px;
+      box-shadow: 0 0 12px rgba($color-primary, 0.5);
+    }
+  }
+}
+
+.input-group {
+  margin-bottom: $spacing-6;
+
+  label {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    color: $text-light-secondary;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+  }
+
+  input,
+  textarea,
+  select {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: $radius-xl;
+    padding: 0.875rem 1.25rem;
+    color: $text-light;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+      box-shadow:
+        0 0 0 4px rgba($color-primary, 0.1),
+        0 4px 12px rgba(0, 0, 0, 0.1);
+      background: rgba(0, 0, 0, 0.3);
+      transform: translateY(-1px);
+    }
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.15);
+    }
+  }
+
+  textarea {
+    min-height: 180px;
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.25rem;
+    padding-right: 3rem;
+
+    option {
+      background: #1a1a1a;
+      color: white;
+    }
+  }
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+
+  span {
+    color: $text-light-secondary;
+    font-weight: 500;
+    padding-left: 0.5rem;
+  }
+}
+
+.toggle-btn {
+  position: relative;
+  display: inline-flex;
+  height: 1.75rem;
+  width: 3rem;
+  align-items: center;
+  border-radius: 9999px;
+  transition: background-color 0.2s;
+  border: none;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px $color-primary;
+  }
+
+  &.active {
+    background-color: #22c55e;
+  }
+
+  &.inactive {
+    background-color: #4b5563;
+  }
+
+  span {
+    display: inline-block;
+    height: 1.25rem;
+    width: 1.25rem;
+    transform: translateX(0.25rem);
+    border-radius: 50%;
+    background-color: white;
+    transition: transform 0.2s;
+    padding: 0; // Reset padding from parent span rule
+  }
+
+  &.active span {
+    transform: translateX(1.5rem);
+  }
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: $spacing-6;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: $spacing-8;
+
+  .btn-cancel {
+    padding: 0.75rem 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+    transition: all 0.2s;
+    background: transparent;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  .btn-submit {
+    padding: 0.75rem 2rem;
+    background: linear-gradient(
+      135deg,
+      $color-primary 0%,
+      darken($color-primary, 10%) 100%
+    );
+    color: white;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    border: none;
+    box-shadow: 0 4px 12px rgba($color-primary, 0.3);
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba($color-primary, 0.4);
+    }
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  }
+}

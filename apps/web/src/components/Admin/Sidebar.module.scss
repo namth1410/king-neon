@@ -1,0 +1,130 @@
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
+
+.sidebar {
+  width: 280px;
+  height: 100vh;
+  background: rgba($bg-dark-secondary, 0.5);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: $z-fixed;
+  transition: transform $transition-base;
+
+  &__logo {
+    height: 80px;
+    padding: 0 $spacing-6;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+    &-text {
+      font-family: $font-display;
+      font-size: $font-size-xl;
+      font-weight: $font-weight-bold;
+      color: $text-light;
+      letter-spacing: 0.05em;
+
+      span {
+        color: $color-primary;
+      }
+    }
+  }
+
+  &__nav {
+    flex: 1;
+    padding: $spacing-6 $spacing-4;
+    overflow-y: auto;
+  }
+
+  &__menu {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-2;
+  }
+
+  &__link {
+    display: flex;
+    align-items: center;
+    gap: $spacing-3;
+    padding: $spacing-3 $spacing-4;
+    border-radius: $radius-lg;
+    color: $text-light-secondary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    transition: all $transition-fast;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: $text-light;
+    }
+
+    &.active {
+      background: rgba($color-primary, 0.1);
+      color: $color-primary;
+
+      svg {
+        color: $color-primary;
+      }
+    }
+
+    svg {
+      width: 20px;
+      height: 20px;
+      color: rgba(255, 255, 255, 0.4);
+      transition: color $transition-fast;
+    }
+  }
+
+  &__footer {
+    padding: $spacing-4;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  &__user {
+    display: flex;
+    align-items: center;
+    gap: $spacing-3;
+    padding: $spacing-3;
+    border-radius: $radius-lg;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+
+    &-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: $gradient-primary;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+    }
+
+    &-info {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    &-name {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+      color: $text-light;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    &-role {
+      font-size: 11px; // Tiny
+      color: $text-light-secondary;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  }
+}

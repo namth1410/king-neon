@@ -10,7 +10,20 @@ import {
   LogOut,
   Palette,
   FileText,
+  Image,
+  FolderTree,
 } from "lucide-react";
+
+const menuItems = [
+  { href: "/", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/products", icon: ShoppingBag, label: "Products" },
+  { href: "/categories", icon: FolderTree, label: "Categories" },
+  { href: "/orders", icon: FileText, label: "Orders" },
+  { href: "/customers", icon: Users, label: "Customers" },
+  { href: "/neon-config", icon: Palette, label: "Neon Config" },
+  { href: "/preview-backgrounds", icon: Image, label: "Preview Backgrounds" },
+  { href: "/settings", icon: Settings, label: "Settings" },
+];
 
 export default function Sidebar() {
   const router = useRouter();
@@ -23,101 +36,141 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-64 bg-black/40 backdrop-blur-xl border-r border-white/10 flex flex-col h-screen fixed left-0 top-0 z-20 transition-all duration-300">
-      <div className="p-8 border-b border-white/5 bg-gradient-to-b from-white/5 to-transparent">
-        <h1 className="text-2xl font-bold font-[family-name:var(--font-outfit)] tracking-tight text-white mb-1">
+    <aside
+      style={{
+        width: "256px",
+        minWidth: "256px",
+        background: "rgba(0,0,0,0.6)",
+        backdropFilter: "blur(20px)",
+        borderRight: "1px solid rgba(255,255,255,0.08)",
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+        position: "fixed",
+        left: 0,
+        top: 0,
+        zIndex: 50,
+      }}
+    >
+      {/* Logo */}
+      <div
+        style={{
+          padding: "24px",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+        }}
+      >
+        <h1
+          style={{
+            fontSize: "24px",
+            fontWeight: 700,
+            color: "white",
+            marginBottom: "4px",
+          }}
+        >
           KING{" "}
-          <span className="text-[#ff3366] drop-shadow-[0_0_10px_rgba(255,51,102,0.5)]">
+          <span
+            style={{
+              color: "#ff3366",
+              textShadow: "0 0 20px rgba(255,51,102,0.5)",
+            }}
+          >
             NEON
           </span>
         </h1>
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-semibold bg-[#ff3366]/20 text-[#ff3366] px-2 py-0.5 rounded border border-[#ff3366]/20 tracking-wider uppercase">
-            Admin Panel
-          </span>
-        </div>
+        <span
+          style={{
+            fontSize: "10px",
+            fontWeight: 600,
+            background: "rgba(255,51,102,0.15)",
+            color: "#ff3366",
+            padding: "3px 8px",
+            borderRadius: "4px",
+            border: "1px solid rgba(255,51,102,0.2)",
+            textTransform: "uppercase",
+            letterSpacing: "1px",
+          }}
+        >
+          Admin Panel
+        </span>
       </div>
 
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-        <NavItem
-          href="/"
-          icon={<LayoutDashboard size={20} />}
-          label="Dashboard"
-          active={pathname === "/"}
-        />
-        <NavItem
-          href="/products"
-          icon={<ShoppingBag size={20} />}
-          label="Products"
-          active={pathname.startsWith("/products")}
-        />
-        <NavItem
-          href="/orders"
-          icon={<FileText size={20} />}
-          label="Orders"
-          active={pathname.startsWith("/orders")}
-        />
-        <NavItem
-          href="/customers"
-          icon={<Users size={20} />}
-          label="Customers"
-          active={pathname.startsWith("/customers")}
-        />
-        <NavItem
-          href="/neon-config"
-          icon={<Palette size={20} />}
-          label="Neon Config"
-          active={pathname.startsWith("/neon-config")}
-        />
-        <NavItem
-          href="/settings"
-          icon={<Settings size={20} />}
-          label="Settings"
-          active={pathname.startsWith("/settings")}
-        />
+      {/* Navigation */}
+      <nav style={{ flex: 1, padding: "16px", overflowY: "auto" }}>
+        {menuItems.map((item) => {
+          const isActive =
+            item.href === "/"
+              ? pathname === "/"
+              : pathname.startsWith(item.href);
+          const Icon = item.icon;
+
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                padding: "12px 16px",
+                marginBottom: "4px",
+                borderRadius: "10px",
+                textDecoration: "none",
+                transition: "all 0.2s",
+                background: isActive ? "rgba(255,51,102,0.15)" : "transparent",
+                color: isActive ? "#ff3366" : "rgba(255,255,255,0.6)",
+                position: "relative",
+              }}
+            >
+              {isActive && (
+                <div
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    width: "3px",
+                    height: "24px",
+                    background: "#ff3366",
+                    borderRadius: "0 4px 4px 0",
+                    boxShadow: "0 0 10px #ff3366",
+                  }}
+                />
+              )}
+              <Icon size={20} />
+              <span style={{ fontWeight: 500 }}>{item.label}</span>
+            </Link>
+          );
+        })}
       </nav>
 
-      <div className="p-4 border-t border-[#222]">
+      {/* Logout */}
+      <div
+        style={{
+          padding: "16px",
+          borderTop: "1px solid rgba(255,255,255,0.08)",
+        }}
+      >
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-3 w-full text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            padding: "12px 16px",
+            width: "100%",
+            borderRadius: "10px",
+            border: "none",
+            background: "rgba(239,68,68,0.1)",
+            color: "#ef4444",
+            cursor: "pointer",
+            fontSize: "14px",
+            fontWeight: 500,
+          }}
         >
           <LogOut size={20} />
-          <span>Logout</span>
+          Logout
         </button>
       </div>
     </aside>
-  );
-}
-
-function NavItem({
-  href,
-  icon,
-  label,
-  active = false,
-}: {
-  href: string;
-  icon: React.ReactNode;
-  label: string;
-  active?: boolean;
-}) {
-  return (
-    <Link
-      href={href}
-      className={`flex items-center gap-3 px-4 py-3 w-full rounded-lg transition-all duration-200 group relative overflow-hidden ${
-        active
-          ? "bg-[#ff3366]/10 text-[#ff3366]"
-          : "text-gray-400 hover:text-white"
-      }`}
-    >
-      <div
-        className={`absolute inset-0 bg-gradient-to-r from-[#ff3366]/10 to-transparent opacity-0 transition-opacity duration-200 ${active ? "opacity-100" : "group-hover:opacity-100"}`}
-      />
-      <span className="relative z-10">{icon}</span>
-      <span className="font-medium relative z-10">{label}</span>
-      {active && (
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[#ff3366] rounded-r-full shadow-[0_0_10px_#ff3366]" />
-      )}
-    </Link>
   );
 }

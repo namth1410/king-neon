@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import { selectCartCount, openCart } from "@/store";
@@ -17,6 +18,7 @@ const navLinks = [
 
 export default function Header() {
   const dispatch = useDispatch();
+  const currentPath = usePathname();
   const cartCount = useSelector(selectCartCount);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -48,15 +50,24 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className={styles.header__nav}>
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={styles["header__nav-link"]}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isActive =
+                link.href === "/"
+                  ? currentPath === "/"
+                  : currentPath.startsWith(link.href);
+
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`${styles["header__nav-link"]} ${
+                    isActive ? styles.active : ""
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Actions */}
@@ -130,22 +141,31 @@ export default function Header() {
             </button>
 
             <nav className={styles["mobile-menu__nav"]}>
-              {navLinks.map((link, index) => (
-                <motion.div
-                  key={link.href}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Link
-                    href={link.href}
-                    className={styles["mobile-menu__link"]}
-                    onClick={() => setIsMobileMenuOpen(false)}
+              {navLinks.map((link, index) => {
+                const isActive =
+                  link.href === "/"
+                    ? currentPath === "/"
+                    : currentPath.startsWith(link.href);
+
+                return (
+                  <motion.div
+                    key={link.href}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
                   >
-                    {link.label}
-                  </Link>
-                </motion.div>
-              ))}
+                    <Link
+                      href={link.href}
+                      className={`${styles["mobile-menu__link"]} ${
+                        isActive ? styles.active : ""
+                      }`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {link.label}
+                    </Link>
+                  </motion.div>
+                );
+              })}
             </nav>
           </motion.div>
         )}

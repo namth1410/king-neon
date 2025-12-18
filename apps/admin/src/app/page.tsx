@@ -10,6 +10,7 @@ import {
   ArrowUpRight,
   ChevronRight,
 } from "lucide-react";
+import toast from "react-hot-toast";
 import DashboardLayout from "@/components/DashboardLayout";
 import api from "@/utils/api";
 
@@ -62,6 +63,7 @@ export default function AdminDashboard() {
         });
       } catch (error) {
         console.error("Failed to fetch stats:", error);
+        toast.error("Failed to load dashboard statistics");
       } finally {
         setLoading(false);
       }

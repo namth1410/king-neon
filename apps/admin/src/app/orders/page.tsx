@@ -7,8 +7,6 @@ import {
   Filter,
   Eye,
   RefreshCw,
-  ChevronLeft,
-  ChevronRight,
   Package,
   Truck,
   CheckCircle,
@@ -16,7 +14,9 @@ import {
   Clock,
   Settings,
 } from "lucide-react";
+import toast from "react-hot-toast";
 import DashboardLayout from "@/components/DashboardLayout";
+import Pagination from "@/components/Pagination";
 import api from "@/utils/api";
 
 interface Order {
@@ -89,6 +89,7 @@ export default function OrdersPage() {
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "all">("all");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalOrders, setTotalOrders] = useState(0);
   const limit = 10;
 
   const fetchOrders = useCallback(async () => {
@@ -102,13 +103,18 @@ export default function OrdersPage() {
 
       if (response.data.data) {
         setOrders(response.data.data);
-        setTotalPages(Math.ceil(response.data.total / limit));
+        setTotalOrders(response.data.total || response.data.data.length);
+        setTotalPages(
+          response.data.totalPages || Math.ceil(response.data.total / limit)
+        );
       } else {
         setOrders(response.data);
+        setTotalOrders(response.data.length);
         setTotalPages(1);
       }
     } catch (error) {
       console.error("Failed to fetch orders:", error);
+      toast.error("Failed to load orders");
       setOrders([]);
     } finally {
       setLoading(false);
@@ -342,29 +348,15 @@ export default function OrdersPage() {
           </div>
 
           {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between px-6 py-4 border-t border-white/10">
-              <span className="text-white/50 text-sm">
-                Page {page} of {totalPages}
-              </span>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="p-2 bg-white/5 border border-white/10 rounded-lg text-white/60 hover:bg-white/10 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  <ChevronLeft size={18} />
-                </button>
-                <button
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={page === totalPages}
-                  className="p-2 bg-white/5 border border-white/10 rounded-lg text-white/60 hover:bg-white/10 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  <ChevronRight size={18} />
-                </button>
-              </div>
-            </div>
-          )}
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            totalItems={totalOrders}
+            itemsOnPage={orders.length}
+            limit={limit}
+            onPageChange={setPage}
+            itemName="orders"
+          />
         </div>
       </div>
     </DashboardLayout>

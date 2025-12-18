@@ -1,0 +1,172 @@
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
+
+.image-upload {
+  margin-bottom: $spacing-4;
+
+  &__label {
+    display: block;
+    margin-bottom: $spacing-3;
+    font-size: $font-size-xs;
+    font-weight: 600;
+    color: $text-light-secondary;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: $spacing-4;
+    margin-bottom: $spacing-4;
+  }
+
+  &__preview {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: $radius-xl;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+      transform: translateY(-2px);
+
+      img {
+        transform: scale(1.08);
+      }
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    &-remove {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      @include flex-center;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0; // Hide by default
+      transform: translateY(-4px);
+
+      &:hover {
+        background: #ef4444;
+        border-color: #ef4444;
+        transform: scale(1.1);
+        box-shadow: 0 4px 8px rgba(239, 68, 68, 0.4);
+      }
+    }
+
+    // Show remove button on hover
+    &:hover &-remove {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  &__dropzone {
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    border-radius: $radius-xl;
+    padding: $spacing-8;
+    background: rgba(255, 255, 255, 0.02);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    @include flex-center;
+    flex-direction: column;
+    gap: $spacing-4;
+    text-align: center;
+    min-height: 200px;
+    position: relative;
+    overflow: hidden;
+
+    // Subtle animated pattern background could go here if needed
+
+    &:hover {
+      border-color: $color-primary;
+      background: rgba($color-primary, 0.05);
+      box-shadow: 0 0 24px rgba($color-primary, 0.1) inset;
+    }
+
+    &--active {
+      background: rgba($color-primary, 0.05);
+      border-color: $color-primary;
+    }
+
+    &-icon {
+      color: $text-light-secondary;
+      opacity: 0.7;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+      // Add a glow effect
+      filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.5));
+    }
+
+    // Target icon when parent has --active class
+    &--active &-icon {
+      color: $color-primary;
+      animation: bounce 1s infinite;
+    }
+
+    &:hover &-icon {
+      color: $color-primary;
+      opacity: 1;
+      transform: scale(1.1) translateY(-4px);
+      filter: drop-shadow(0 0 12px rgba($color-primary, 0.6));
+    }
+
+    &-text {
+      font-size: $font-size-base;
+      color: $text-light-secondary;
+      transition: color 0.3s;
+
+      strong {
+        color: $text-light;
+        font-weight: 600;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        padding-bottom: 2px;
+      }
+    }
+
+    &:hover &-text {
+      color: $text-light;
+
+      strong {
+        border-color: $color-primary;
+      }
+    }
+
+    &-subtext {
+      font-size: $font-size-xs;
+      color: rgba(255, 255, 255, 0.4);
+      background: rgba(0, 0, 0, 0.2);
+      padding: $spacing-1 $spacing-3;
+      border-radius: 999px;
+    }
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}

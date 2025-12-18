@@ -1,25 +1,52 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Upload } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import toast from "react-hot-toast";
 import DashboardLayout from "@/components/DashboardLayout";
 import api from "@/utils/api";
+import ImageUpload, { PendingFile } from "@/components/ImageUpload";
+import styles from "./page.module.scss";
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  active: boolean;
+}
 
 export default function CreateProductPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
-    price: "",
-    quantity: "",
-    category: "",
+    basePrice: "",
+    categoryId: "",
     description: "",
-    isActive: true,
+    isCustom: false,
+    active: true,
     images: [] as string[],
   });
+
+  const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
+
+  // Fetch categories on mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get("/categories/active");
+        setCategories(res.data);
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+        toast.error("Failed to load categories");
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -55,7 +82,7 @@ export default function CreateProductPage() {
   };
 
   const handleToggleActive = () => {
-    setFormData((prev) => ({ ...prev, isActive: !prev.isActive }));
+    setFormData((prev) => ({ ...prev, active: !prev.active }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -63,20 +90,48 @@ export default function CreateProductPage() {
     setIsLoading(true);
 
     try {
-      // In a real app, you would upload images first and get URLs
-      // For now, we'll send the data as is or mock image URLs if needed
+      // 1. Upload pending images first
+      let uploadedImageUrls: string[] = [];
+      if (pendingFiles.length > 0) {
+        const uploadFormData = new FormData();
+        pendingFiles.forEach((p) => {
+          uploadFormData.append("files", p.file);
+        });
+
+        const uploadRes = await api.post("/upload/images", uploadFormData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        const result = uploadRes.data;
+        if (Array.isArray(result)) {
+          uploadedImageUrls = result.map((item: { url?: string } | string) =>
+            typeof item === "string" ? item : item.url || ""
+          );
+        } else if (result.urls) {
+          uploadedImageUrls = result.urls;
+        }
+      }
+
+      const finalImages = [...formData.images, ...uploadedImageUrls];
 
       const payload = {
-        ...formData,
-        price: parseFloat(formData.price),
-        quantity: parseInt(formData.quantity) || 0,
+        name: formData.name,
+        slug: formData.slug,
+        description: formData.description,
+        basePrice: parseFloat(formData.basePrice) || 0,
+        categoryId: formData.categoryId || undefined,
+        isCustom: formData.isCustom,
+        active: formData.active,
+        images: finalImages,
+        featuredImage: finalImages[0] || undefined,
       };
 
       await api.post("/products", payload);
+      toast.success("Product created successfully");
       router.push("/products");
     } catch (error) {
       console.error("Failed to create product", error);
-      alert("Failed to create product");
+      toast.error("Failed to create product");
     } finally {
       setIsLoading(false);
     }
@@ -84,204 +139,139 @@ export default function CreateProductPage() {
 
   return (
     <DashboardLayout title="Create Product">
-      <div className="max-w-4xl mx-auto">
-        <Link
-          href="/products"
-          className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
-        >
-          <ArrowLeft size={20} />
-          <span>Back to Products</span>
-        </Link>
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <Link href="/products" className={styles["back-link"]}>
+            <ArrowLeft size={20} />
+            <span>Back to Products</span>
+          </Link>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <form onSubmit={handleSubmit}>
+          <div className={styles["form-grid"]}>
             {/* Left Column: Main Info */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="bg-[#111] border border-[#222] rounded-xl p-6 space-y-6">
-                <h3 className="text-lg font-medium text-white">
-                  Basic Information
-                </h3>
+            <div className="left-column">
+              <div className={styles.card}>
+                <h3>Basic Information</h3>
 
-                <div className="space-y-4">
-                  <div>
-                    <label
-                      htmlFor="name"
-                      className="block text-sm font-medium text-gray-400 mb-1"
-                    >
-                      Product Name
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                      className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:border-[#ff3366] focus:outline-none transition-colors"
-                      placeholder="e.g. Neon Heart Sign"
-                    />
-                  </div>
+                <div className={styles["input-group"]}>
+                  <label htmlFor="name">Product Name</label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    placeholder="e.g. Neon Heart Sign"
+                  />
+                </div>
 
-                  <div>
-                    <label
-                      htmlFor="slug"
-                      className="block text-sm font-medium text-gray-400 mb-1"
-                    >
-                      Slug
-                    </label>
-                    <input
-                      type="text"
-                      id="slug"
-                      name="slug"
-                      value={formData.slug}
-                      onChange={handleSlugChange}
-                      required
-                      className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:border-[#ff3366] focus:outline-none transition-colors"
-                      placeholder="e.g. neon-heart-sign"
-                    />
-                  </div>
+                <div className={styles["input-group"]}>
+                  <label htmlFor="slug">Slug (URL)</label>
+                  <input
+                    type="text"
+                    id="slug"
+                    name="slug"
+                    value={formData.slug}
+                    onChange={handleSlugChange}
+                    required
+                    placeholder="e.g. neon-heart-sign"
+                  />
+                </div>
 
-                  <div>
-                    <label
-                      htmlFor="description"
-                      className="block text-sm font-medium text-gray-400 mb-1"
-                    >
-                      Description
-                    </label>
-                    <textarea
-                      id="description"
-                      name="description"
-                      value={formData.description}
-                      onChange={handleChange}
-                      rows={5}
-                      className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:border-[#ff3366] focus:outline-none transition-colors resize-none"
-                      placeholder="Product description..."
-                    />
-                  </div>
+                <div className={styles["input-group"]}>
+                  <label htmlFor="description">Description</label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    placeholder="Product description..."
+                  />
                 </div>
               </div>
 
-              <div className="bg-[#111] border border-[#222] rounded-xl p-6 space-y-6">
-                <h3 className="text-lg font-medium text-white">Media</h3>
-
-                <div className="border-2 border-dashed border-[#333] rounded-xl p-8 flex flex-col items-center justify-center text-gray-400 hover:border-[#ff3366] hover:text-[#ff3366] transition-colors cursor-pointer bg-[#1a1a1a]/50">
-                  <Upload size={32} className="mb-4" />
-                  <p className="font-medium">Click to upload image</p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    SVG, PNG, JPG or GIF (max. 5MB)
-                  </p>
-                </div>
+              <div className={styles.card}>
+                <h3>Media</h3>
+                <ImageUpload
+                  images={formData.images}
+                  onImagesChange={(imgs) =>
+                    setFormData((prev) => ({ ...prev, images: imgs }))
+                  }
+                  pendingFiles={pendingFiles}
+                  onPendingFilesChange={setPendingFiles}
+                  maxFiles={10}
+                />
               </div>
             </div>
 
             {/* Right Column: Pricing & Organization */}
-            <div className="space-y-6">
-              <div className="bg-[#111] border border-[#222] rounded-xl p-6 space-y-6">
-                <h3 className="text-lg font-medium text-white">Status</h3>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Active</span>
+            <div className="right-column">
+              <div className={styles.card}>
+                <h3>Status</h3>
+                <div className={styles["status-row"]}>
+                  <span>Active Status</span>
                   <button
                     type="button"
                     onClick={handleToggleActive}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.isActive ? "bg-green-500" : "bg-gray-600"}`}
+                    className={`${styles["toggle-btn"]} ${formData.active ? styles.active : styles.inactive}`}
                   >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.isActive ? "translate-x-6" : "translate-x-1"}`}
-                    />
+                    <span />
                   </button>
                 </div>
               </div>
 
-              <div className="bg-[#111] border border-[#222] rounded-xl p-6 space-y-6">
-                <h3 className="text-lg font-medium text-white">
-                  Pricing & Inventory
-                </h3>
-
-                <div className="space-y-4">
-                  <div>
-                    <label
-                      htmlFor="price"
-                      className="block text-sm font-medium text-gray-400 mb-1"
-                    >
-                      Price ($)
-                    </label>
-                    <input
-                      type="number"
-                      id="price"
-                      name="price"
-                      value={formData.price}
-                      onChange={handleChange}
-                      required
-                      min="0"
-                      step="0.01"
-                      className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:border-[#ff3366] focus:outline-none transition-colors"
-                      placeholder="0.00"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="quantity"
-                      className="block text-sm font-medium text-gray-400 mb-1"
-                    >
-                      Quantity
-                    </label>
-                    <input
-                      type="number"
-                      id="quantity"
-                      name="quantity"
-                      value={formData.quantity}
-                      onChange={handleChange}
-                      required
-                      min="0"
-                      className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:border-[#ff3366] focus:outline-none transition-colors"
-                      placeholder="0"
-                    />
-                  </div>
+              <div className={styles.card}>
+                <h3>Pricing</h3>
+                <div className={styles["input-group"]}>
+                  <label htmlFor="basePrice">Base Price ($)</label>
+                  <input
+                    type="number"
+                    id="basePrice"
+                    name="basePrice"
+                    value={formData.basePrice}
+                    onChange={handleChange}
+                    required
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                  />
                 </div>
               </div>
 
-              <div className="bg-[#111] border border-[#222] rounded-xl p-6 space-y-6">
-                <h3 className="text-lg font-medium text-white">Organization</h3>
-
-                <div>
-                  <label
-                    htmlFor="category"
-                    className="block text-sm font-medium text-gray-400 mb-1"
-                  >
-                    Category
-                  </label>
+              <div className={styles.card}>
+                <h3>Organization</h3>
+                <div className={styles["input-group"]}>
+                  <label htmlFor="categoryId">Category</label>
                   <select
-                    id="category"
-                    name="category"
-                    value={formData.category}
+                    id="categoryId"
+                    name="categoryId"
+                    value={formData.categoryId}
                     onChange={handleChange}
-                    className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg px-4 py-2.5 text-white focus:border-[#ff3366] focus:outline-none transition-colors"
                   >
                     <option value="">Select category...</option>
-                    <option value="text-signs">Text Signs</option>
-                    <option value="shapes">Shapes & Icons</option>
-                    <option value="business">Business</option>
-                    <option value="custom">Custom</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="flex justify-end gap-4 pt-4 border-t border-[#222]">
-            <Link
-              href="/products"
-              className="px-6 py-2.5 border border-[#333] rounded-lg text-gray-300 hover:text-white hover:bg-[#222] transition-colors font-medium"
-            >
+          <div className={styles.actions}>
+            <Link href="/products" className={styles["btn-cancel"]}>
               Cancel
             </Link>
             <button
               type="submit"
               disabled={isLoading}
-              className="px-6 py-2.5 bg-[#ff3366] hover:bg-[#ff3366]/90 text-white rounded-lg font-medium transition-colors shadow-[0_0_20px_rgba(255,51,102,0.3)] hover:shadow-[0_0_30px_rgba(255,51,102,0.5)]"
+              className={styles["btn-submit"]}
             >
-              {isLoading ? "creating..." : "Create Product"}
+              {isLoading ? "Saving..." : "Save Product"}
             </button>
           </div>
         </form>

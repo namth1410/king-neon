@@ -12,7 +12,7 @@ interface Product {
   name: string;
   slug: string;
   basePrice: number;
-  category: string;
+  category: { id: string; name: string; slug: string } | null;
   images: string[];
   featuredImage: string | null;
 }
@@ -44,7 +44,7 @@ export default function FeaturedProducts() {
     name: p.name,
     slug: p.slug,
     price: p.basePrice,
-    category: p.category.replace(/-/g, " "),
+    category: p.category?.name || "",
     image: p.images[0] || p.featuredImage || undefined,
   }));
 

@@ -36,10 +36,60 @@ export class UsersService {
     return this.userRepository.save(user);
   }
 
-  async findAll(): Promise<User[]> {
-    return this.userRepository.find({
-      select: ['id', 'email', 'name', 'phone', 'role', 'isActive', 'createdAt'],
-    });
+  async findAll(options?: {
+    search?: string;
+    role?: string;
+    status?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<{
+    data: Partial<User>[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }> {
+    const page = options?.page || 1;
+    const limit = options?.limit || 20;
+    const skip = (page - 1) * limit;
+
+    const queryBuilder = this.userRepository.createQueryBuilder('user');
+    queryBuilder.select([
+      'user.id',
+      'user.email',
+      'user.name',
+      'user.phone',
+      'user.role',
+      'user.isActive',
+      'user.createdAt',
+    ]);
+
+    if (options?.search) {
+      queryBuilder.andWhere(
+        '(user.name ILIKE :search OR user.email ILIKE :search)',
+        { search: `%${options.search}%` },
+      );
+    }
+
+    if (options?.role && options.role !== 'all') {
+      queryBuilder.andWhere('user.role = :role', { role: options.role });
+    }
+
+    if (options?.status && options.status !== 'all') {
+      const isActive = options.status === 'active';
+      queryBuilder.andWhere('user.isActive = :isActive', { isActive });
+    }
+
+    queryBuilder.orderBy('user.createdAt', 'DESC');
+    queryBuilder.skip(skip).take(limit);
+
+    const [data, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async findOne(id: string): Promise<User> {

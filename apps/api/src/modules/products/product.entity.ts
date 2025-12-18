@@ -5,15 +5,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { OrderItem } from '../orders/order-item.entity';
-
-export enum ProductCategory {
-  LED_NEON = 'led-neon',
-  BACKLIT_SIGNS = 'backlit-signs',
-  CHANNEL_LETTERS = 'channel-letters',
-  LIGHTBOX_SIGNS = 'lightbox-signs',
-}
+import { Category } from '../categories/category.entity';
 
 @Entity('products')
 export class Product {
@@ -32,12 +28,15 @@ export class Product {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   basePrice: number;
 
-  @Column({
-    type: 'enum',
-    enum: ProductCategory,
-    default: ProductCategory.LED_NEON,
+  @ManyToOne(() => Category, (category) => category.products, {
+    nullable: true,
+    onDelete: 'SET NULL',
   })
-  category: ProductCategory;
+  @JoinColumn({ name: 'categoryId' })
+  category: Category;
+
+  @Column({ nullable: true })
+  categoryId: string;
 
   @Column({ default: false })
   isCustom: boolean;

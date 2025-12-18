@@ -20,13 +20,13 @@ import api from "@/utils/api";
 import RelatedProducts from "@/components/RelatedProducts/RelatedProducts";
 import styles from "./ProductDetail.module.scss";
 
-interface Product {
+export interface Product {
   id: string;
   name: string;
   slug: string;
   description: string;
   basePrice: number;
-  category: string;
+  category: { id: string; name: string; slug: string } | null;
   isCustom: boolean;
   options: Record<string, unknown> | null;
   active: boolean;
@@ -34,23 +34,38 @@ interface Product {
   featuredImage: string | null;
 }
 
-export default function ProductDetailPage() {
+interface ProductDetailClientProps {
+  initialProduct?: Product | null;
+}
+
+export default function ProductDetailPage({
+  initialProduct,
+}: ProductDetailClientProps) {
   const params = useParams();
   const slug = params.slug as string;
   const dispatch = useDispatch();
 
-  const [product, setProduct] = useState<Product | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [product, setProduct] = useState<Product | null>(
+    initialProduct || null
+  );
+  const [isLoading, setIsLoading] = useState(!initialProduct);
   const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
 
   useEffect(() => {
+    // If we already have the product (passed from server) and slugs match, don't refetch
+    if (initialProduct && initialProduct.slug === slug) {
+      return;
+    }
+
     const fetchProduct = async () => {
+      setIsLoading(true);
       try {
         const response = await api.get(`/products/slug/${slug}`);
         setProduct(response.data);
+        setError(null);
       } catch (err) {
         console.error("Failed to fetch product", err);
         setError("Product not found");
@@ -62,7 +77,7 @@ export default function ProductDetailPage() {
     if (slug) {
       fetchProduct();
     }
-  }, [slug]);
+  }, [slug, initialProduct]);
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -195,12 +210,12 @@ export default function ProductDetailPage() {
         {/* Product Info */}
         <div className={styles.productInfo}>
           <div className={styles.category}>
-            {product.category?.replace(/-/g, " ").toUpperCase()}
+            {product.category?.name?.toUpperCase() || "UNCATEGORIZED"}
           </div>
           <h1 className={styles.title}>{product.name}</h1>
 
           <div className={styles.priceContainer}>
-            <span className={styles.price}>
+            <span className={styles.price} suppressHydrationWarning>
               ${Number(product.basePrice).toFixed(2)}
             </span>
             {product.isCustom && (
@@ -283,7 +298,7 @@ export default function ProductDetailPage() {
       {/* Related Products */}
       <RelatedProducts
         currentProductId={product.id}
-        category={product.category}
+        category={product.category?.slug || ""}
       />
     </div>
   );

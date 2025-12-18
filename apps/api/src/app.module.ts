@@ -8,9 +8,12 @@ import { AppService } from './app.service';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ProductsModule } from './modules/products/products.module';
+import { CategoriesModule } from './modules/categories/categories.module';
 import { NeonConfigModule } from './modules/neon-config/neon-config.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { QuotesModule } from './modules/quotes/quotes.module';
+import { UploadModule } from './modules/upload/upload.module';
+import { CartModule } from './modules/cart/cart.module';
 
 @Module({
   imports: [
@@ -41,9 +44,12 @@ import { QuotesModule } from './modules/quotes/quotes.module';
     UsersModule,
     AuthModule,
     ProductsModule,
+    CategoriesModule,
     NeonConfigModule,
     OrdersModule,
     QuotesModule,
+    UploadModule,
+    CartModule,
   ],
   controllers: [AppController],
   providers: [AppService],

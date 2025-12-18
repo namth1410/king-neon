@@ -1,18 +1,22 @@
 import {
   IsString,
   IsNumber,
-  IsEnum,
   IsOptional,
   IsBoolean,
   IsArray,
+  IsUUID,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ProductCategory } from '../product.entity';
 
 export class CreateProductDto {
   @ApiProperty({ example: 'Custom LED Neon Sign' })
   @IsString()
   name: string;
+
+  @ApiPropertyOptional({ example: 'custom-led-neon-sign' })
+  @IsOptional()
+  @IsString()
+  slug?: string;
 
   @ApiProperty({ example: 'Beautiful custom LED neon sign for your space' })
   @IsString()
@@ -22,9 +26,10 @@ export class CreateProductDto {
   @IsNumber()
   basePrice: number;
 
-  @ApiProperty({ enum: ProductCategory, default: ProductCategory.LED_NEON })
-  @IsEnum(ProductCategory)
-  category: ProductCategory;
+  @ApiPropertyOptional({ example: 'uuid-of-category' })
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string;
 
   @ApiPropertyOptional({ default: false })
   @IsOptional()

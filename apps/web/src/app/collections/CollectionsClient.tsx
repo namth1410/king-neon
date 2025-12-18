@@ -1,127 +1,74 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import ProductCard from "@/components/ProductCard";
+import Link from "next/link";
+import Image from "next/image";
 import api from "@/utils/api";
 import styles from "./collections.module.scss";
 
-interface Product {
+interface Category {
   id: string;
   name: string;
   slug: string;
-  basePrice: number;
-  category: string;
-  images: string[];
-  featuredImage: string | null;
+  description: string | null;
+  image: string | null;
+  icon: string | null;
 }
 
-interface Category {
-  category: string;
-  count: number;
-}
-
-const sortOptions = [
-  { value: "featured", label: "Featured" },
-  { value: "newest", label: "Newest" },
-  { value: "price-low", label: "Price: Low to High" },
-  { value: "price-high", label: "Price: High to Low" },
+// Gradient fallbacks for categories without images
+const gradientColors = [
+  "linear-gradient(135deg, hsl(330, 70%, 25%) 0%, hsl(350, 70%, 15%) 100%)",
+  "linear-gradient(135deg, hsl(210, 70%, 25%) 0%, hsl(230, 70%, 15%) 100%)",
+  "linear-gradient(135deg, hsl(150, 70%, 25%) 0%, hsl(170, 70%, 15%) 100%)",
+  "linear-gradient(135deg, hsl(270, 70%, 25%) 0%, hsl(290, 70%, 15%) 100%)",
+  "linear-gradient(135deg, hsl(45, 70%, 25%) 0%, hsl(35, 70%, 15%) 100%)",
+  "linear-gradient(135deg, hsl(180, 70%, 25%) 0%, hsl(200, 70%, 15%) 100%)",
+  "linear-gradient(135deg, hsl(0, 70%, 25%) 0%, hsl(20, 70%, 15%) 100%)",
+  "linear-gradient(135deg, hsl(60, 70%, 25%) 0%, hsl(80, 70%, 15%) 100%)",
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 30, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.5, ease: "easeOut" },
+  },
+};
+
 export default function CollectionsClient() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<string[]>(["All"]);
-  const [activeCategory, setActiveCategory] = useState("All");
-  const [sortBy, setSortBy] = useState("featured");
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [totalProducts, setTotalProducts] = useState(0);
-  const limit = 12;
 
   // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await api.get("/products/categories");
-        const categoryList = response.data.map((c: Category) =>
-          c.category
-            .replace(/-/g, " ")
-            .replace(/\b\w/g, (l: string) => l.toUpperCase())
-        );
-        setCategories(["All", ...categoryList]);
+        const response = await api.get("/categories/active");
+        setCategories(response.data);
       } catch (error) {
         console.error("Failed to fetch categories:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchCategories();
   }, []);
 
-  // Fetch products
-  const fetchProducts = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const params: Record<string, string | number> = {
-        page,
-        limit,
-      };
-
-      if (activeCategory !== "All") {
-        // Convert display category back to API format (e.g., "Led Neon" -> "led-neon")
-        params.category = activeCategory.toLowerCase().replace(/ /g, "-");
-      }
-
-      const response = await api.get("/products", { params });
-
-      // Handle response - could be array or { data, total } object
-      if (Array.isArray(response.data)) {
-        setProducts(response.data);
-        setTotalProducts(response.data.length);
-      } else {
-        setProducts(response.data.data || response.data);
-        setTotalProducts(response.data.total || response.data.length);
-      }
-    } catch (error) {
-      console.error("Failed to fetch products:", error);
-      setProducts([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [activeCategory, page]);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
-
-  // Reset page when category changes
-  useEffect(() => {
-    setPage(1);
-  }, [activeCategory]);
-
-  // Sort products client-side
-  const sortedProducts = [...products].sort((a, b) => {
-    switch (sortBy) {
-      case "price-low":
-        return a.basePrice - b.basePrice;
-      case "price-high":
-        return b.basePrice - a.basePrice;
-      case "newest":
-        return b.id.localeCompare(a.id);
-      default:
-        return 0;
-    }
-  });
-
-  // Transform to ProductCard format
-  const transformedProducts = sortedProducts.map((p) => ({
-    id: p.id,
-    name: p.name,
-    slug: p.slug,
-    price: p.basePrice,
-    category: p.category.replace(/-/g, " "),
-    image: p.images[0] || p.featuredImage || undefined,
-  }));
-
-  const totalPages = Math.ceil(totalProducts / limit);
+  // Limit to 8 categories for gallery display
+  const displayCategories = categories.slice(0, 8);
 
   return (
     <div className={styles.collections}>
@@ -133,109 +80,77 @@ export default function CollectionsClient() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className={styles.collections__title}>Our Collections</h1>
+          <h1 className={styles.collections__title}>Neon Sign Collection</h1>
           <p className={styles.collections__subtitle}>
-            Discover our handcrafted LED neon signs for every occasion
+            Explore our curated collections of premium LED neon signs for every
+            occasion
           </p>
         </motion.div>
 
-        {/* Category Filters */}
-        <motion.div
-          className={styles.collections__filters}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
-          {categories.map((category) => (
-            <button
-              key={category}
-              className={`${styles.collections__filter} ${
-                activeCategory === category ? styles.active : ""
-              }`}
-              onClick={() => setActiveCategory(category)}
-            >
-              {category}
-            </button>
-          ))}
-        </motion.div>
-
-        {/* Toolbar */}
-        <div className={styles.collections__toolbar}>
-          <span className={styles.collections__count}>
-            {isLoading
-              ? "Loading..."
-              : `Showing ${transformedProducts.length} products`}
-          </span>
-
-          <div className={styles.collections__sort}>
-            <span className={styles["collections__sort-label"]}>Sort by:</span>
-            <select
-              className={styles["collections__sort-select"]}
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-            >
-              {sortOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Product Grid */}
-        <div className={styles.collections__grid}>
-          {isLoading ? (
-            // Loading skeleton
-            Array.from({ length: 8 }).map((_, index) => (
-              <div key={index} className={styles.collections__skeleton}>
-                <div className={styles["collections__skeleton-image"]} />
-                <div className={styles["collections__skeleton-text"]} />
-                <div className={styles["collections__skeleton-price"]} />
-              </div>
-            ))
-          ) : transformedProducts.length > 0 ? (
-            transformedProducts.map((product, index) => (
-              <ProductCard key={product.id} product={product} index={index} />
-            ))
-          ) : (
-            <div className={styles.collections__empty}>
-              <p>No products found in this category</p>
-            </div>
-          )}
-        </div>
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className={styles.collections__pagination}>
-            <button
-              className={styles["collections__pagination-btn"]}
-              disabled={page === 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-            >
-              ←
-            </button>
-            {Array.from(
-              { length: Math.min(totalPages, 5) },
-              (_, i) => i + 1
-            ).map((p) => (
-              <button
-                key={p}
-                className={`${styles["collections__pagination-btn"]} ${
-                  page === p ? styles.active : ""
-                }`}
-                onClick={() => setPage(p)}
+        {/* Category Gallery Grid */}
+        {isLoading ? (
+          <div className={styles.collections__gallery}>
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div
+                key={index}
+                className={`${styles.collections__card} ${styles["collections__card--skeleton"]}`}
               >
-                {p}
-              </button>
+                <div className={styles["collections__card-skeleton"]} />
+              </div>
             ))}
-            <button
-              className={styles["collections__pagination-btn"]}
-              disabled={page === totalPages}
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            >
-              →
-            </button>
+          </div>
+        ) : displayCategories.length > 0 ? (
+          <motion.div
+            className={styles.collections__gallery}
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {displayCategories.map((category, index) => (
+              <motion.div key={category.id} variants={itemVariants}>
+                <Link
+                  href={`/collections/${category.slug}`}
+                  className={`${styles.collections__card} ${
+                    index === 0 ? styles["collections__card--large"] : ""
+                  } ${index === 1 ? styles["collections__card--medium"] : ""}`}
+                >
+                  {/* Background Image or Gradient */}
+                  <div className={styles["collections__card-bg"]}>
+                    {category.image ? (
+                      <Image
+                        src={category.image}
+                        alt={category.name}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className={styles["collections__card-image"]}
+                      />
+                    ) : (
+                      <div
+                        className={styles["collections__card-gradient"]}
+                        style={{
+                          background:
+                            gradientColors[index % gradientColors.length],
+                        }}
+                      />
+                    )}
+                  </div>
+
+                  {/* Overlay */}
+                  <div className={styles["collections__card-overlay"]} />
+
+                  {/* Content */}
+                  <div className={styles["collections__card-content"]}>
+                    <span className={styles["collections__card-label"]}>
+                      {category.name}
+                    </span>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </motion.div>
+        ) : (
+          <div className={styles.collections__empty}>
+            <p>No collections available</p>
           </div>
         )}
       </div>

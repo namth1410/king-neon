@@ -7,7 +7,8 @@ import {
   NeonBackboard,
   BackboardType,
 } from '../modules/neon-config/entities/neon-backboard.entity';
-import { Product, ProductCategory } from '../modules/products/product.entity';
+import { Product } from '../modules/products/product.entity';
+import { Category } from '../modules/categories/category.entity';
 import { User, UserRole } from '../modules/users/user.entity';
 import * as bcrypt from 'bcrypt';
 
@@ -260,129 +261,23 @@ const BACKBOARDS: Partial<NeonBackboard>[] = [
   },
 ];
 
-const PRODUCTS: Partial<Product>[] = [
+// Default categories to seed
+const CATEGORIES: Partial<Category>[] = [
   {
-    name: 'Good Vibes Only',
-    slug: 'good-vibes-only',
-    description:
-      'Spread positivity with this iconic "Good Vibes Only" LED neon sign. Perfect for bedrooms, living rooms, or creative spaces.',
-    basePrice: 199,
-    category: ProductCategory.LED_NEON,
-    isCustom: false,
+    name: 'Trending',
+    slug: 'trending',
+    description: 'Hot and trending neon signs',
+    icon: 'trending',
+    sortOrder: 1,
     active: true,
-    images: [
-      '/products/good-vibes-only-1.jpg',
-      '/products/good-vibes-only-2.jpg',
-    ],
-    featuredImage: '/products/good-vibes-only-1.jpg',
   },
   {
-    name: 'Hello Gorgeous',
-    slug: 'hello-gorgeous',
-    description:
-      'Add a touch of glamour to your space with this beautiful "Hello Gorgeous" neon sign. Ideal for salons, bedrooms, or vanity areas.',
-    basePrice: 179,
-    category: ProductCategory.LED_NEON,
-    isCustom: false,
+    name: 'Home Decor',
+    slug: 'home-decor',
+    description: 'Beautiful neon signs for home decoration',
+    icon: 'home',
+    sortOrder: 2,
     active: true,
-    images: ['/products/hello-gorgeous-1.jpg'],
-    featuredImage: '/products/hello-gorgeous-1.jpg',
-  },
-  {
-    name: 'Love',
-    slug: 'love',
-    description:
-      'Classic "Love" neon sign that spreads warmth and affection. Perfect for weddings, bedrooms, or as a heartfelt gift.',
-    basePrice: 149,
-    category: ProductCategory.LED_NEON,
-    isCustom: false,
-    active: true,
-    images: ['/products/love-1.jpg', '/products/love-2.jpg'],
-    featuredImage: '/products/love-1.jpg',
-  },
-  {
-    name: 'Dream Big',
-    slug: 'dream-big',
-    description:
-      'Inspire yourself daily with this motivational "Dream Big" LED neon sign. Great for home offices, studios, or kids rooms.',
-    basePrice: 189,
-    category: ProductCategory.LED_NEON,
-    isCustom: false,
-    active: true,
-    images: ['/products/dream-big-1.jpg'],
-    featuredImage: '/products/dream-big-1.jpg',
-  },
-  {
-    name: 'Better Together',
-    slug: 'better-together',
-    description:
-      'The perfect wedding or couple\'s neon sign. "Better Together" celebrates love and partnership.',
-    basePrice: 249,
-    category: ProductCategory.LED_NEON,
-    isCustom: false,
-    active: true,
-    images: ['/products/better-together-1.jpg'],
-    featuredImage: '/products/better-together-1.jpg',
-  },
-  {
-    name: 'Cheers',
-    slug: 'cheers',
-    description:
-      'Celebrate every moment with this fun "Cheers" neon sign. Perfect for bars, parties, or home entertainment areas.',
-    basePrice: 159,
-    category: ProductCategory.LED_NEON,
-    isCustom: false,
-    active: true,
-    images: ['/products/cheers-1.jpg'],
-    featuredImage: '/products/cheers-1.jpg',
-  },
-  {
-    name: 'Neon Martini Glass',
-    slug: 'neon-martini-glass',
-    description:
-      'Stylish martini glass LED neon art. Adds a sophisticated touch to bars, lounges, or home cocktail corners.',
-    basePrice: 129,
-    category: ProductCategory.LED_NEON,
-    isCustom: false,
-    active: true,
-    images: ['/products/martini-1.jpg'],
-    featuredImage: '/products/martini-1.jpg',
-  },
-  {
-    name: 'Hustle',
-    slug: 'hustle',
-    description:
-      'Stay motivated with this bold "Hustle" neon sign. Perfect for entrepreneurs, home offices, or gyms.',
-    basePrice: 169,
-    category: ProductCategory.LED_NEON,
-    isCustom: false,
-    active: true,
-    images: ['/products/hustle-1.jpg'],
-    featuredImage: '/products/hustle-1.jpg',
-  },
-  {
-    name: 'Custom Logo Sign',
-    slug: 'custom-logo-sign',
-    description:
-      'Transform your business logo into a stunning LED neon sign. Perfect for storefronts, offices, or events.',
-    basePrice: 399,
-    category: ProductCategory.BACKLIT_SIGNS,
-    isCustom: true,
-    active: true,
-    images: ['/products/custom-logo-1.jpg'],
-    featuredImage: '/products/custom-logo-1.jpg',
-  },
-  {
-    name: 'Channel Letter Sign',
-    slug: 'channel-letter-sign',
-    description:
-      'Professional 3D channel letter signage for businesses. High-impact, durable, and energy-efficient.',
-    basePrice: 599,
-    category: ProductCategory.CHANNEL_LETTERS,
-    isCustom: true,
-    active: true,
-    images: ['/products/channel-letters-1.jpg'],
-    featuredImage: '/products/channel-letters-1.jpg',
   },
 ];
 
@@ -468,12 +363,157 @@ export async function seed(dataSource: DataSource): Promise<void> {
     console.log(`⏭️  Neon backboards already exist (${existingBackboards})`);
   }
 
-  // Seed Products
+  // Seed Categories
+  const categoryRepo = dataSource.getRepository(Category);
+  const existingCategories = await categoryRepo.count();
+  let savedCategories: Category[] = [];
+  if (existingCategories === 0) {
+    savedCategories = await categoryRepo.save(CATEGORIES);
+    console.log(`✅ ${CATEGORIES.length} categories seeded`);
+  } else {
+    savedCategories = await categoryRepo.find();
+    console.log(`⏭️  Categories already exist (${existingCategories})`);
+  }
+
+  // Create a map of slug to category for easy lookup
+  const categoryMap = new Map<string, Category>();
+  savedCategories.forEach((cat) => categoryMap.set(cat.slug, cat));
+
+  // Seed Products with category relationships
   const productRepo = dataSource.getRepository(Product);
   const existingProducts = await productRepo.count();
   if (existingProducts === 0) {
-    await productRepo.save(PRODUCTS);
-    console.log(`✅ ${PRODUCTS.length} products seeded`);
+    const trendingCategory = categoryMap.get('trending');
+    const homeDecorCategory = categoryMap.get('home-decor');
+
+    const products: Partial<Product>[] = [
+      {
+        name: 'Good Vibes Only',
+        slug: 'good-vibes-only',
+        description:
+          'Spread positivity with this iconic "Good Vibes Only" LED neon sign. Perfect for bedrooms, living rooms, or creative spaces.',
+        basePrice: 199,
+        category: trendingCategory,
+        isCustom: false,
+        active: true,
+        images: [
+          '/products/good-vibes-only-1.jpg',
+          '/products/good-vibes-only-2.jpg',
+        ],
+        featuredImage: '/products/good-vibes-only-1.jpg',
+      },
+      {
+        name: 'Hello Gorgeous',
+        slug: 'hello-gorgeous',
+        description:
+          'Add a touch of glamour to your space with this beautiful "Hello Gorgeous" neon sign. Ideal for salons, bedrooms, or vanity areas.',
+        basePrice: 179,
+        category: trendingCategory,
+        isCustom: false,
+        active: true,
+        images: ['/products/hello-gorgeous-1.jpg'],
+        featuredImage: '/products/hello-gorgeous-1.jpg',
+      },
+      {
+        name: 'Love',
+        slug: 'love',
+        description:
+          'Classic "Love" neon sign that spreads warmth and affection. Perfect for weddings, bedrooms, or as a heartfelt gift.',
+        basePrice: 149,
+        category: homeDecorCategory,
+        isCustom: false,
+        active: true,
+        images: ['/products/love-1.jpg', '/products/love-2.jpg'],
+        featuredImage: '/products/love-1.jpg',
+      },
+      {
+        name: 'Dream Big',
+        slug: 'dream-big',
+        description:
+          'Inspire yourself daily with this motivational "Dream Big" LED neon sign. Great for home offices, studios, or kids rooms.',
+        basePrice: 189,
+        category: homeDecorCategory,
+        isCustom: false,
+        active: true,
+        images: ['/products/dream-big-1.jpg'],
+        featuredImage: '/products/dream-big-1.jpg',
+      },
+      {
+        name: 'Better Together',
+        slug: 'better-together',
+        description:
+          'The perfect wedding or couple\'s neon sign. "Better Together" celebrates love and partnership.',
+        basePrice: 249,
+        category: homeDecorCategory,
+        isCustom: false,
+        active: true,
+        images: ['/products/better-together-1.jpg'],
+        featuredImage: '/products/better-together-1.jpg',
+      },
+      {
+        name: 'Cheers',
+        slug: 'cheers',
+        description:
+          'Celebrate every moment with this fun "Cheers" neon sign. Perfect for bars, parties, or home entertainment areas.',
+        basePrice: 159,
+        category: trendingCategory,
+        isCustom: false,
+        active: true,
+        images: ['/products/cheers-1.jpg'],
+        featuredImage: '/products/cheers-1.jpg',
+      },
+      {
+        name: 'Neon Martini Glass',
+        slug: 'neon-martini-glass',
+        description:
+          'Stylish martini glass LED neon art. Adds a sophisticated touch to bars, lounges, or home cocktail corners.',
+        basePrice: 129,
+        category: trendingCategory,
+        isCustom: false,
+        active: true,
+        images: ['/products/martini-1.jpg'],
+        featuredImage: '/products/martini-1.jpg',
+      },
+      {
+        name: 'Hustle',
+        slug: 'hustle',
+        description:
+          'Stay motivated with this bold "Hustle" neon sign. Perfect for entrepreneurs, home offices, or gyms.',
+        basePrice: 169,
+        category: trendingCategory,
+        isCustom: false,
+        active: true,
+        images: ['/products/hustle-1.jpg'],
+        featuredImage: '/products/hustle-1.jpg',
+      },
+      {
+        name: 'Custom Logo Sign',
+        slug: 'custom-logo-sign',
+        description:
+          'Transform your business logo into a stunning LED neon sign. Perfect for storefronts, offices, or events.',
+        basePrice: 399,
+        category: homeDecorCategory,
+        isCustom: true,
+        active: true,
+        images: ['/products/custom-logo-1.jpg'],
+        featuredImage: '/products/custom-logo-1.jpg',
+      },
+      {
+        name: 'Channel Letter Sign',
+        slug: 'channel-letter-sign',
+        description:
+          'Professional 3D channel letter signage for businesses. High-impact, durable, and energy-efficient.',
+        basePrice: 599,
+        category: homeDecorCategory,
+        isCustom: true,
+        active: true,
+        images: ['/products/channel-letters-1.jpg'],
+        featuredImage: '/products/channel-letters-1.jpg',
+      },
+    ];
+
+    await productRepo.save(products);
+    console.log(`✅ ${products.length} products seeded`);
   } else {
     console.log(`⏭️  Products already exist (${existingProducts})`);
   }

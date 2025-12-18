@@ -1,17 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { Plus, Search, Edit, Trash2, Package } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Package, Filter } from "lucide-react";
+import toast from "react-hot-toast";
 import DashboardLayout from "@/components/DashboardLayout";
+import Pagination from "@/components/Pagination";
 import api from "@/utils/api";
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 interface Product {
   id: string;
   name: string;
   slug: string;
   basePrice: string;
-  category: string;
+  category: { id: string; name: string; slug: string } | null;
   active: boolean;
   images: string[];
   featuredImage: string | null;
@@ -20,43 +28,98 @@ interface Product {
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [sortBy, setSortBy] = useState<string>("newest");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const limit = 10;
 
+  // Debounce search
   useEffect(() => {
-    fetchProducts();
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setPage(1); // Reset to first page on search
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get("/categories");
+        setCategories(res.data);
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+      }
+    };
+    fetchCategories();
   }, []);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
+    setIsLoading(true);
     try {
-      const response = await api.get("/products");
-      const productsData = Array.isArray(response.data)
-        ? response.data
-        : response.data.data || [];
-      setProducts(productsData);
+      const params: Record<string, string | number> = {
+        page,
+        limit,
+        sortBy,
+      };
+      if (debouncedSearch) params.search = debouncedSearch;
+      if (categoryFilter) params.categoryId = categoryFilter;
+
+      const response = await api.get("/products", { params });
+
+      if (response.data.data) {
+        setProducts(response.data.data);
+        setTotalProducts(response.data.total);
+        setTotalPages(response.data.totalPages);
+      } else {
+        const productsData = Array.isArray(response.data) ? response.data : [];
+        setProducts(productsData);
+        setTotalProducts(productsData.length);
+        setTotalPages(1);
+      }
     } catch (error) {
       console.error("Failed to fetch products", error);
+      toast.error("Failed to load products");
       setProducts([]);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [page, debouncedSearch, categoryFilter, sortBy]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this product?")) {
       try {
         await api.delete(`/products/${id}`);
-        setProducts(products.filter((p) => p.id !== id));
+        toast.success("Product deleted successfully");
+        fetchProducts();
       } catch (error) {
         console.error("Failed to delete product", error);
-        alert("Failed to delete product");
+        toast.error("Failed to delete product");
       }
     }
   };
 
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Reset page when filters change
+  const handleCategoryChange = (value: string) => {
+    setCategoryFilter(value);
+    setPage(1);
+  };
+
+  const handleSortChange = (value: string) => {
+    setSortBy(value);
+    setPage(1);
+  };
 
   return (
     <DashboardLayout title="Products">
@@ -104,34 +167,131 @@ export default function ProductsPage() {
           </Link>
         </div>
 
-        {/* Search */}
-        <div style={{ position: "relative", maxWidth: "400px" }}>
-          <Search
-            size={20}
+        {/* Filters Row */}
+        <div
+          style={{
+            display: "flex",
+            gap: "16px",
+            flexWrap: "wrap",
+            alignItems: "center",
+          }}
+        >
+          {/* Search */}
+          <div
             style={{
-              position: "absolute",
-              left: "16px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "rgba(255,255,255,0.4)",
+              position: "relative",
+              flex: "1",
+              minWidth: "200px",
+              maxWidth: "400px",
             }}
-          />
-          <input
-            type="text"
-            placeholder="Search products..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+          >
+            <Search
+              size={20}
+              style={{
+                position: "absolute",
+                left: "16px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "rgba(255,255,255,0.4)",
+              }}
+            />
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "12px 16px 12px 48px",
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: "12px",
+                color: "white",
+                fontSize: "14px",
+                outline: "none",
+              }}
+            />
+          </div>
+
+          {/* Category Filter */}
+          <div style={{ position: "relative" }}>
+            <Filter
+              size={16}
+              style={{
+                position: "absolute",
+                left: "12px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "rgba(255,255,255,0.4)",
+                pointerEvents: "none",
+              }}
+            />
+            <select
+              value={categoryFilter}
+              onChange={(e) => handleCategoryChange(e.target.value)}
+              style={{
+                padding: "12px 16px 12px 36px",
+                paddingRight: "40px",
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: "12px",
+                color: "white",
+                fontSize: "14px",
+                outline: "none",
+                cursor: "pointer",
+                appearance: "none",
+                minWidth: "160px",
+              }}
+            >
+              <option value="" style={{ background: "#1a1a1a" }}>
+                All Categories
+              </option>
+              {categories.map((cat) => (
+                <option
+                  key={cat.id}
+                  value={cat.id}
+                  style={{ background: "#1a1a1a" }}
+                >
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Sort */}
+          <select
+            value={sortBy}
+            onChange={(e) => handleSortChange(e.target.value)}
             style={{
-              width: "100%",
-              padding: "12px 16px 12px 48px",
+              padding: "12px 16px",
+              paddingRight: "40px",
               background: "rgba(255,255,255,0.05)",
               border: "1px solid rgba(255,255,255,0.1)",
               borderRadius: "12px",
               color: "white",
               fontSize: "14px",
               outline: "none",
+              cursor: "pointer",
+              appearance: "none",
+              minWidth: "150px",
             }}
-          />
+          >
+            <option value="newest" style={{ background: "#1a1a1a" }}>
+              Newest First
+            </option>
+            <option value="name-asc" style={{ background: "#1a1a1a" }}>
+              Name A-Z
+            </option>
+            <option value="name-desc" style={{ background: "#1a1a1a" }}>
+              Name Z-A
+            </option>
+            <option value="price-asc" style={{ background: "#1a1a1a" }}>
+              Price: Low to High
+            </option>
+            <option value="price-desc" style={{ background: "#1a1a1a" }}>
+              Price: High to Low
+            </option>
+          </select>
         </div>
 
         {/* Products Table */}
@@ -164,7 +324,7 @@ export default function ProductsPage() {
               />
               Loading products...
             </div>
-          ) : filteredProducts.length === 0 ? (
+          ) : products.length === 0 ? (
             <div style={{ padding: "60px", textAlign: "center" }}>
               <Package
                 size={48}
@@ -189,7 +349,7 @@ export default function ProductsPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredProducts.map((product) => (
+                {products.map((product) => (
                   <tr
                     key={product.id}
                     style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
@@ -252,7 +412,7 @@ export default function ProductsPage() {
                           textTransform: "capitalize",
                         }}
                       >
-                        {product.category.replace(/-/g, " ")}
+                        {product.category?.name || "No Category"}
                       </span>
                     </td>
                     <td style={tdStyle}>
@@ -351,6 +511,17 @@ export default function ProductsPage() {
               </tbody>
             </table>
           )}
+
+          {/* Pagination */}
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            totalItems={totalProducts}
+            itemsOnPage={products.length}
+            limit={limit}
+            onPageChange={setPage}
+            itemName="products"
+          />
         </div>
       </div>
     </DashboardLayout>

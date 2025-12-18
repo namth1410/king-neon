@@ -14,10 +14,9 @@ import {
   Mail,
   Phone,
   User,
-  Calendar,
-  DollarSign,
   Save,
 } from "lucide-react";
+import toast from "react-hot-toast";
 import DashboardLayout from "@/components/DashboardLayout";
 import api from "@/utils/api";
 
@@ -132,6 +131,7 @@ export default function OrderDetailPage() {
         setNotes(response.data.notes || "");
       } catch (error) {
         console.error("Failed to fetch order:", error);
+        toast.error("Failed to load order");
       } finally {
         setLoading(false);
       }
@@ -151,10 +151,10 @@ export default function OrderDetailPage() {
         notes,
       });
       setOrder({ ...order, status: selectedStatus, notes });
-      alert("Order updated successfully!");
+      toast.success("Order updated successfully!");
     } catch (error) {
       console.error("Failed to update order:", error);
-      alert("Failed to update order");
+      toast.error("Failed to update order");
     } finally {
       setUpdating(false);
     }
@@ -169,7 +169,7 @@ export default function OrderDetailPage() {
       setSelectedStatus("cancelled");
     } catch (error) {
       console.error("Failed to cancel order:", error);
-      alert("Failed to cancel order");
+      toast.error("Failed to cancel order");
     } finally {
       setUpdating(false);
     }

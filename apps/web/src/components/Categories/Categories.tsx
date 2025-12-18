@@ -11,6 +11,8 @@ const categories = [
     count: 42,
     image: "/images/categories/wedding.jpg",
     href: "/collections/wedding",
+    gradient:
+      "linear-gradient(135deg, hsl(330, 70%, 20%) 0%, hsl(350, 70%, 10%) 100%)",
   },
   {
     id: "business",
@@ -18,6 +20,8 @@ const categories = [
     count: 58,
     image: "/images/categories/business.jpg",
     href: "/collections/business",
+    gradient:
+      "linear-gradient(135deg, hsl(210, 70%, 20%) 0%, hsl(230, 70%, 10%) 100%)",
   },
   {
     id: "home",
@@ -25,6 +29,8 @@ const categories = [
     count: 35,
     image: "/images/categories/home.jpg",
     href: "/collections/home",
+    gradient:
+      "linear-gradient(135deg, hsl(150, 70%, 20%) 0%, hsl(170, 70%, 10%) 100%)",
   },
   {
     id: "quotes",
@@ -32,6 +38,8 @@ const categories = [
     count: 67,
     image: "/images/categories/quotes.jpg",
     href: "/collections/quotes",
+    gradient:
+      "linear-gradient(135deg, hsl(270, 70%, 20%) 0%, hsl(290, 70%, 10%) 100%)",
   },
 ];
 
@@ -90,9 +98,7 @@ export default function Categories() {
                     style={{
                       width: "100%",
                       height: "100%",
-                      background: `linear-gradient(135deg, 
-                        hsl(${Math.random() * 360}, 70%, 20%) 0%, 
-                        hsl(${Math.random() * 360}, 70%, 10%) 100%)`,
+                      background: category.gradient,
                     }}
                   />
                 </div>

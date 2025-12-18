@@ -82,8 +82,8 @@ export default function RelatedProducts({
             </div>
             <div className={styles.info}>
               <h3 className={styles.name}>{product.name}</h3>
-              <span className={styles.price}>
-                ${product.basePrice.toFixed(2)}
+              <span className={styles.price} suppressHydrationWarning>
+                ${Number(product.basePrice).toFixed(2)}
               </span>
             </div>
           </Link>
