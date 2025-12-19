@@ -1,82 +1,103 @@
-import { useRef, useEffect } from "react";
-import { Canvas, useThree } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import {
   OrbitControls,
   PerspectiveCamera,
   Environment,
 } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
-import NeonSign from "./NeonSign";
+import NeonPlane from "./NeonPlane";
+import NeonLogo, { ProcessingMethod } from "./NeonLogo";
+
+type TextAlign = "left" | "center" | "right";
 
 interface SceneProps {
   text: string;
   color: string;
-  font: string;
   size: number;
+  fontFamily: string;
   backboard: string;
-  cameraDistance: number;
-}
-
-function CameraController({ distance }: { distance: number }) {
-  const { camera } = useThree();
-
-  useEffect(() => {
-    camera.position.z = distance;
-    camera.updateProjectionMatrix();
-  }, [distance, camera]);
-
-  return null;
+  borderWidth: number;
+  textAlign: TextAlign;
+  mode: "text" | "logo";
+  // Logo props
+  logoUrl?: string;
+  logoSize?: number;
+  logoOutlineWidth?: number;
+  logoProcessingMethod?: ProcessingMethod;
 }
 
 export default function Scene({
   text,
   color,
-  font,
   size,
+  fontFamily,
   backboard,
-  cameraDistance,
+  borderWidth,
+  textAlign,
+  mode,
+  // Logo props with defaults
+  logoUrl,
+  logoSize = 2,
+  logoOutlineWidth = 0.5,
+  logoProcessingMethod = "alpha",
 }: SceneProps) {
   return (
     <Canvas
       shadows
       dpr={[1, 2]}
-      gl={{ preserveDrawingBuffer: true, antialias: true }}
+      gl={{
+        preserveDrawingBuffer: true,
+        antialias: true,
+        alpha: true,
+      }}
+      style={{ background: "transparent" }}
     >
-      <PerspectiveCamera makeDefault position={[0, 0, 10]} fov={50} />
-      <CameraController distance={cameraDistance} />
+      <PerspectiveCamera makeDefault position={[0, 0, 15]} fov={50} />
 
-      {/* Lighting & Environment */}
-      <ambientLight intensity={0.5} />
-      <pointLight position={[10, 10, 10]} intensity={1} />
-      <Environment preset="night" background blur={0.5} />
+      {/* Minimal Lighting */}
+      <ambientLight intensity={0.3} />
+      <Environment preset="night" blur={0.8} />
 
-      {/* Controls */}
+      {/* Controls - allows full 3D rotation of the neon sign */}
       <OrbitControls
-        minPolarAngle={Math.PI / 4}
-        maxPolarAngle={Math.PI / 1.5}
-        minDistance={2}
-        maxDistance={100}
+        enablePan={true}
+        enableZoom={true}
+        enableRotate={true}
+        minDistance={5}
+        maxDistance={50}
       />
 
-      {/* Neon Sign Object & Backboard */}
-      <group position={[0, 0, 0]}>
-        <NeonSign
+      {/* Neon Text - only in text mode */}
+      {mode === "text" && (
+        <NeonPlane
           text={text}
           color={color}
           size={size}
-          font={font}
+          fontFamily={fontFamily}
           backboard={backboard}
+          borderWidth={borderWidth}
+          textAlign={textAlign}
         />
-      </group>
+      )}
 
-      {/* Post Processing Effects */}
-      <EffectComposer disableNormalPass>
+      {/* Neon Logo - only in logo mode when logo is uploaded */}
+      {mode === "logo" && logoUrl && (
+        <NeonLogo
+          imageUrl={logoUrl}
+          color={color}
+          size={logoSize}
+          outlineWidth={logoOutlineWidth}
+          processingMethod={logoProcessingMethod}
+        />
+      )}
+
+      {/* Post Processing - Enhanced bloom for neon glow */}
+      <EffectComposer enableNormalPass={false}>
         <Bloom
-          luminanceThreshold={0.5}
+          luminanceThreshold={0.3}
           luminanceSmoothing={0.9}
-          height={300}
-          opacity={1.5}
-          intensity={2}
+          height={400}
+          intensity={1.5}
         />
       </EffectComposer>
     </Canvas>
