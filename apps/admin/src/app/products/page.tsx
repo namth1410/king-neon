@@ -2,11 +2,31 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { Plus, Search, Edit, Trash2, Package, Filter } from "lucide-react";
-import toast from "react-hot-toast";
+import { Plus, Search, Edit, Trash2, Package } from "lucide-react";
+import { Spinner } from "@king-neon/ui";
+import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import Pagination from "@/components/Pagination";
 import api from "@/utils/api";
+import { useApiRequest, withSignal } from "@/hooks/useApiRequest";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Category {
   id: string;
@@ -37,16 +57,21 @@ export default function ProductsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
-  const limit = 10;
+  const limit = 3;
 
-  // Debounce search
+  const { request, abort, abortAll } = useApiRequest();
+
+  // Debounce search - abort pending request immediately when typing
   useEffect(() => {
+    // Abort any pending products request immediately when user types
+    abort("products");
+
     const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm);
-      setPage(1); // Reset to first page on search
+      setPage(1);
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchTerm]);
+  }, [searchTerm, abort]);
 
   // Fetch categories
   useEffect(() => {
@@ -72,7 +97,12 @@ export default function ProductsPage() {
       if (debouncedSearch) params.search = debouncedSearch;
       if (categoryFilter) params.categoryId = categoryFilter;
 
-      const response = await api.get("/products", { params });
+      const response = await request("products", (signal) =>
+        api.get("/products", withSignal(signal, { params }))
+      );
+
+      // Response is null if request was aborted
+      if (!response) return;
 
       if (response.data.data) {
         setProducts(response.data.data);
@@ -91,11 +121,12 @@ export default function ProductsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [page, debouncedSearch, categoryFilter, sortBy]);
+  }, [page, debouncedSearch, categoryFilter, sortBy, request]);
 
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+    return () => abortAll(); // Cleanup on unmount
+  }, [fetchProducts, abortAll]);
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this product?")) {
@@ -110,9 +141,8 @@ export default function ProductsPage() {
     }
   };
 
-  // Reset page when filters change
   const handleCategoryChange = (value: string) => {
-    setCategoryFilter(value);
+    setCategoryFilter(value === "all" ? "" : value);
     setPage(1);
   };
 
@@ -123,393 +153,180 @@ export default function ProductsPage() {
 
   return (
     <DashboardLayout title="Products">
-      <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+      <div className="flex flex-col gap-6">
         {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
+        <div className="flex justify-between items-center">
           <div>
-            <h1
-              style={{
-                fontSize: "24px",
-                fontWeight: 700,
-                color: "white",
-                marginBottom: "4px",
-              }}
-            >
+            <h1 className="text-2xl font-bold text-white mb-1">
               Product Management
             </h1>
-            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "14px" }}>
-              {products.length} products in catalog
+            <p className="text-zinc-500 text-sm">
+              {totalProducts} products in catalog
             </p>
           </div>
-          <Link
-            href="/products/create"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "12px 20px",
-              background: "linear-gradient(135deg, #ff3366 0%, #ff3366cc 100%)",
-              borderRadius: "12px",
-              color: "white",
-              fontWeight: 600,
-              textDecoration: "none",
-              boxShadow: "0 4px 20px rgba(255,51,102,0.3)",
-            }}
-          >
-            <Plus size={20} />
-            Add Product
-          </Link>
+          <Button asChild className="bg-pink-600 hover:bg-pink-700 gap-2">
+            <Link href="/products/create">
+              <Plus size={20} />
+              Add Product
+            </Link>
+          </Button>
         </div>
 
         {/* Filters Row */}
-        <div
-          style={{
-            display: "flex",
-            gap: "16px",
-            flexWrap: "wrap",
-            alignItems: "center",
-          }}
-        >
+        <div className="flex gap-4 flex-wrap items-center">
           {/* Search */}
-          <div
-            style={{
-              position: "relative",
-              flex: "1",
-              minWidth: "200px",
-              maxWidth: "400px",
-            }}
-          >
+          <div className="relative flex-1 min-w-[200px] max-w-[400px]">
             <Search
               size={20}
-              style={{
-                position: "absolute",
-                left: "16px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "rgba(255,255,255,0.4)",
-              }}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"
             />
-            <input
+            <Input
               type="text"
               placeholder="Search products..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "12px 16px 12px 48px",
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: "12px",
-                color: "white",
-                fontSize: "14px",
-                outline: "none",
-              }}
+              className="pl-10 bg-zinc-800/50 border-zinc-700"
             />
           </div>
 
           {/* Category Filter */}
-          <div style={{ position: "relative" }}>
-            <Filter
-              size={16}
-              style={{
-                position: "absolute",
-                left: "12px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "rgba(255,255,255,0.4)",
-                pointerEvents: "none",
-              }}
-            />
-            <select
-              value={categoryFilter}
-              onChange={(e) => handleCategoryChange(e.target.value)}
-              style={{
-                padding: "12px 16px 12px 36px",
-                paddingRight: "40px",
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: "12px",
-                color: "white",
-                fontSize: "14px",
-                outline: "none",
-                cursor: "pointer",
-                appearance: "none",
-                minWidth: "160px",
-              }}
-            >
-              <option value="" style={{ background: "#1a1a1a" }}>
-                All Categories
-              </option>
+          <Select
+            onValueChange={handleCategoryChange}
+            value={categoryFilter || "all"}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
               {categories.map((cat) => (
-                <option
-                  key={cat.id}
-                  value={cat.id}
-                  style={{ background: "#1a1a1a" }}
-                >
+                <SelectItem key={cat.id} value={cat.id}>
                   {cat.name}
-                </option>
+                </SelectItem>
               ))}
-            </select>
-          </div>
+            </SelectContent>
+          </Select>
 
           {/* Sort */}
-          <select
-            value={sortBy}
-            onChange={(e) => handleSortChange(e.target.value)}
-            style={{
-              padding: "12px 16px",
-              paddingRight: "40px",
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: "12px",
-              color: "white",
-              fontSize: "14px",
-              outline: "none",
-              cursor: "pointer",
-              appearance: "none",
-              minWidth: "150px",
-            }}
-          >
-            <option value="newest" style={{ background: "#1a1a1a" }}>
-              Newest First
-            </option>
-            <option value="name-asc" style={{ background: "#1a1a1a" }}>
-              Name A-Z
-            </option>
-            <option value="name-desc" style={{ background: "#1a1a1a" }}>
-              Name Z-A
-            </option>
-            <option value="price-asc" style={{ background: "#1a1a1a" }}>
-              Price: Low to High
-            </option>
-            <option value="price-desc" style={{ background: "#1a1a1a" }}>
-              Price: High to Low
-            </option>
-          </select>
+          <Select onValueChange={handleSortChange} value={sortBy}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest First</SelectItem>
+              <SelectItem value="name-asc">Name A-Z</SelectItem>
+              <SelectItem value="name-desc">Name Z-A</SelectItem>
+              <SelectItem value="price-asc">Price: Low to High</SelectItem>
+              <SelectItem value="price-desc">Price: High to Low</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Products Table */}
-        <div
-          style={{
-            background: "rgba(255,255,255,0.03)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: "16px",
-            overflow: "hidden",
-          }}
-        >
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
           {isLoading ? (
-            <div
-              style={{
-                padding: "60px",
-                textAlign: "center",
-                color: "rgba(255,255,255,0.4)",
-              }}
-            >
-              <div
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  border: "3px solid rgba(255,51,102,0.2)",
-                  borderTopColor: "#ff3366",
-                  borderRadius: "50%",
-                  margin: "0 auto 16px",
-                  animation: "spin 1s linear infinite",
-                }}
-              />
+            <div className="p-16 text-center text-zinc-500">
+              <Spinner className="w-10 h-10 animate-spin mx-auto mb-4 text-pink-500" />
               Loading products...
             </div>
           ) : products.length === 0 ? (
-            <div style={{ padding: "60px", textAlign: "center" }}>
-              <Package
-                size={48}
-                style={{ color: "rgba(255,255,255,0.2)", marginBottom: "16px" }}
-              />
-              <p style={{ color: "rgba(255,255,255,0.5)" }}>
-                No products found
-              </p>
+            <div className="p-16 text-center">
+              <Package size={48} className="text-zinc-700 mx-auto mb-4" />
+              <p className="text-zinc-500">No products found</p>
             </div>
           ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr
-                  style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
-                >
-                  <th style={thStyle}>Product</th>
-                  <th style={thStyle}>Category</th>
-                  <th style={thStyle}>Price</th>
-                  <th style={thStyle}>Status</th>
-                  <th style={thStyle}>Type</th>
-                  <th style={{ ...thStyle, textAlign: "right" }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table>
+              <TableHeader>
+                <TableRow className="border-zinc-800 hover:bg-transparent">
+                  <TableHead>Product</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {products.map((product) => (
-                  <tr
-                    key={product.id}
-                    style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
-                  >
-                    <td style={tdStyle}>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "12px",
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: "48px",
-                            height: "48px",
-                            borderRadius: "8px",
-                            background:
-                              "linear-gradient(135deg, rgba(255,51,102,0.2) 0%, rgba(147,51,234,0.2) 100%)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            color: "#ff3366",
-                            fontWeight: 700,
-                            fontSize: "14px",
-                          }}
-                        >
+                  <TableRow key={product.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-pink-500/20 to-purple-500/20 flex items-center justify-center text-pink-500 font-bold text-sm">
                           {product.name.slice(0, 2).toUpperCase()}
                         </div>
                         <div>
-                          <div
-                            style={{
-                              color: "white",
-                              fontWeight: 600,
-                              marginBottom: "2px",
-                            }}
-                          >
+                          <div className="font-semibold text-white">
                             {product.name}
                           </div>
-                          <div
-                            style={{
-                              color: "rgba(255,255,255,0.4)",
-                              fontSize: "12px",
-                            }}
-                          >
+                          <div className="text-xs text-zinc-500">
                             /{product.slug}
                           </div>
                         </div>
                       </div>
-                    </td>
-                    <td style={tdStyle}>
-                      <span
-                        style={{
-                          padding: "4px 12px",
-                          borderRadius: "20px",
-                          background: "rgba(255,255,255,0.05)",
-                          border: "1px solid rgba(255,255,255,0.1)",
-                          color: "rgba(255,255,255,0.7)",
-                          fontSize: "12px",
-                          textTransform: "capitalize",
-                        }}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className="border-zinc-700 text-zinc-400"
                       >
                         {product.category?.name || "No Category"}
-                      </span>
-                    </td>
-                    <td style={tdStyle}>
-                      <span
-                        style={{
-                          color: "#22c55e",
-                          fontWeight: 700,
-                          fontSize: "16px",
-                        }}
-                      >
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-green-400 font-bold text-base">
                         ${Number(product.basePrice).toFixed(2)}
                       </span>
-                    </td>
-                    <td style={tdStyle}>
-                      <span
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "6px",
-                          padding: "4px 12px",
-                          borderRadius: "20px",
-                          background: product.active
-                            ? "rgba(34,197,94,0.1)"
-                            : "rgba(239,68,68,0.1)",
-                          border: `1px solid ${product.active ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)"}`,
-                          color: product.active ? "#22c55e" : "#ef4444",
-                          fontSize: "12px",
-                          fontWeight: 500,
-                        }}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={product.active ? "success" : "destructive"}
                       >
                         <span
-                          style={{
-                            width: "6px",
-                            height: "6px",
-                            borderRadius: "50%",
-                            background: product.active ? "#22c55e" : "#ef4444",
-                          }}
+                          className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                            product.active ? "bg-green-400" : "bg-red-400"
+                          }`}
                         />
                         {product.active ? "Active" : "Inactive"}
-                      </span>
-                    </td>
-                    <td style={tdStyle}>
-                      <span
-                        style={{
-                          padding: "4px 12px",
-                          borderRadius: "20px",
-                          background: product.isCustom
-                            ? "rgba(168,85,247,0.1)"
-                            : "rgba(59,130,246,0.1)",
-                          border: `1px solid ${product.isCustom ? "rgba(168,85,247,0.3)" : "rgba(59,130,246,0.3)"}`,
-                          color: product.isCustom ? "#a855f7" : "#3b82f6",
-                          fontSize: "12px",
-                        }}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={product.isCustom ? "info" : "secondary"}
+                        className={
+                          product.isCustom
+                            ? "bg-purple-500/15 text-purple-400 border-purple-500/20"
+                            : ""
+                        }
                       >
                         {product.isCustom ? "Custom" : "Standard"}
-                      </span>
-                    </td>
-                    <td style={{ ...tdStyle, textAlign: "right" }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "8px",
-                          justifyContent: "flex-end",
-                        }}
-                      >
-                        <Link
-                          href={`/products/edit/${product.id}`}
-                          style={{
-                            padding: "8px",
-                            borderRadius: "8px",
-                            background: "rgba(255,255,255,0.05)",
-                            color: "rgba(255,255,255,0.6)",
-                            display: "flex",
-                          }}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex gap-2 justify-end">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          asChild
+                          className="h-8 w-8"
                         >
-                          <Edit size={16} />
-                        </Link>
-                        <button
+                          <Link href={`/products/edit/${product.id}`}>
+                            <Edit size={16} />
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-500/10"
                           onClick={() => handleDelete(product.id)}
-                          style={{
-                            padding: "8px",
-                            borderRadius: "8px",
-                            background: "rgba(239,68,68,0.1)",
-                            color: "#ef4444",
-                            border: "none",
-                            cursor: "pointer",
-                            display: "flex",
-                          }}
                         >
                           <Trash2 size={16} />
-                        </button>
+                        </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           )}
 
           {/* Pagination */}
@@ -527,17 +344,3 @@ export default function ProductsPage() {
     </DashboardLayout>
   );
 }
-
-const thStyle: React.CSSProperties = {
-  padding: "16px 20px",
-  textAlign: "left",
-  fontSize: "12px",
-  fontWeight: 600,
-  color: "rgba(255,255,255,0.5)",
-  textTransform: "uppercase",
-  letterSpacing: "0.5px",
-};
-
-const tdStyle: React.CSSProperties = {
-  padding: "16px 20px",
-};

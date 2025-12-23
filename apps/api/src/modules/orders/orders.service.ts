@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Order, OrderStatus } from './order.entity';
+import { Order, OrderStatus, PaymentStatus } from './order.entity';
 import { OrderItem } from './order-item.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
@@ -69,7 +69,7 @@ export class OrdersService {
     const limit = options?.limit || 10;
     const skip = (page - 1) * limit;
 
-    const where: any = {};
+    const where: { userId?: string; status?: OrderStatus } = {};
 
     if (options?.userId) {
       where.userId = options.userId;
@@ -105,7 +105,41 @@ export class OrdersService {
       throw new NotFoundException(`Order with ID ${id} not found`);
     }
 
+    // Transform product image URLs
+    this.transformProductImageUrls(order);
+
     return order;
+  }
+
+  /**
+   * Transform product image keys to full URLs
+   */
+  private transformProductImageUrls(order: Order): void {
+    const storageBaseUrl =
+      process.env.MINIO_PUBLIC_URL ||
+      process.env.MINIO_ENDPOINT ||
+      'http://localhost:9002';
+    const bucketName = process.env.MINIO_BUCKET || 'king-neon';
+
+    const transformUrl = (path: string | null): string | null => {
+      if (!path) return null;
+      if (path.startsWith('http://') || path.startsWith('https://')) {
+        return path;
+      }
+      const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+      return `${storageBaseUrl}/${bucketName}/${cleanPath}`;
+    };
+
+    order.items?.forEach((item) => {
+      if (item.product?.images) {
+        item.product.images = item.product.images.map(
+          (img) => transformUrl(img) || '',
+        );
+      }
+      if (item.product?.featuredImage) {
+        item.product.featuredImage = transformUrl(item.product.featuredImage)!;
+      }
+    });
   }
 
   async findByOrderNumber(orderNumber: string): Promise<Order> {
@@ -135,6 +169,27 @@ export class OrdersService {
 
   async cancel(id: string): Promise<Order> {
     return this.updateStatus(id, OrderStatus.CANCELLED);
+  }
+
+  /**
+   * Update payment status when Stripe webhook is received
+   */
+  async updatePaymentStatus(
+    orderId: string,
+    paymentStatus: PaymentStatus,
+    stripePaymentIntentId: string,
+  ): Promise<Order> {
+    const order = await this.findOne(orderId);
+
+    order.paymentStatus = paymentStatus;
+    order.stripePaymentIntentId = stripePaymentIntentId;
+
+    if (paymentStatus === PaymentStatus.PAID) {
+      order.paidAt = new Date();
+      order.status = OrderStatus.CONFIRMED;
+    }
+
+    return this.orderRepository.save(order);
   }
 
   async findByUser(userId: string): Promise<Order[]> {

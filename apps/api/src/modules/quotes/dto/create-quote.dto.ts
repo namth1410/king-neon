@@ -1,13 +1,21 @@
-import { IsString, IsEmail, IsOptional, IsArray } from 'class-validator';
+import {
+  IsString,
+  IsEmail,
+  IsOptional,
+  IsArray,
+  MinLength,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateQuoteDto {
-  @ApiProperty({ example: 'Acme Corporation' })
+  @ApiProperty({ example: 'Acme Corporation', minLength: 2 })
   @IsString()
+  @MinLength(2, { message: 'Company name must be at least 2 characters' })
   companyName: string;
 
-  @ApiProperty({ example: 'John Smith' })
+  @ApiProperty({ example: 'John Smith', minLength: 2 })
   @IsString()
+  @MinLength(2, { message: 'Contact name must be at least 2 characters' })
   contactName: string;
 
   @ApiProperty({ example: 'john@acme.com' })
@@ -21,8 +29,12 @@ export class CreateQuoteDto {
 
   @ApiProperty({
     example: 'We need 10 custom neon signs for our retail stores...',
+    minLength: 10,
   })
   @IsString()
+  @MinLength(10, {
+    message: 'Requirements must be at least 10 characters for proper context',
+  })
   requirements: string;
 
   @ApiPropertyOptional({ type: [String] })

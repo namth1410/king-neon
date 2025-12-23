@@ -81,6 +81,35 @@
     gap: $spacing-4;
   }
 
+  &__user {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $text-light;
+    transition: color $transition-fast;
+
+    &:hover {
+      color: $color-primary;
+    }
+
+    &-icon {
+      width: 24px;
+      height: 24px;
+    }
+
+    &-indicator {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 8px;
+      height: 8px;
+      background: #22c55e;
+      border-radius: $radius-full;
+      border: 2px solid $bg-dark;
+    }
+  }
+
   &__cart {
     position: relative;
 

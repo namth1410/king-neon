@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Upload, X, Loader2 } from "lucide-react";
+import { Upload, X } from "lucide-react";
+import { Spinner } from "@king-neon/ui";
 import api from "@/utils/api";
 import styles from "./ImageUpload.module.scss";
 
@@ -104,7 +105,7 @@ export default function ImageUpload({
           onClick={() => inputRef.current?.click()}
         >
           {uploading ? (
-            <Loader2 className="animate-spin text-primary" size={32} />
+            <Spinner className="animate-spin text-primary" size="lg" />
           ) : (
             <>
               <Upload

@@ -10,10 +10,30 @@ import {
   UserCheck,
   UserX,
 } from "lucide-react";
-import toast from "react-hot-toast";
+import { Spinner } from "@king-neon/ui";
+import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import Pagination from "@/components/Pagination";
 import api from "@/utils/api";
+import { useApiRequest, withSignal } from "@/hooks/useApiRequest";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface User {
   id: string;
@@ -45,14 +65,18 @@ export default function CustomersPage() {
   const [totalUsers, setTotalUsers] = useState(0);
   const limit = 10;
 
-  // Debounce search
+  const { request, abort, abortAll } = useApiRequest();
+
+  // Debounce search - abort pending request immediately when typing
   useEffect(() => {
+    abort("users");
+
     const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm);
       setPage(1);
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchTerm]);
+  }, [searchTerm, abort]);
 
   const fetchUsers = useCallback(async () => {
     setIsLoading(true);
@@ -62,7 +86,12 @@ export default function CustomersPage() {
       if (roleFilter !== "all") params.role = roleFilter;
       if (statusFilter !== "all") params.status = statusFilter;
 
-      const response = await api.get("/users", { params });
+      const response = await request("users", (signal) =>
+        api.get("/users", withSignal(signal, { params }))
+      );
+
+      // Response is null if request was aborted
+      if (!response) return;
 
       if (response.data.data) {
         setUsers(response.data.data);
@@ -81,11 +110,12 @@ export default function CustomersPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [page, debouncedSearch, roleFilter, statusFilter]);
+  }, [page, debouncedSearch, roleFilter, statusFilter, request]);
 
   useEffect(() => {
     fetchUsers();
-  }, [fetchUsers]);
+    return () => abortAll();
+  }, [fetchUsers, abortAll]);
 
   const handleToggleStatus = async (user: User) => {
     try {
@@ -106,379 +136,181 @@ export default function CustomersPage() {
     });
   };
 
+  const handleRoleChange = (value: string) => {
+    setRoleFilter(value);
+    setPage(1);
+  };
+
+  const handleStatusChange = (value: string) => {
+    setStatusFilter(value);
+    setPage(1);
+  };
+
   return (
     <DashboardLayout title="Customers">
-      <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+      <div className="flex flex-col gap-6">
         {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
+        <div className="flex justify-between items-center">
           <div>
-            <h1
-              style={{
-                fontSize: "24px",
-                fontWeight: 700,
-                color: "white",
-                marginBottom: "4px",
-              }}
-            >
+            <h1 className="text-2xl font-bold text-white mb-1">
               Customer Management
             </h1>
-            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "14px" }}>
+            <p className="text-zinc-500 text-sm">
               {totalUsers} customers registered
             </p>
           </div>
         </div>
 
         {/* Filters */}
-        <div
-          style={{
-            display: "flex",
-            gap: "16px",
-            flexWrap: "wrap",
-            alignItems: "center",
-          }}
-        >
-          {/* Search */}
-          <div
-            style={{
-              position: "relative",
-              flex: "1",
-              minWidth: "200px",
-              maxWidth: "400px",
-            }}
-          >
+        <div className="flex gap-4 flex-wrap items-center">
+          <div className="relative flex-1 min-w-[200px] max-w-[400px]">
             <Search
               size={20}
-              style={{
-                position: "absolute",
-                left: "16px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "rgba(255,255,255,0.4)",
-              }}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"
             />
-            <input
+            <Input
               type="text"
               placeholder="Search by name or email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "12px 16px 12px 48px",
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: "12px",
-                color: "white",
-                fontSize: "14px",
-                outline: "none",
-              }}
+              className="pl-10 bg-zinc-800/50 border-zinc-700"
             />
           </div>
 
-          {/* Role Filter */}
-          <select
-            value={roleFilter}
-            onChange={(e) => {
-              setRoleFilter(e.target.value);
-              setPage(1);
-            }}
-            style={{
-              padding: "12px 16px",
-              paddingRight: "40px",
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: "12px",
-              color: "white",
-              fontSize: "14px",
-              outline: "none",
-              cursor: "pointer",
-              appearance: "none",
-              minWidth: "130px",
-            }}
-          >
-            <option value="all" style={{ background: "#1a1a1a" }}>
-              All Roles
-            </option>
-            <option value="customer" style={{ background: "#1a1a1a" }}>
-              Customer
-            </option>
-            <option value="admin" style={{ background: "#1a1a1a" }}>
-              Admin
-            </option>
-          </select>
+          <Select onValueChange={handleRoleChange} value={roleFilter}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="All Roles" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Roles</SelectItem>
+              <SelectItem value="customer">Customer</SelectItem>
+              <SelectItem value="admin">Admin</SelectItem>
+            </SelectContent>
+          </Select>
 
-          {/* Status Filter */}
-          <select
-            value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value);
-              setPage(1);
-            }}
-            style={{
-              padding: "12px 16px",
-              paddingRight: "40px",
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: "12px",
-              color: "white",
-              fontSize: "14px",
-              outline: "none",
-              cursor: "pointer",
-              appearance: "none",
-              minWidth: "130px",
-            }}
-          >
-            <option value="all" style={{ background: "#1a1a1a" }}>
-              All Status
-            </option>
-            <option value="active" style={{ background: "#1a1a1a" }}>
-              Active
-            </option>
-            <option value="inactive" style={{ background: "#1a1a1a" }}>
-              Inactive
-            </option>
-          </select>
+          <Select onValueChange={handleStatusChange} value={statusFilter}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="All Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Table */}
-        <div
-          style={{
-            background: "rgba(255,255,255,0.03)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: "16px",
-            overflow: "hidden",
-          }}
-        >
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
           {isLoading ? (
-            <div
-              style={{
-                padding: "60px",
-                textAlign: "center",
-                color: "rgba(255,255,255,0.4)",
-              }}
-            >
-              <div
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  border: "3px solid rgba(255,51,102,0.2)",
-                  borderTopColor: "#ff3366",
-                  borderRadius: "50%",
-                  margin: "0 auto 16px",
-                  animation: "spin 1s linear infinite",
-                }}
-              />
+            <div className="p-16 text-center text-zinc-500">
+              <Spinner className="w-10 h-10 animate-spin mx-auto mb-4 text-pink-500" />
               Loading customers...
             </div>
           ) : users.length === 0 ? (
-            <div style={{ padding: "60px", textAlign: "center" }}>
-              <Users
-                size={48}
-                style={{ color: "rgba(255,255,255,0.2)", marginBottom: "16px" }}
-              />
-              <p style={{ color: "rgba(255,255,255,0.5)" }}>
-                No customers found
-              </p>
+            <div className="p-16 text-center">
+              <Users size={48} className="text-zinc-700 mx-auto mb-4" />
+              <p className="text-zinc-500">No customers found</p>
             </div>
           ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr
-                  style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
-                >
-                  <th style={thStyle}>Customer</th>
-                  <th style={thStyle}>Contact</th>
-                  <th style={thStyle}>Role</th>
-                  <th style={thStyle}>Status</th>
-                  <th style={thStyle}>Joined</th>
-                  <th style={{ ...thStyle, textAlign: "right" }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table>
+              <TableHeader>
+                <TableRow className="border-zinc-800 hover:bg-transparent">
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Contact</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Joined</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {users.map((user) => (
-                  <tr
-                    key={user.id}
-                    style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
-                  >
-                    <td style={tdStyle}>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "12px",
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: "40px",
-                            height: "40px",
-                            borderRadius: "50%",
-                            background:
-                              "linear-gradient(135deg, #ff3366 0%, #a855f7 100%)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            color: "white",
-                            fontWeight: 600,
-                            fontSize: "14px",
-                          }}
-                        >
+                  <TableRow key={user.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center text-white font-semibold text-sm">
                           {user.name?.charAt(0)?.toUpperCase() || "?"}
                         </div>
                         <div>
-                          <div style={{ color: "white", fontWeight: 600 }}>
+                          <div className="font-semibold text-white">
                             {user.name}
                           </div>
-                          <div
-                            style={{
-                              color: "rgba(255,255,255,0.4)",
-                              fontSize: "12px",
-                            }}
-                          >
+                          <div className="text-xs text-zinc-500">
                             ID: {user.id.slice(0, 8)}...
                           </div>
                         </div>
                       </div>
-                    </td>
-                    <td style={tdStyle}>
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "4px",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                            color: "rgba(255,255,255,0.7)",
-                            fontSize: "13px",
-                          }}
-                        >
-                          <Mail
-                            size={14}
-                            style={{ color: "rgba(255,255,255,0.4)" }}
-                          />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-1.5 text-zinc-400 text-sm">
+                          <Mail size={14} className="text-zinc-600" />
                           {user.email}
                         </div>
                         {user.phone && (
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "6px",
-                              color: "rgba(255,255,255,0.5)",
-                              fontSize: "12px",
-                            }}
-                          >
-                            <Phone
-                              size={12}
-                              style={{ color: "rgba(255,255,255,0.3)" }}
-                            />
+                          <div className="flex items-center gap-1.5 text-zinc-500 text-xs">
+                            <Phone size={12} className="text-zinc-600" />
                             {user.phone}
                           </div>
                         )}
                       </div>
-                    </td>
-                    <td style={tdStyle}>
-                      <span
-                        style={{
-                          padding: "4px 12px",
-                          borderRadius: "20px",
-                          background:
-                            user.role === "admin"
-                              ? "rgba(168,85,247,0.1)"
-                              : "rgba(59,130,246,0.1)",
-                          border: `1px solid ${user.role === "admin" ? "rgba(168,85,247,0.3)" : "rgba(59,130,246,0.3)"}`,
-                          color: user.role === "admin" ? "#a855f7" : "#3b82f6",
-                          fontSize: "12px",
-                          textTransform: "capitalize",
-                        }}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={user.role === "admin" ? "info" : "secondary"}
+                        className={
+                          user.role === "admin"
+                            ? "bg-purple-500/15 text-purple-400 border-purple-500/20"
+                            : ""
+                        }
                       >
                         {user.role}
-                      </span>
-                    </td>
-                    <td style={tdStyle}>
-                      <span
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "6px",
-                          padding: "4px 12px",
-                          borderRadius: "20px",
-                          background: user.isActive
-                            ? "rgba(34,197,94,0.1)"
-                            : "rgba(239,68,68,0.1)",
-                          border: `1px solid ${user.isActive ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)"}`,
-                          color: user.isActive ? "#22c55e" : "#ef4444",
-                          fontSize: "12px",
-                        }}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={user.isActive ? "success" : "destructive"}
                       >
                         <span
-                          style={{
-                            width: "6px",
-                            height: "6px",
-                            borderRadius: "50%",
-                            background: "currentColor",
-                          }}
+                          className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                            user.isActive ? "bg-green-400" : "bg-red-400"
+                          }`}
                         />
                         {user.isActive ? "Active" : "Inactive"}
-                      </span>
-                    </td>
-                    <td style={tdStyle}>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "6px",
-                          color: "rgba(255,255,255,0.5)",
-                          fontSize: "13px",
-                        }}
-                      >
-                        <Calendar
-                          size={14}
-                          style={{ color: "rgba(255,255,255,0.3)" }}
-                        />
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5 text-zinc-500 text-sm">
+                        <Calendar size={14} className="text-zinc-600" />
                         {formatDate(user.createdAt)}
                       </div>
-                    </td>
-                    <td style={{ ...tdStyle, textAlign: "right" }}>
-                      <button
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={`h-8 w-8 ${
+                          user.isActive
+                            ? "text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                            : "text-green-400 hover:text-green-300 hover:bg-green-500/10"
+                        }`}
                         onClick={() => handleToggleStatus(user)}
                         title={user.isActive ? "Deactivate" : "Activate"}
-                        style={{
-                          padding: "8px",
-                          borderRadius: "8px",
-                          background: user.isActive
-                            ? "rgba(239,68,68,0.1)"
-                            : "rgba(34,197,94,0.1)",
-                          border: "none",
-                          color: user.isActive ? "#ef4444" : "#22c55e",
-                          cursor: "pointer",
-                          display: "inline-flex",
-                        }}
                       >
                         {user.isActive ? (
                           <UserX size={16} />
                         ) : (
                           <UserCheck size={16} />
                         )}
-                      </button>
-                    </td>
-                  </tr>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           )}
 
-          {/* Pagination */}
           <Pagination
             page={page}
             totalPages={totalPages}
@@ -493,17 +325,3 @@ export default function CustomersPage() {
     </DashboardLayout>
   );
 }
-
-const thStyle: React.CSSProperties = {
-  padding: "16px 20px",
-  textAlign: "left",
-  fontSize: "12px",
-  fontWeight: 600,
-  color: "rgba(255,255,255,0.5)",
-  textTransform: "uppercase",
-  letterSpacing: "0.5px",
-};
-
-const tdStyle: React.CSSProperties = {
-  padding: "16px 20px",
-};

@@ -103,9 +103,7 @@ export class ProductsService {
     });
 
     const saved = await this.productRepository.save(product);
-    // save can return array or single entity, handle both
-    const savedProduct = Array.isArray(saved) ? saved[0] : saved;
-    return this.transformImageUrls(savedProduct);
+    return this.transformImageUrls(saved);
   }
 
   async findAll(options?: {
@@ -281,7 +279,11 @@ export class ProductsService {
       .addGroupBy('category.name')
       .getRawMany();
 
-    return results;
+    return results as {
+      categoryId: string;
+      categoryName: string;
+      count: number;
+    }[];
   }
 
   private generateSlug(name: string): string {

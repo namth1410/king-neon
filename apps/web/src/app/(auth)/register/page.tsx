@@ -1,13 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import styles from "../auth.module.scss";
 import api from "@/utils/api";
+import { useAuth } from "@/hooks/useAuth";
 
-export default function RegisterPage() {
+function RegisterContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/account";
+  const { login } = useAuth();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -44,15 +49,16 @@ export default function RegisterPage() {
         password: formData.password,
       });
 
-      // Auto login after registration
-      const loginResponse = await api.post("/auth/login", {
-        email: formData.email,
-        password: formData.password,
-      });
+      // Auto login after registration using useAuth hook
+      const success = await login(formData.email, formData.password);
 
-      const data = loginResponse.data;
-      localStorage.setItem("token", data.accessToken);
-      router.push("/account");
+      if (success) {
+        // Redirect to the original page or account
+        router.push(redirectTo);
+      } else {
+        // Registration succeeded but login failed, redirect to login
+        router.push(`/login?redirect=${encodeURIComponent(redirectTo)}`);
+      }
     } catch (err: unknown) {
       let message = "Registration failed";
       if (typeof err === "object" && err !== null && "response" in err) {
@@ -158,5 +164,13 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <RegisterContent />
+    </Suspense>
   );
 }

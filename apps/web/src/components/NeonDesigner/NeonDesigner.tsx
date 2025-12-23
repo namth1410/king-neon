@@ -13,11 +13,17 @@ import {
   Save,
   LogIn,
 } from "lucide-react";
-import { addToCart, openCart } from "@/store/cartSlice";
+import { addItemToCart, openCart } from "@/store/cartSlice";
 import { useAuth } from "@/hooks/useAuth";
+import {
+  useDraftStorage,
+  NeonDesignerDraft,
+  DRAFT_KEYS,
+} from "@/hooks/useDraftStorage";
 import api from "@/utils/api";
 import NeonCanvas, { NeonCanvasRef } from "./NeonCanvas";
 import SaveDesignModal from "./SaveDesignModal";
+import DraftRecoveryModal from "@/components/DraftRecoveryModal";
 import styles from "./NeonDesigner.module.scss";
 
 // Font options with Google Fonts (48 fonts from fonts.gstatic.com)
@@ -361,7 +367,18 @@ export default function NeonDesigner() {
 
   const [openSteps, setOpenSteps] = useState<number[]>([1]);
 
-  // Load design from URL params on mount
+  // Draft recovery modal state
+  const [showRecoveryModal, setShowRecoveryModal] = useState(false);
+  const [pendingDraft, setPendingDraft] = useState<NeonDesignerDraft | null>(
+    null
+  );
+  const [draftTimestamp, setDraftTimestamp] = useState<string | null>(null);
+
+  // Draft storage hook
+  const { saveDraftDebounced, loadDraft, clearDraft, getTimeSinceModified } =
+    useDraftStorage<NeonDesignerDraft>(DRAFT_KEYS.NEON_DESIGNER);
+
+  // Load design from URL params on mount OR check for saved draft
   useEffect(() => {
     const text = searchParams.get("text");
     const font = searchParams.get("font");
@@ -373,6 +390,7 @@ export default function NeonDesigner() {
     const mount = searchParams.get("mount");
     const remote = searchParams.get("remote");
 
+    // If URL has design params, use those and clear any draft
     if (text || font || color) {
       setDesign((prev) => ({
         ...prev,
@@ -386,8 +404,62 @@ export default function NeonDesigner() {
         ...(mount && { mountingId: mount }),
         ...(remote && { remoteId: remote }),
       }));
+      clearDraft();
+      return;
     }
-  }, [searchParams]);
+
+    // Check for saved draft
+    const draft = loadDraft();
+    if (draft) {
+      setPendingDraft(draft);
+      setDraftTimestamp(getTimeSinceModified());
+      setShowRecoveryModal(true);
+    }
+  }, [searchParams, loadDraft, clearDraft, getTimeSinceModified]);
+
+  // Auto-save design changes (debounced)
+  useEffect(() => {
+    // Don't save if recovery modal is still showing
+    if (showRecoveryModal) return;
+
+    saveDraftDebounced({
+      text: design.text,
+      fontId: design.fontId,
+      colorId: design.colorId,
+      sizeId: design.sizeId,
+      materialId: design.materialId,
+      backboardId: design.backboardId,
+      backboardColorId: design.backboardColorId,
+      mountingId: design.mountingId,
+      remoteId: design.remoteId,
+    });
+  }, [design, saveDraftDebounced, showRecoveryModal]);
+
+  // Handle continuing from draft
+  const handleContinueDraft = useCallback(() => {
+    if (pendingDraft) {
+      setDesign({
+        text: pendingDraft.text,
+        fontId: pendingDraft.fontId,
+        colorId: pendingDraft.colorId,
+        sizeId: pendingDraft.sizeId,
+        materialId: pendingDraft.materialId,
+        backboardId: pendingDraft.backboardId,
+        backboardColorId: pendingDraft.backboardColorId,
+        mountingId: pendingDraft.mountingId,
+        remoteId: pendingDraft.remoteId,
+      });
+    }
+    setShowRecoveryModal(false);
+    setPendingDraft(null);
+  }, [pendingDraft]);
+
+  // Handle starting fresh
+  const handleStartFresh = useCallback(() => {
+    clearDraft();
+    setShowRecoveryModal(false);
+    setPendingDraft(null);
+  }, [clearDraft]);
 
   // Fetch preview backgrounds from API
   useEffect(() => {
@@ -554,8 +626,9 @@ export default function NeonDesigner() {
     const customId = `custom-${Date.now()}`;
 
     dispatch(
-      addToCart({
+      addItemToCart({
         id: customId,
+        productId: customId,
         type: "custom",
         name: `Custom Neon: "${design.text.substring(0, 30)}${design.text.length > 30 ? "..." : ""}"`,
         price: calculatedPrice,
@@ -569,7 +642,8 @@ export default function NeonDesigner() {
           backboard: selectedBackboard?.name,
           backboardColor: selectedBackboardColor?.name,
         },
-      })
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      }) as any
     );
 
     setAddedToCart(true);
@@ -1231,6 +1305,16 @@ export default function NeonDesigner() {
           </div>
         </div>
       </div>
+
+      {/* Draft Recovery Modal */}
+      <DraftRecoveryModal
+        isOpen={showRecoveryModal}
+        onContinue={handleContinueDraft}
+        onStartFresh={handleStartFresh}
+        onClose={handleStartFresh}
+        preview={pendingDraft?.text}
+        lastModified={draftTimestamp ?? undefined}
+      />
     </div>
   );
 }

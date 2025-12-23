@@ -38,7 +38,7 @@ export class QuotesService {
     const limit = options?.limit || 10;
     const skip = (page - 1) * limit;
 
-    const where: any = {};
+    const where: { status?: QuoteStatus } = {};
 
     if (options?.status) {
       where.status = options.status;
@@ -73,7 +73,7 @@ export class QuotesService {
     const quote = await this.findOne(id);
 
     if (updateQuoteDto.status === QuoteStatus.QUOTED && !quote.respondedAt) {
-      (quote as any).respondedAt = new Date();
+      quote.respondedAt = new Date();
     }
 
     Object.assign(quote, updateQuoteDto);

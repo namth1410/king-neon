@@ -1,0 +1,60 @@
+@import "tailwindcss";
+@plugin "tailwindcss-animate";
+
+/*
+  Admin theme - Dark mode only
+  Using direct Tailwind v4 color definitions
+*/
+
+@theme {
+  /* Brand colors */
+  --color-primary: #ff3366;
+  --color-primary-hover: #e62e5c;
+  --color-bg-dark: #0a0a0a;
+
+  /* Typography */
+  --font-sans: Inter, sans-serif;
+  --font-display: Outfit, sans-serif;
+
+  /* Zinc palette for dark theme */
+  --color-zinc-50: #fafafa;
+  --color-zinc-100: #f4f4f5;
+  --color-zinc-200: #e4e4e7;
+  --color-zinc-300: #d4d4d8;
+  --color-zinc-400: #a1a1aa;
+  --color-zinc-500: #71717a;
+  --color-zinc-600: #52525b;
+  --color-zinc-700: #3f3f46;
+  --color-zinc-800: #27272a;
+  --color-zinc-900: #18181b;
+  --color-zinc-950: #09090b;
+
+  /* Pink accent */
+  --color-pink-400: #f472b6;
+  --color-pink-500: #ec4899;
+  --color-pink-600: #db2777;
+  --color-pink-700: #be185d;
+
+  /* Green for success */
+  --color-green-500: #22c55e;
+  --color-green-600: #16a34a;
+
+  /* Red for errors */
+  --color-red-400: #f87171;
+  --color-red-500: #ef4444;
+  --color-red-600: #dc2626;
+}
+
+/* Force dark mode defaults */
+html,
+body {
+  background-color: #09090b;
+  color: #fafafa;
+}
+
+/* Ensure all zinc utility classes work */
+@layer base {
+  * {
+    border-color: var(--color-zinc-800);
+  }
+}

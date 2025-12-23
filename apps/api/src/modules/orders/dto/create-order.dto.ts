@@ -5,6 +5,8 @@ import {
   IsString,
   ValidateNested,
   IsEmail,
+  Min,
+  ArrayMinSize,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -42,12 +44,14 @@ class OrderItemDto {
   @IsString()
   customDesignId?: string;
 
-  @ApiProperty()
+  @ApiProperty({ minimum: 1 })
   @IsNumber()
+  @Min(1, { message: 'Quantity must be at least 1' })
   quantity: number;
 
-  @ApiProperty()
+  @ApiProperty({ minimum: 0 })
   @IsNumber()
+  @Min(0, { message: 'Unit price cannot be negative' })
   unitPrice: number;
 
   @ApiPropertyOptional()
@@ -61,8 +65,9 @@ class OrderItemDto {
 }
 
 export class CreateOrderDto {
-  @ApiProperty({ type: [OrderItemDto] })
+  @ApiProperty({ type: [OrderItemDto], minItems: 1 })
   @IsArray()
+  @ArrayMinSize(1, { message: 'Order must have at least one item' })
   @ValidateNested({ each: true })
   @Type(() => OrderItemDto)
   items: OrderItemDto[];
@@ -91,14 +96,16 @@ export class CreateOrderDto {
   @IsString()
   customerPhone?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ minimum: 0 })
   @IsOptional()
   @IsNumber()
+  @Min(0, { message: 'Shipping cost cannot be negative' })
   shipping?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ minimum: 0 })
   @IsOptional()
   @IsNumber()
+  @Min(0, { message: 'Tax cannot be negative' })
   tax?: number;
 
   @ApiPropertyOptional()

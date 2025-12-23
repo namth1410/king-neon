@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import "@/app/globals.css";
 import "@/styles/globals.scss";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -7,6 +9,7 @@ import CartProvider from "@/components/CartProvider";
 import { ReduxProvider } from "@/store";
 import { ToastProvider } from "@/components/Toast";
 import { AuthProvider } from "@/hooks/useAuth";
+import { NavigationProgress } from "@/components/NavigationProgress";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -55,6 +58,27 @@ export const metadata: Metadata = {
   },
 };
 
+// Organization JSON-LD for SEO
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "King Neon",
+  url: process.env.NEXT_PUBLIC_APP_URL || "https://king-neon.com",
+  logo: `${process.env.NEXT_PUBLIC_APP_URL || "https://king-neon.com"}/logo.png`,
+  description:
+    "Create stunning custom LED neon signs for your home, business, or special event.",
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "customer service",
+    email: "support@king-neon.com",
+  },
+  sameAs: [
+    "https://facebook.com/kingneon",
+    "https://instagram.com/kingneon",
+    "https://twitter.com/kingneon",
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -62,7 +86,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationJsonLd),
+          }}
+        />
+      </head>
       <body>
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
         <ReduxProvider>
           <AuthProvider>
             <CartProvider>

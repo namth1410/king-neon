@@ -107,7 +107,7 @@ export default async function ProductDetailPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <ProductDetailClient initialProduct={product} />
+      <ProductDetailClient initialProduct={product} key={product?.id || slug} />
     </>
   );
 }

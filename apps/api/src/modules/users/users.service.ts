@@ -119,13 +119,15 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.findOne(id);
+    // Find full user entity when password needs to be updated
+    const user = await this.userRepository.findOne({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
 
     if (updateUserDto.password) {
-      (user as any).passwordHash = await bcrypt.hash(
-        updateUserDto.password,
-        10,
-      );
+      user.passwordHash = await bcrypt.hash(updateUserDto.password, 10);
       delete updateUserDto.password;
     }
 

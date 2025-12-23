@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Spinner } from "@king-neon/ui";
 import styles from "./account.module.scss";
 import api from "@/utils/api";
+import { useAuth } from "@/hooks/useAuth";
 
 interface User {
   id: string;
@@ -23,14 +25,20 @@ interface Order {
 
 export default function AccountPage() {
   const router = useRouter();
+  const { isAuthenticated, isLoading: authLoading, logout } = useAuth();
   const [user, setUser] = useState<User | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
+    // Wait for auth to complete loading
+    if (authLoading) return;
+
+    // Redirect if not authenticated
+    if (!isAuthenticated) {
       router.push("/login");
       return;
     }
@@ -38,47 +46,42 @@ export default function AccountPage() {
     // Fetch user profile
     const fetchProfile = async () => {
       try {
-        const response = await api.get("/auth/profile");
+        const response = await api.get("/auth/me");
         setUser(response.data);
       } catch {
-        localStorage.removeItem("token");
+        logout();
         router.push("/login");
       } finally {
         setIsLoading(false);
       }
     };
 
-    // Mock orders
-    setOrders([
-      {
-        id: "1",
-        orderNumber: "KN-2024-001",
-        createdAt: "2024-12-15",
-        status: "delivered",
-        total: 299,
-      },
-      {
-        id: "2",
-        orderNumber: "KN-2024-002",
-        createdAt: "2024-12-10",
-        status: "shipped",
-        total: 449,
-      },
-      {
-        id: "3",
-        orderNumber: "KN-2024-003",
-        createdAt: "2024-12-05",
-        status: "processing",
-        total: 175,
-      },
-    ]);
+    // Fetch user orders
+    const fetchOrders = async () => {
+      setOrdersLoading(true);
+      try {
+        const response = await api.get("/orders/my-orders");
+        setOrders(response.data);
+      } catch (error) {
+        console.error("Failed to fetch orders:", error);
+        setOrders([]);
+      } finally {
+        setOrdersLoading(false);
+      }
+    };
 
     fetchProfile();
-  }, [router]);
+    fetchOrders();
+  }, [authLoading, isAuthenticated, router, logout]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    router.push("/");
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      await logout();
+      router.push("/");
+    } finally {
+      setLoggingOut(false);
+    }
   };
 
   if (isLoading) {
@@ -169,16 +172,21 @@ export default function AccountPage() {
               <button
                 className={`${styles["account__nav-link"]} ${styles["account__nav-logout"]}`}
                 onClick={handleLogout}
+                disabled={loggingOut}
               >
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                  />
-                </svg>
-                Logout
+                {loggingOut ? (
+                  <Spinner size="sm" />
+                ) : (
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                    />
+                  </svg>
+                )}
+                {loggingOut ? "Logging out..." : "Logout"}
               </button>
             </nav>
           </aside>
@@ -186,7 +194,9 @@ export default function AccountPage() {
           {/* Content */}
           <div className={styles.account__content}>
             {activeTab === "profile" && <ProfileTab user={user} />}
-            {activeTab === "orders" && <OrdersTab orders={orders} />}
+            {activeTab === "orders" && (
+              <OrdersTab orders={orders} isLoading={ordersLoading} />
+            )}
             {activeTab === "designs" && <DesignsTab />}
           </div>
         </div>
@@ -273,10 +283,32 @@ function ProfileTab({ user }: { user: User | null }) {
 }
 
 // Orders Tab
-function OrdersTab({ orders }: { orders: Order[] }) {
+function OrdersTab({
+  orders,
+  isLoading,
+}: {
+  orders: Order[];
+  isLoading: boolean;
+}) {
   const getStatusClass = (status: string) => {
     return styles[`account__order-status--${status}`] || "";
   };
+
+  if (isLoading) {
+    return (
+      <>
+        <div className={styles.account__header}>
+          <h1 className={styles.account__title}>Order History</h1>
+          <p className={styles.account__subtitle}>View and track your orders</p>
+        </div>
+        <section className={styles.account__section}>
+          <div style={{ textAlign: "center", padding: "2rem" }}>
+            Loading orders...
+          </div>
+        </section>
+      </>
+    );
+  }
 
   return (
     <>

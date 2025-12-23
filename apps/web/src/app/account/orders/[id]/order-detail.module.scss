@@ -1,0 +1,289 @@
+@use "@/styles/variables" as *;
+@use "@/styles/mixins" as *;
+
+.orderDetail {
+  min-height: 100vh;
+  padding-top: 100px;
+  padding-bottom: $spacing-16;
+  background: $bg-dark;
+
+  &__container {
+    @include container;
+    max-width: 1000px;
+  }
+
+  &__loading,
+  &__error {
+    @include glass;
+    border-radius: $radius-xl;
+    padding: $spacing-10;
+    text-align: center;
+    color: $text-light-secondary;
+
+    h2 {
+      font-size: $font-size-xl;
+      color: $text-light;
+      margin-bottom: $spacing-4;
+    }
+
+    p {
+      margin-bottom: $spacing-6;
+    }
+  }
+
+  &__header {
+    margin-bottom: $spacing-8;
+  }
+
+  &__backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-2;
+    font-size: $font-size-sm;
+    color: $color-primary;
+    margin-bottom: $spacing-4;
+    transition: opacity $transition-fast;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
+  &__titleRow {
+    display: flex;
+    align-items: center;
+    gap: $spacing-4;
+    flex-wrap: wrap;
+    margin-bottom: $spacing-2;
+  }
+
+  &__title {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $text-light;
+
+    @include min-width($breakpoint-md) {
+      font-size: $font-size-3xl;
+    }
+  }
+
+  &__status {
+    padding: $spacing-1 $spacing-3;
+    border-radius: $radius-full;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+
+    &--pending {
+      background: rgba(251, 191, 36, 0.1);
+      color: #fbbf24;
+    }
+
+    &--confirmed {
+      background: rgba(59, 130, 246, 0.1);
+      color: #3b82f6;
+    }
+
+    &--processing {
+      background: rgba(168, 85, 247, 0.1);
+      color: #a855f7;
+    }
+
+    &--shipped {
+      background: rgba(99, 102, 241, 0.1);
+      color: #6366f1;
+    }
+
+    &--delivered {
+      background: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
+    }
+
+    &--cancelled {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+    }
+  }
+
+  &__date {
+    color: $text-light-secondary;
+    font-size: $font-size-sm;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $spacing-6;
+
+    @include min-width($breakpoint-md) {
+      grid-template-columns: 1fr 350px;
+    }
+  }
+
+  &__section {
+    @include glass;
+    border-radius: $radius-xl;
+    padding: $spacing-6;
+  }
+
+  &__sectionTitle {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $text-light;
+    margin-bottom: $spacing-4;
+    padding-bottom: $spacing-3;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  // Order Items
+  &__items {
+    @include flex-column;
+    gap: $spacing-4;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: $spacing-4;
+    padding: $spacing-3;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: $radius-lg;
+  }
+
+  &__itemImage {
+    width: 60px;
+    height: 60px;
+    border-radius: $radius-md;
+    background: $bg-dark-secondary;
+    overflow: hidden;
+    flex-shrink: 0;
+    @include flex-center;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__itemPlaceholder {
+    font-weight: $font-weight-bold;
+    color: $color-primary;
+    @include neon-glow($neon-pink);
+  }
+
+  &__itemDetails {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__itemName {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $text-light;
+    margin-bottom: $spacing-1;
+  }
+
+  &__itemMeta {
+    font-size: $font-size-xs;
+    color: $text-light-secondary;
+  }
+
+  &__itemTotal {
+    font-weight: $font-weight-semibold;
+    color: $text-light;
+  }
+
+  // Order Summary
+  &__summary {
+    @include flex-column;
+    gap: $spacing-3;
+  }
+
+  &__summaryRow {
+    display: flex;
+    justify-content: space-between;
+    font-size: $font-size-sm;
+    color: $text-light-secondary;
+
+    &:last-child {
+      margin-top: $spacing-2;
+      padding-top: $spacing-3;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  &__summaryTotal {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $text-light;
+  }
+
+  &__payment {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: $spacing-4;
+    padding-top: $spacing-4;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: $font-size-sm;
+    color: $text-light-secondary;
+  }
+
+  &__paymentBadge {
+    padding: $spacing-1 $spacing-2;
+    border-radius: $radius-md;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+
+    &--pending {
+      background: rgba(251, 191, 36, 0.1);
+      color: #fbbf24;
+    }
+
+    &--paid {
+      background: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
+    }
+
+    &--failed {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+    }
+
+    &--refunded {
+      background: rgba(168, 85, 247, 0.1);
+      color: #a855f7;
+    }
+  }
+
+  // Shipping Address
+  &__address {
+    font-style: normal;
+    font-size: $font-size-sm;
+    color: $text-light;
+    line-height: 1.8;
+
+    div {
+      color: $text-light-secondary;
+
+      &:first-child {
+        font-weight: $font-weight-medium;
+        color: $text-light;
+      }
+    }
+  }
+
+  &__phone,
+  &__email {
+    margin-top: $spacing-2;
+    color: $color-primary !important;
+  }
+
+  // Notes
+  &__notes {
+    font-size: $font-size-sm;
+    color: $text-light-secondary;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+}

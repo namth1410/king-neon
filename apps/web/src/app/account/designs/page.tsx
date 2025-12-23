@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, ExternalLink, Loader2, FolderOpen } from "lucide-react";
+import { Trash2, ExternalLink, FolderOpen } from "lucide-react";
+import { Spinner } from "@king-neon/ui";
 import { useAuth } from "@/hooks/useAuth";
 import api from "@/utils/api";
 import styles from "./designs.module.scss";
@@ -78,7 +79,7 @@ export default function MyDesignsPage() {
   if (authLoading || (!isAuthenticated && !isLoading)) {
     return (
       <div className={styles.loading}>
-        <Loader2 className={styles.spinner} size={32} />
+        <Spinner className={styles.spinner} size="lg" />
         <p>Loading...</p>
       </div>
     );
@@ -94,7 +95,7 @@ export default function MyDesignsPage() {
 
         {isLoading ? (
           <div className={styles.loading}>
-            <Loader2 className={styles.spinner} size={32} />
+            <Spinner className={styles.spinner} size="lg" />
             <p>Loading your designs...</p>
           </div>
         ) : designs.length === 0 ? (
@@ -166,7 +167,7 @@ export default function MyDesignsPage() {
                       disabled={deletingId === design.id}
                     >
                       {deletingId === design.id ? (
-                        <Loader2 className={styles.spinner} size={16} />
+                        <Spinner className={styles.spinner} size="sm" />
                       ) : (
                         <Trash2 size={16} />
                       )}

@@ -1,9 +1,22 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { Upload, X, AlignLeft, AlignCenter, AlignRight } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import {
+  Upload,
+  X,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  RotateCcw,
+} from "lucide-react";
 import Scene from "./Scene";
 import { ProcessingMethod } from "./NeonLogo";
+import {
+  useDraftStorage,
+  NeonConfigurator3DDraft,
+  DRAFT_KEYS,
+} from "@/hooks/useDraftStorage";
+import DraftRecoveryModal from "@/components/DraftRecoveryModal";
 import styles from "./NeonConfigurator3D.module.scss";
 
 // Google Fonts available for 2D canvas
@@ -119,8 +132,97 @@ export default function NeonConfigurator3D() {
   // Mode: 'text' or 'logo'
   const [mode, setMode] = useState<"text" | "logo">("text");
 
+  // Glow controls
+  const [glowIntensity, setGlowIntensity] = useState(1.5);
+  const [glowSpread, setGlowSpread] = useState(1);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
+
+  // Camera reset function from Scene
+  const [resetCameraFn, setResetCameraFn] = useState<(() => void) | null>(null);
+
+  // Draft recovery modal state
+  const [showRecoveryModal, setShowRecoveryModal] = useState(false);
+  const [pendingDraft, setPendingDraft] =
+    useState<NeonConfigurator3DDraft | null>(null);
+  const [draftTimestamp, setDraftTimestamp] = useState<string | null>(null);
+
+  // Draft storage hook
+  const { saveDraftDebounced, loadDraft, clearDraft, getTimeSinceModified } =
+    useDraftStorage<NeonConfigurator3DDraft>(DRAFT_KEYS.NEON_CONFIGURATOR_3D);
+
+  // Check for saved draft on mount
+  useEffect(() => {
+    const draft = loadDraft();
+    if (draft) {
+      setPendingDraft(draft);
+      setDraftTimestamp(getTimeSinceModified());
+      setShowRecoveryModal(true);
+    }
+  }, [loadDraft, getTimeSinceModified]);
+
+  // Auto-save design changes (debounced)
+  useEffect(() => {
+    // Don't save if recovery modal is still showing
+    if (showRecoveryModal) return;
+
+    saveDraftDebounced({
+      mode,
+      text,
+      color,
+      fontFamily,
+      size,
+      backboard,
+      borderWidth,
+      textAlign,
+      logoSize,
+      logoOutlineWidth,
+      logoProcessingMethod,
+    });
+  }, [
+    mode,
+    text,
+    color,
+    fontFamily,
+    size,
+    backboard,
+    borderWidth,
+    textAlign,
+    logoSize,
+    logoOutlineWidth,
+    logoProcessingMethod,
+    saveDraftDebounced,
+    showRecoveryModal,
+  ]);
+
+  // Handle continuing from draft
+  const handleContinueDraft = useCallback(() => {
+    if (pendingDraft) {
+      setMode(pendingDraft.mode);
+      setText(pendingDraft.text);
+      setColor(pendingDraft.color);
+      setFontFamily(pendingDraft.fontFamily);
+      setSize(pendingDraft.size);
+      setBackboard(pendingDraft.backboard);
+      setBorderWidth(pendingDraft.borderWidth);
+      setTextAlign(pendingDraft.textAlign);
+      setLogoSize(pendingDraft.logoSize);
+      setLogoOutlineWidth(pendingDraft.logoOutlineWidth);
+      setLogoProcessingMethod(
+        pendingDraft.logoProcessingMethod as ProcessingMethod
+      );
+    }
+    setShowRecoveryModal(false);
+    setPendingDraft(null);
+  }, [pendingDraft]);
+
+  // Handle starting fresh
+  const handleStartFresh = useCallback(() => {
+    clearDraft();
+    setShowRecoveryModal(false);
+    setPendingDraft(null);
+  }, [clearDraft]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -186,7 +288,22 @@ export default function NeonConfigurator3D() {
           logoSize={logoSize}
           logoOutlineWidth={logoOutlineWidth}
           logoProcessingMethod={logoProcessingMethod}
+          onControlsReady={(resetFn) => setResetCameraFn(() => resetFn)}
+          glowIntensity={glowIntensity}
+          glowSpread={glowSpread}
         />
+
+        {/* Reset View Button */}
+        {resetCameraFn && (
+          <button
+            className={styles.resetViewBtn}
+            onClick={resetCameraFn}
+            title="Reset camera view"
+          >
+            <RotateCcw size={18} />
+            Reset View
+          </button>
+        )}
       </div>
 
       {/* UI Controls Overlay */}
@@ -457,6 +574,37 @@ export default function NeonConfigurator3D() {
           </div>
         </div>
 
+        {/* Glow Controls */}
+        <div className={styles.controlGroup}>
+          <label>Glow</label>
+          <div className={styles.glowSliders}>
+            <div className={styles.sliderItem}>
+              <span>Int</span>
+              <input
+                type="range"
+                min="0.5"
+                max="3"
+                step="0.1"
+                value={glowIntensity}
+                onChange={(e) => setGlowIntensity(parseFloat(e.target.value))}
+                title="Intensity"
+              />
+            </div>
+            <div className={styles.sliderItem}>
+              <span>Spr</span>
+              <input
+                type="range"
+                min="0.5"
+                max="2"
+                step="0.1"
+                value={glowSpread}
+                onChange={(e) => setGlowSpread(parseFloat(e.target.value))}
+                title="Spread"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Background Image Upload - shared between modes */}
         <div className={styles.controlGroup}>
           <label>BG</label>
@@ -486,6 +634,16 @@ export default function NeonConfigurator3D() {
           </div>
         </div>
       </div>
+
+      {/* Draft Recovery Modal */}
+      <DraftRecoveryModal
+        isOpen={showRecoveryModal}
+        onContinue={handleContinueDraft}
+        onStartFresh={handleStartFresh}
+        onClose={handleStartFresh}
+        preview={pendingDraft?.text}
+        lastModified={draftTimestamp ?? undefined}
+      />
     </div>
   );
 }

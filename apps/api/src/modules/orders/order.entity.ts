@@ -20,6 +20,13 @@ export enum OrderStatus {
   CANCELLED = 'cancelled',
 }
 
+export enum PaymentStatus {
+  PENDING = 'pending',
+  PAID = 'paid',
+  FAILED = 'failed',
+  REFUNDED = 'refunded',
+}
+
 @Entity('orders')
 export class Order {
   @PrimaryGeneratedColumn('uuid')
@@ -28,10 +35,10 @@ export class Order {
   @Column({ unique: true })
   orderNumber: string;
 
-  @Column({ nullable: true })
+  @Column()
   userId: string;
 
-  @ManyToOne(() => User, (user) => user.orders, { nullable: true })
+  @ManyToOne(() => User, (user) => user.orders)
   @JoinColumn({ name: 'userId' })
   user: User;
 
@@ -80,6 +87,20 @@ export class Order {
 
   @Column({ nullable: true })
   customerPhone: string;
+
+  // Payment fields
+  @Column({ nullable: true })
+  stripePaymentIntentId: string;
+
+  @Column({
+    type: 'enum',
+    enum: PaymentStatus,
+    default: PaymentStatus.PENDING,
+  })
+  paymentStatus: PaymentStatus;
+
+  @Column({ type: 'timestamp', nullable: true })
+  paidAt: Date;
 
   @Column({ type: 'text', nullable: true })
   notes: string;

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import toast, { Toaster } from "react-hot-toast";
+import { toast } from "sonner";
 import api from "@/utils/api";
 import styles from "./page.module.css";
 
@@ -129,7 +129,6 @@ export default function PreviewBackgroundsPage() {
 
   return (
     <div className={styles.container}>
-      <Toaster position="top-right" />
       <div className={styles.header}>
         <h1>Preview Backgrounds</h1>
         <p>Manage background images for the neon designer preview</p>

@@ -14,6 +14,18 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../users/user.entity';
+import {
+  CreateFontDto,
+  UpdateFontDto,
+  CreateColorDto,
+  UpdateColorDto,
+  CreateSizeDto,
+  UpdateSizeDto,
+  CreateMaterialDto,
+  UpdateMaterialDto,
+  CreateBackboardDto,
+  UpdateBackboardDto,
+} from './dto/neon-config.dto';
 
 @ApiTags('neon-config')
 @Controller('neon')
@@ -38,7 +50,7 @@ export class NeonConfigController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
-  createFont(@Body() data: any) {
+  createFont(@Body() data: CreateFontDto) {
     return this.neonConfigService.createFont(data);
   }
 
@@ -47,7 +59,7 @@ export class NeonConfigController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
-  updateFont(@Param('id') id: string, @Body() data: any) {
+  updateFont(@Param('id') id: string, @Body() data: UpdateFontDto) {
     return this.neonConfigService.updateFont(id, data);
   }
 
@@ -72,7 +84,7 @@ export class NeonConfigController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
-  createColor(@Body() data: any) {
+  createColor(@Body() data: CreateColorDto) {
     return this.neonConfigService.createColor(data);
   }
 
@@ -81,7 +93,7 @@ export class NeonConfigController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
-  updateColor(@Param('id') id: string, @Body() data: any) {
+  updateColor(@Param('id') id: string, @Body() data: UpdateColorDto) {
     return this.neonConfigService.updateColor(id, data);
   }
 
@@ -106,7 +118,7 @@ export class NeonConfigController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
-  createSize(@Body() data: any) {
+  createSize(@Body() data: CreateSizeDto) {
     return this.neonConfigService.createSize(data);
   }
 
@@ -115,7 +127,7 @@ export class NeonConfigController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
-  updateSize(@Param('id') id: string, @Body() data: any) {
+  updateSize(@Param('id') id: string, @Body() data: UpdateSizeDto) {
     return this.neonConfigService.updateSize(id, data);
   }
 
@@ -140,7 +152,7 @@ export class NeonConfigController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
-  createMaterial(@Body() data: any) {
+  createMaterial(@Body() data: CreateMaterialDto) {
     return this.neonConfigService.createMaterial(data);
   }
 
@@ -149,7 +161,7 @@ export class NeonConfigController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
-  updateMaterial(@Param('id') id: string, @Body() data: any) {
+  updateMaterial(@Param('id') id: string, @Body() data: UpdateMaterialDto) {
     return this.neonConfigService.updateMaterial(id, data);
   }
 
@@ -174,7 +186,7 @@ export class NeonConfigController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
-  createBackboard(@Body() data: any) {
+  createBackboard(@Body() data: CreateBackboardDto) {
     return this.neonConfigService.createBackboard(data);
   }
 
@@ -183,7 +195,7 @@ export class NeonConfigController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
-  updateBackboard(@Param('id') id: string, @Body() data: any) {
+  updateBackboard(@Param('id') id: string, @Body() data: UpdateBackboardDto) {
     return this.neonConfigService.updateBackboard(id, data);
   }
 

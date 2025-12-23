@@ -3,20 +3,12 @@
 @use "variables" as *;
 @use "mixins" as *;
 
-// Tailwind CSS
-@import "tailwindcss";
-
 // Google Fonts
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap");
 
 // CSS Reset & Base
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+// CSS Reset & Base - Handled by Tailwind
+// *, *::before, *::after { ... } removed to avoid conflicts
 
 html {
   font-size: 16px;
@@ -51,12 +43,10 @@ img {
   display: block;
 }
 
-// Buttons
+// Buttons - minimal reset, let Tailwind handle styling
 button {
   font-family: inherit;
   cursor: pointer;
-  border: none;
-  background: none;
 }
 
 // Lists

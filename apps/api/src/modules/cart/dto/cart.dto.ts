@@ -1,5 +1,14 @@
-import { IsString, IsNumber, IsOptional, IsEnum, Min } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsEnum,
+  Min,
+  IsArray,
+  ValidateNested,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class AddToCartDto {
   @ApiProperty({ example: 'product-uuid' })
@@ -10,8 +19,9 @@ export class AddToCartDto {
   @IsString()
   productName: string;
 
-  @ApiProperty({ example: 195.5 })
+  @ApiProperty({ example: 195.5, minimum: 0 })
   @IsNumber()
+  @Min(0, { message: 'Price cannot be negative' })
   price: number;
 
   @ApiPropertyOptional({ default: 1 })
@@ -44,5 +54,8 @@ export class UpdateCartItemDto {
 
 export class MergeCartDto {
   @ApiProperty({ type: [AddToCartDto] })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AddToCartDto)
   items: AddToCartDto[];
 }

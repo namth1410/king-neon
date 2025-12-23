@@ -7,14 +7,18 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true, // Enable sending cookies with requests
 });
+
+// Auth token key - must match useAuth hook
+const AUTH_TOKEN_KEY = "king_neon_token";
 
 // Request interceptor to add token
 api.interceptors.request.use(
   (config) => {
     // Check if running on client side
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem(AUTH_TOKEN_KEY);
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }

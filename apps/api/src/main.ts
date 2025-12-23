@@ -1,10 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Enable cookie parser for auth cookies
+  app.use(cookieParser());
 
   // Enable CORS for frontend apps
   app.enableCors({
@@ -52,4 +56,4 @@ async function bootstrap() {
   console.log(`🚀 API is running on http://localhost:${port}/api`);
   console.log(`📚 Swagger docs: http://localhost:${port}/api/docs`);
 }
-bootstrap();
+void bootstrap();

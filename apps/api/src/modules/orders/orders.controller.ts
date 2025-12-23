@@ -24,6 +24,10 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../users/user.entity';
 import { OrderStatus } from './order.entity';
 
+interface AuthRequest extends Request {
+  user?: { userId: string; email: string; role: string };
+}
+
 @ApiTags('orders')
 @Controller('orders')
 export class OrdersController {
@@ -31,8 +35,13 @@ export class OrdersController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new order' })
-  create(@Body() createOrderDto: CreateOrderDto, @Request() req: any) {
-    return this.ordersService.create(createOrderDto, req.user?.userId);
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  create(
+    @Body() createOrderDto: CreateOrderDto,
+    @Request() req: Required<AuthRequest>,
+  ) {
+    return this.ordersService.create(createOrderDto, req.user.userId);
   }
 
   @Get()
@@ -55,7 +64,7 @@ export class OrdersController {
   @ApiOperation({ summary: 'Get current user orders' })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  getMyOrders(@Request() req: any) {
+  getMyOrders(@Request() req: Required<AuthRequest>) {
     return this.ordersService.findByUser(req.user.userId);
   }
 

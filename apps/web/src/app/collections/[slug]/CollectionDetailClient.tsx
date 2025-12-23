@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
 import api from "@/utils/api";
+import { useApiRequest, withSignal } from "@/hooks/useApiRequest";
 import styles from "./collection-detail.module.scss";
 
 interface Product {
@@ -51,6 +52,8 @@ export default function CollectionDetailClient({
   const [availability, setAvailability] = useState<"all" | "in-stock">("all");
   const limit = 12;
 
+  const { request, abortAll } = useApiRequest();
+
   // Fetch category by slug
   useEffect(() => {
     const fetchCategory = async () => {
@@ -84,7 +87,12 @@ export default function CollectionDetailClient({
         params.search = searchQuery.trim();
       }
 
-      const response = await api.get("/products", { params });
+      const response = await request("products", (signal) =>
+        api.get("/products", withSignal(signal, { params }))
+      );
+
+      // Response is null if request was aborted
+      if (!response) return;
 
       if (Array.isArray(response.data)) {
         setProducts(response.data);
@@ -99,13 +107,14 @@ export default function CollectionDetailClient({
     } finally {
       setIsLoading(false);
     }
-  }, [category, page, searchQuery]);
+  }, [category, page, searchQuery, request]);
 
   useEffect(() => {
     if (category) {
       fetchProducts();
     }
-  }, [fetchProducts, category]);
+    return () => abortAll();
+  }, [fetchProducts, category, abortAll]);
 
   // Reset page when filters change
   useEffect(() => {

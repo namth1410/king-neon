@@ -15,6 +15,7 @@ import {
   ApiBearerAuth,
   ApiQuery,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { QuotesService } from './quotes.service';
 import { CreateQuoteDto } from './dto/create-quote.dto';
 import { UpdateQuoteDto } from './dto/update-quote.dto';
@@ -24,6 +25,15 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../users/user.entity';
 import { QuoteStatus } from './quote.entity';
 
+interface AuthRequest extends Request {
+  user: { userId: string };
+}
+
+// Dùng cho endpoint có thể có hoặc không có authentication
+interface OptionalAuthRequest extends Request {
+  user?: { userId: string };
+}
+
 @ApiTags('quotes')
 @Controller('quotes')
 export class QuotesController {
@@ -31,7 +41,11 @@ export class QuotesController {
 
   @Post()
   @ApiOperation({ summary: 'Submit a quote request' })
-  create(@Body() createQuoteDto: CreateQuoteDto, @Request() req: any) {
+  @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 requests per minute - spam protection
+  create(
+    @Body() createQuoteDto: CreateQuoteDto,
+    @Request() req: OptionalAuthRequest,
+  ) {
     return this.quotesService.create(createQuoteDto, req.user?.userId);
   }
 
@@ -55,7 +69,7 @@ export class QuotesController {
   @ApiOperation({ summary: 'Get current user quotes' })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  getMyQuotes(@Request() req: any) {
+  getMyQuotes(@Request() req: AuthRequest) {
     return this.quotesService.findByUser(req.user.userId);
   }
 

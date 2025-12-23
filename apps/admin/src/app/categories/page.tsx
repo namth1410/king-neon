@@ -3,9 +3,13 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Plus, Edit2, Trash2, Package, AlertCircle } from "lucide-react";
-import toast from "react-hot-toast";
+import { Spinner } from "@king-neon/ui";
+import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import api from "@/utils/api";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface Category {
   id: string;
@@ -48,7 +52,6 @@ export default function CategoriesPage() {
 
   const handleDeleteClick = async (category: Category) => {
     try {
-      // Check product count first
       const res = await api.get(`/categories/${category.id}/products/count`);
       setDeleteModal({
         open: true,
@@ -79,223 +82,102 @@ export default function CategoriesPage() {
 
   return (
     <DashboardLayout title="Categories">
-      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+      <div className="max-w-6xl mx-auto flex flex-col gap-6">
         {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "2rem",
-          }}
-        >
+        <div className="flex justify-between items-center">
           <div>
-            <h1 style={{ fontSize: "1.5rem", fontWeight: 600, color: "white" }}>
-              Categories
-            </h1>
-            <p style={{ color: "rgba(255,255,255,0.5)", marginTop: "0.25rem" }}>
+            <h1 className="text-2xl font-bold text-white mb-1">Categories</h1>
+            <p className="text-zinc-500 text-sm">
               Manage your product categories
             </p>
           </div>
-          <Link
-            href="/categories/create"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              padding: "0.75rem 1.5rem",
-              background: "linear-gradient(135deg, #ec4899, #8b5cf6)",
-              color: "white",
-              borderRadius: "0.75rem",
-              fontWeight: 600,
-              textDecoration: "none",
-              transition: "all 0.2s",
-            }}
-          >
-            <Plus size={20} />
-            Add Category
-          </Link>
+          <Button asChild className="bg-pink-600 hover:bg-pink-700 gap-2">
+            <Link href="/categories/create">
+              <Plus size={20} />
+              Add Category
+            </Link>
+          </Button>
         </div>
 
         {/* Error State */}
         {error && (
-          <div
-            style={{
-              padding: "1rem",
-              background: "rgba(239,68,68,0.1)",
-              border: "1px solid rgba(239,68,68,0.2)",
-              borderRadius: "0.75rem",
-              color: "#ef4444",
-              marginBottom: "1rem",
-            }}
-          >
+          <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400">
             {error}
           </div>
         )}
 
         {/* Loading State */}
         {loading ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "4rem",
-              color: "rgba(255,255,255,0.5)",
-            }}
-          >
+          <div className="p-16 text-center text-zinc-500">
+            <Spinner className="w-10 h-10 animate-spin mx-auto mb-4 text-pink-500" />
             Loading categories...
           </div>
         ) : categories.length === 0 ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "4rem",
-              background: "rgba(255,255,255,0.02)",
-              borderRadius: "1rem",
-              border: "1px dashed rgba(255,255,255,0.1)",
-            }}
-          >
-            <Package
-              size={48}
-              style={{ color: "rgba(255,255,255,0.3)", marginBottom: "1rem" }}
-            />
-            <p style={{ color: "rgba(255,255,255,0.5)" }}>No categories yet</p>
+          <div className="text-center p-16 bg-zinc-900/50 rounded-xl border border-dashed border-zinc-800">
+            <Package size={48} className="text-zinc-700 mx-auto mb-4" />
+            <p className="text-zinc-500">No categories yet</p>
             <Link
               href="/categories/create"
-              style={{
-                color: "#ec4899",
-                marginTop: "0.5rem",
-                display: "inline-block",
-              }}
+              className="text-pink-500 mt-2 inline-block"
             >
               Create your first category
             </Link>
           </div>
         ) : (
           /* Categories Grid */
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-              gap: "1.5rem",
-            }}
-          >
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {categories.map((category) => (
-              <div
+              <Card
                 key={category.id}
-                style={{
-                  background: "rgba(20,20,20,0.4)",
-                  backdropFilter: "blur(20px)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  borderRadius: "1rem",
-                  padding: "1.5rem",
-                  transition: "all 0.2s",
-                }}
+                className="bg-zinc-900/50 border-zinc-800"
               >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  <div>
-                    <h3
-                      style={{
-                        color: "white",
-                        fontWeight: 600,
-                        fontSize: "1.125rem",
-                      }}
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="text-lg text-white">
+                        {category.name}
+                      </CardTitle>
+                      <span className="text-xs text-zinc-500 font-mono">
+                        /{category.slug}
+                      </span>
+                    </div>
+                    <Badge
+                      variant={category.active ? "success" : "destructive"}
                     >
-                      {category.name}
-                    </h3>
-                    <span
-                      style={{
-                        fontSize: "0.75rem",
-                        color: "rgba(255,255,255,0.4)",
-                        fontFamily: "monospace",
-                      }}
-                    >
-                      /{category.slug}
-                    </span>
+                      {category.active ? "Active" : "Inactive"}
+                    </Badge>
                   </div>
-                  <span
-                    style={{
-                      padding: "0.25rem 0.5rem",
-                      borderRadius: "9999px",
-                      fontSize: "0.75rem",
-                      fontWeight: 500,
-                      background: category.active
-                        ? "rgba(34,197,94,0.1)"
-                        : "rgba(239,68,68,0.1)",
-                      color: category.active ? "#22c55e" : "#ef4444",
-                    }}
-                  >
-                    {category.active ? "Active" : "Inactive"}
-                  </span>
-                </div>
-
-                {category.description && (
-                  <p
-                    style={{
-                      color: "rgba(255,255,255,0.6)",
-                      fontSize: "0.875rem",
-                      marginBottom: "1rem",
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {category.description}
-                  </p>
-                )}
-
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "0.5rem",
-                    paddingTop: "1rem",
-                    borderTop: "1px solid rgba(255,255,255,0.05)",
-                  }}
-                >
-                  <Link
-                    href={`/categories/edit/${category.id}`}
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "0.25rem",
-                      padding: "0.5rem 1rem",
-                      background: "rgba(255,255,255,0.05)",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      borderRadius: "0.5rem",
-                      color: "rgba(255,255,255,0.7)",
-                      fontSize: "0.875rem",
-                      textDecoration: "none",
-                      transition: "all 0.2s",
-                    }}
-                  >
-                    <Edit2 size={14} />
-                    Edit
-                  </Link>
-                  <button
-                    onClick={() => handleDeleteClick(category)}
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "0.25rem",
-                      padding: "0.5rem 1rem",
-                      background: "rgba(239,68,68,0.1)",
-                      border: "1px solid rgba(239,68,68,0.2)",
-                      borderRadius: "0.5rem",
-                      color: "#ef4444",
-                      fontSize: "0.875rem",
-                      cursor: "pointer",
-                      transition: "all 0.2s",
-                    }}
-                  >
-                    <Trash2 size={14} />
-                    Delete
-                  </button>
-                </div>
-              </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  {category.description && (
+                    <p className="text-zinc-400 text-sm mb-4 line-clamp-2">
+                      {category.description}
+                    </p>
+                  )}
+                  <div className="flex gap-2 pt-4 border-t border-zinc-800">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      className="border-zinc-700 gap-1"
+                    >
+                      <Link href={`/categories/edit/${category.id}`}>
+                        <Edit2 size={14} />
+                        Edit
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10 gap-1"
+                      onClick={() => handleDeleteClick(category)}
+                    >
+                      <Trash2 size={14} />
+                      Delete
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         )}
@@ -303,59 +185,38 @@ export default function CategoriesPage() {
         {/* Delete Confirmation Modal */}
         {deleteModal.open && (
           <div
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(0,0,0,0.8)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 50,
-            }}
+            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
             onClick={() =>
               setDeleteModal({ open: false, category: null, productCount: 0 })
             }
           >
             <div
-              style={{
-                background: "#1a1a1a",
-                borderRadius: "1rem",
-                padding: "2rem",
-                maxWidth: "400px",
-                width: "90%",
-                border: "1px solid rgba(255,255,255,0.1)",
-              }}
+              className="bg-zinc-900 rounded-xl p-6 max-w-md w-[90%] border border-zinc-800"
               onClick={(e) => e.stopPropagation()}
             >
               {deleteModal.productCount > 0 ? (
                 <>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.75rem",
-                      marginBottom: "1rem",
-                    }}
-                  >
-                    <AlertCircle size={24} style={{ color: "#f59e0b" }} />
-                    <h3 style={{ color: "white", fontWeight: 600 }}>
+                  <div className="flex items-center gap-3 mb-4">
+                    <AlertCircle size={24} className="text-yellow-500" />
+                    <h3 className="text-white font-semibold">
                       Cannot Delete Category
                     </h3>
                   </div>
-                  <p
-                    style={{
-                      color: "rgba(255,255,255,0.7)",
-                      marginBottom: "1.5rem",
-                    }}
-                  >
+                  <p className="text-zinc-400 mb-6">
                     The category{" "}
-                    <strong>&quot;{deleteModal.category?.name}&quot;</strong> is
-                    used by{" "}
-                    <strong>{deleteModal.productCount} product(s)</strong>.
-                    Please reassign these products to another category before
+                    <strong className="text-white">
+                      &quot;{deleteModal.category?.name}&quot;
+                    </strong>{" "}
+                    is used by{" "}
+                    <strong className="text-white">
+                      {deleteModal.productCount} product(s)
+                    </strong>
+                    . Please reassign these products to another category before
                     deleting.
                   </p>
-                  <button
+                  <Button
+                    variant="outline"
+                    className="w-full border-zinc-700"
                     onClick={() =>
                       setDeleteModal({
                         open: false,
@@ -363,43 +224,26 @@ export default function CategoriesPage() {
                         productCount: 0,
                       })
                     }
-                    style={{
-                      width: "100%",
-                      padding: "0.75rem",
-                      background: "rgba(255,255,255,0.1)",
-                      border: "none",
-                      borderRadius: "0.5rem",
-                      color: "white",
-                      fontWeight: 500,
-                      cursor: "pointer",
-                    }}
                   >
                     Got it
-                  </button>
+                  </Button>
                 </>
               ) : (
                 <>
-                  <h3
-                    style={{
-                      color: "white",
-                      fontWeight: 600,
-                      marginBottom: "0.5rem",
-                    }}
-                  >
+                  <h3 className="text-white font-semibold mb-2">
                     Delete Category?
                   </h3>
-                  <p
-                    style={{
-                      color: "rgba(255,255,255,0.7)",
-                      marginBottom: "1.5rem",
-                    }}
-                  >
+                  <p className="text-zinc-400 mb-6">
                     Are you sure you want to delete{" "}
-                    <strong>&quot;{deleteModal.category?.name}&quot;</strong>?
-                    This action cannot be undone.
+                    <strong className="text-white">
+                      &quot;{deleteModal.category?.name}&quot;
+                    </strong>
+                    ? This action cannot be undone.
                   </p>
-                  <div style={{ display: "flex", gap: "0.75rem" }}>
-                    <button
+                  <div className="flex gap-3">
+                    <Button
+                      variant="outline"
+                      className="flex-1 border-zinc-700"
                       onClick={() =>
                         setDeleteModal({
                           open: false,
@@ -407,34 +251,16 @@ export default function CategoriesPage() {
                           productCount: 0,
                         })
                       }
-                      style={{
-                        flex: 1,
-                        padding: "0.75rem",
-                        background: "rgba(255,255,255,0.1)",
-                        border: "none",
-                        borderRadius: "0.5rem",
-                        color: "white",
-                        fontWeight: 500,
-                        cursor: "pointer",
-                      }}
                     >
                       Cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      className="flex-1"
                       onClick={confirmDelete}
-                      style={{
-                        flex: 1,
-                        padding: "0.75rem",
-                        background: "#ef4444",
-                        border: "none",
-                        borderRadius: "0.5rem",
-                        color: "white",
-                        fontWeight: 500,
-                        cursor: "pointer",
-                      }}
                     >
                       Delete
-                    </button>
+                    </Button>
                   </div>
                 </>
               )}

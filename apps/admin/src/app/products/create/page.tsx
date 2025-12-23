@@ -4,11 +4,21 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import toast from "react-hot-toast";
+import { Spinner } from "@king-neon/ui";
+import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import api from "@/utils/api";
 import ImageUpload, { PendingFile } from "@/components/ImageUpload";
-import styles from "./page.module.scss";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Category {
   id: string;
@@ -34,7 +44,6 @@ export default function CreateProductPage() {
 
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
 
-  // Fetch categories on mount
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -49,13 +58,10 @@ export default function CreateProductPage() {
   }, []);
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
 
-    // Auto-generate slug from name if slug is empty or matches previous name slugified
     if (
       name === "name" &&
       (!formData.slug || formData.slug === slugify(formData.name))
@@ -70,19 +76,22 @@ export default function CreateProductPage() {
     setFormData((prev) => ({ ...prev, slug: slugify(e.target.value) }));
   };
 
+  const handleCategoryChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      categoryId: value === "none" ? "" : value,
+    }));
+  };
+
   const slugify = (text: string) => {
     return text
       .toString()
       .toLowerCase()
-      .replace(/\s+/g, "-") // Replace spaces with -
-      .replace(/[^\w-]+/g, "") // Remove all non-word chars
-      .replace(/--+/g, "-") // Replace multiple - with single -
-      .replace(/^-+/, "") // Trim - from start of text
-      .replace(/-+$/, ""); // Trim - from end of text
-  };
-
-  const handleToggleActive = () => {
-    setFormData((prev) => ({ ...prev, active: !prev.active }));
+      .replace(/\s+/g, "-")
+      .replace(/[^\w-]+/g, "")
+      .replace(/--+/g, "-")
+      .replace(/^-+/, "")
+      .replace(/-+$/, "");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -90,7 +99,6 @@ export default function CreateProductPage() {
     setIsLoading(true);
 
     try {
-      // 1. Upload pending images first
       let uploadedImageUrls: string[] = [];
       if (pendingFiles.length > 0) {
         const uploadFormData = new FormData();
@@ -139,61 +147,72 @@ export default function CreateProductPage() {
 
   return (
     <DashboardLayout title="Create Product">
-      <div className={styles.container}>
-        <div className={styles.header}>
-          <Link href="/products" className={styles["back-link"]}>
-            <ArrowLeft size={20} />
-            <span>Back to Products</span>
-          </Link>
-        </div>
+      <div className="max-w-4xl">
+        {/* Header */}
+        <Link
+          href="/products"
+          className="inline-flex items-center gap-2 text-zinc-500 hover:text-white mb-6 transition-colors"
+        >
+          <ArrowLeft size={20} />
+          Back to Products
+        </Link>
 
         <form onSubmit={handleSubmit}>
-          <div className={styles["form-grid"]}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column: Main Info */}
-            <div className="left-column">
-              <div className={styles.card}>
-                <h3>Basic Information</h3>
+            <div className="lg:col-span-2 space-y-6">
+              <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
+                <h3 className="text-white font-semibold mb-4">
+                  Basic Information
+                </h3>
 
-                <div className={styles["input-group"]}>
-                  <label htmlFor="name">Product Name</label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                    placeholder="e.g. Neon Heart Sign"
-                  />
-                </div>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-zinc-400">
+                      Product Name
+                    </label>
+                    <Input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                      placeholder="e.g. Neon Heart Sign"
+                    />
+                  </div>
 
-                <div className={styles["input-group"]}>
-                  <label htmlFor="slug">Slug (URL)</label>
-                  <input
-                    type="text"
-                    id="slug"
-                    name="slug"
-                    value={formData.slug}
-                    onChange={handleSlugChange}
-                    required
-                    placeholder="e.g. neon-heart-sign"
-                  />
-                </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-zinc-400">
+                      Slug (URL)
+                    </label>
+                    <Input
+                      type="text"
+                      name="slug"
+                      value={formData.slug}
+                      onChange={handleSlugChange}
+                      required
+                      placeholder="e.g. neon-heart-sign"
+                    />
+                  </div>
 
-                <div className={styles["input-group"]}>
-                  <label htmlFor="description">Description</label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    placeholder="Product description..."
-                  />
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-zinc-400">
+                      Description
+                    </label>
+                    <textarea
+                      name="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      placeholder="Product description..."
+                      rows={4}
+                      className="w-full px-3 py-2 bg-zinc-800 border border-zinc-600 rounded-md text-zinc-200 placeholder:text-zinc-500 hover:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 focus:ring-offset-zinc-900 resize-y transition-colors"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className={styles.card}>
-                <h3>Media</h3>
+              <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
+                <h3 className="text-white font-semibold mb-4">Media</h3>
                 <ImageUpload
                   images={formData.images}
                   onImagesChange={(imgs) =>
@@ -207,28 +226,28 @@ export default function CreateProductPage() {
             </div>
 
             {/* Right Column: Pricing & Organization */}
-            <div className="right-column">
-              <div className={styles.card}>
-                <h3>Status</h3>
-                <div className={styles["status-row"]}>
-                  <span>Active Status</span>
-                  <button
-                    type="button"
-                    onClick={handleToggleActive}
-                    className={`${styles["toggle-btn"]} ${formData.active ? styles.active : styles.inactive}`}
-                  >
-                    <span />
-                  </button>
+            <div className="space-y-6">
+              <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
+                <h3 className="text-white font-semibold mb-4">Status</h3>
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-300">Active Status</span>
+                  <Switch
+                    checked={formData.active}
+                    onCheckedChange={(checked) =>
+                      setFormData((prev) => ({ ...prev, active: checked }))
+                    }
+                  />
                 </div>
               </div>
 
-              <div className={styles.card}>
-                <h3>Pricing</h3>
-                <div className={styles["input-group"]}>
-                  <label htmlFor="basePrice">Base Price ($)</label>
-                  <input
+              <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
+                <h3 className="text-white font-semibold mb-4">Pricing</h3>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-zinc-400">
+                    Base Price ($)
+                  </label>
+                  <Input
                     type="number"
-                    id="basePrice"
                     name="basePrice"
                     value={formData.basePrice}
                     onChange={handleChange}
@@ -240,39 +259,42 @@ export default function CreateProductPage() {
                 </div>
               </div>
 
-              <div className={styles.card}>
-                <h3>Organization</h3>
-                <div className={styles["input-group"]}>
-                  <label htmlFor="categoryId">Category</label>
-                  <select
-                    id="categoryId"
-                    name="categoryId"
-                    value={formData.categoryId}
-                    onChange={handleChange}
+              <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
+                <h3 className="text-white font-semibold mb-4">Organization</h3>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-zinc-400">
+                    Category
+                  </label>
+                  <Select
+                    onValueChange={handleCategoryChange}
+                    value={formData.categoryId || "none"}
                   >
-                    <option value="">Select category...</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select category..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No Category</SelectItem>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className={styles.actions}>
-            <Link href="/products" className={styles["btn-cancel"]}>
-              Cancel
-            </Link>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className={styles["btn-submit"]}
-            >
+          {/* Actions */}
+          <div className="flex gap-4 justify-end mt-6">
+            <Button variant="outline" asChild>
+              <Link href="/products">Cancel</Link>
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading && <Spinner className="w-4 h-4 animate-spin" />}
               {isLoading ? "Saving..." : "Save Product"}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

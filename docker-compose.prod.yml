@@ -1,0 +1,124 @@
+services:
+  # Infrastructure
+  postgres:
+    image: postgres:16-alpine
+    container_name: king-neon-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-king_neon}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-king_neon_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-king_neon_db}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U king_neon -d king_neon_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: king-neon-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: king-neon-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-king_neon_minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-king_neon_minio_secret}
+    ports:
+      - "9000:9000"  # API
+      - "9001:9001"  # Console
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # Applications
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: king-neon-api
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+  cms:
+    build:
+      context: .
+      dockerfile: apps/cms/Dockerfile
+    container_name: king-neon-cms
+    restart: unless-stopped
+    ports:
+      - "1337:1337"
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: king-neon-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file: .env
+    environment:
+      HOSTNAME: "0.0.0.0"
+    depends_on:
+      api:
+        condition: service_started
+      cms:
+        condition: service_started
+
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+    container_name: king-neon-admin
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    env_file: .env
+    environment:
+      HOSTNAME: "0.0.0.0"
+    depends_on:
+      api:
+        condition: service_started
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  # If strapi uploads need persistence and aren't using S3 provider yet:
+  # strapi_uploads:

@@ -4,9 +4,14 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { Spinner } from "@king-neon/ui";
+import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import api from "@/utils/api";
 import ImageUpload, { PendingFile } from "@/components/ImageUpload";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 
 export default function EditCategoryPage() {
   const router = useRouter();
@@ -15,7 +20,6 @@ export default function EditCategoryPage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
@@ -42,7 +46,7 @@ export default function EditCategoryPage() {
         });
       } catch (err) {
         console.error("Failed to fetch category:", err);
-        setError("Failed to load category");
+        toast.error("Failed to load category");
       } finally {
         setIsFetching(false);
       }
@@ -71,17 +75,11 @@ export default function EditCategoryPage() {
     setFormData((prev) => ({ ...prev, slug }));
   };
 
-  const handleToggleActive = () => {
-    setFormData((prev) => ({ ...prev, active: !prev.active }));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError(null);
 
     try {
-      // Upload pending image first
       let uploadedImageUrl = formData.image;
 
       if (pendingFiles.length > 0) {
@@ -108,47 +106,21 @@ export default function EditCategoryPage() {
         image: uploadedImageUrl,
         sortOrder: parseInt(String(formData.sortOrder)) || 0,
       });
+      toast.success("Category updated successfully");
       router.push("/categories");
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
-      setError(error.response?.data?.message || "Failed to update category");
+      toast.error(error.response?.data?.message || "Failed to update category");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const inputStyle = {
-    width: "100%",
-    background: "rgba(0,0,0,0.2)",
-    border: "1px solid rgba(255,255,255,0.08)",
-    borderRadius: "0.75rem",
-    padding: "0.875rem 1.25rem",
-    color: "white",
-    fontSize: "0.95rem",
-    outline: "none",
-  };
-
-  const labelStyle = {
-    display: "block",
-    marginBottom: "0.5rem",
-    fontSize: "0.75rem",
-    fontWeight: 600,
-    color: "rgba(255,255,255,0.6)",
-    textTransform: "uppercase" as const,
-    letterSpacing: "0.02em",
-  };
-
   if (isFetching) {
     return (
       <DashboardLayout title="Edit Category">
-        <div
-          style={{
-            textAlign: "center",
-            padding: "4rem",
-            color: "rgba(255,255,255,0.5)",
-          }}
-        >
-          Loading category...
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Spinner className="w-10 h-10 animate-spin text-pink-500" />
         </div>
       </DashboardLayout>
     );
@@ -156,247 +128,142 @@ export default function EditCategoryPage() {
 
   return (
     <DashboardLayout title="Edit Category">
-      <div style={{ maxWidth: "600px", margin: "0 auto" }}>
+      <div className="max-w-2xl mx-auto">
         <Link
           href="/categories"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            color: "rgba(255,255,255,0.5)",
-            marginBottom: "1.5rem",
-            textDecoration: "none",
-          }}
+          className="inline-flex items-center gap-2 text-zinc-500 hover:text-white mb-6 transition-colors"
         >
           <ArrowLeft size={20} />
           Back to Categories
         </Link>
 
-        {error && (
-          <div
-            style={{
-              padding: "1rem",
-              background: "rgba(239,68,68,0.1)",
-              border: "1px solid rgba(239,68,68,0.2)",
-              borderRadius: "0.75rem",
-              color: "#ef4444",
-              marginBottom: "1.5rem",
-            }}
-          >
-            {error}
-          </div>
-        )}
-
         <form onSubmit={handleSubmit}>
-          <div
-            style={{
-              background: "rgba(20,20,20,0.4)",
-              backdropFilter: "blur(20px)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: "1.5rem",
-              padding: "2rem",
-            }}
-          >
-            <h2
-              style={{
-                color: "white",
-                fontWeight: 600,
-                marginBottom: "1.5rem",
-              }}
-            >
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8">
+            <h2 className="text-white font-semibold text-lg mb-6">
               Edit Category
             </h2>
 
-            <div style={{ marginBottom: "1.5rem" }}>
-              <label style={labelStyle}>Name *</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                placeholder="e.g., LED Neon Signs"
-                style={inputStyle}
-              />
-            </div>
-
-            <div style={{ marginBottom: "1.5rem" }}>
-              <label style={labelStyle}>Slug *</label>
-              <input
-                type="text"
-                name="slug"
-                value={formData.slug}
-                onChange={handleSlugChange}
-                required
-                placeholder="e.g., led-neon-signs"
-                style={inputStyle}
-              />
-              <p
-                style={{
-                  fontSize: "0.75rem",
-                  color: "rgba(255,255,255,0.4)",
-                  marginTop: "0.25rem",
-                }}
-              >
-                URL-friendly identifier
-              </p>
-            </div>
-
-            <div style={{ marginBottom: "1.5rem" }}>
-              <label style={labelStyle}>Description</label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                placeholder="Brief description of this category..."
-                rows={3}
-                style={{ ...inputStyle, resize: "vertical" }}
-              />
-            </div>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "1rem",
-                marginBottom: "1.5rem",
-              }}
-            >
-              <div>
-                <label style={labelStyle}>Icon</label>
-                <input
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">
+                  Name *
+                </label>
+                <Input
                   type="text"
-                  name="icon"
-                  value={formData.icon}
+                  name="name"
+                  value={formData.name}
                   onChange={handleChange}
-                  placeholder="e.g., neon"
-                  style={inputStyle}
+                  required
+                  placeholder="e.g., LED Neon Signs"
+                  className="bg-zinc-800/50 border-zinc-700"
                 />
               </div>
-              <div>
-                <label style={labelStyle}>Sort Order</label>
-                <input
-                  type="number"
-                  name="sortOrder"
-                  value={formData.sortOrder}
-                  onChange={handleChange}
-                  min="0"
-                  style={inputStyle}
-                />
-              </div>
-            </div>
 
-            {/* Category Image */}
-            <div style={{ marginBottom: "1.5rem" }}>
-              <label style={labelStyle}>Category Image</label>
-              <div
-                style={{
-                  background: "rgba(0,0,0,0.2)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  borderRadius: "0.75rem",
-                  padding: "1rem",
-                }}
-              >
-                <ImageUpload
-                  images={formData.image ? [formData.image] : []}
-                  onImagesChange={(imgs) =>
-                    setFormData((prev) => ({ ...prev, image: imgs[0] || "" }))
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">
+                  Slug *
+                </label>
+                <Input
+                  type="text"
+                  name="slug"
+                  value={formData.slug}
+                  onChange={handleSlugChange}
+                  required
+                  placeholder="e.g., led-neon-signs"
+                  className="bg-zinc-800/50 border-zinc-700"
+                />
+                <p className="text-xs text-zinc-500">URL-friendly identifier</p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">
+                  Description
+                </label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder="Brief description of this category..."
+                  rows={3}
+                  className="w-full px-3 py-2 bg-zinc-800/50 border border-zinc-700 rounded-md text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-pink-500 resize-y"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">
+                    Icon
+                  </label>
+                  <Input
+                    type="text"
+                    name="icon"
+                    value={formData.icon}
+                    onChange={handleChange}
+                    placeholder="e.g., neon"
+                    className="bg-zinc-800/50 border-zinc-700"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">
+                    Sort Order
+                  </label>
+                  <Input
+                    type="number"
+                    name="sortOrder"
+                    value={formData.sortOrder}
+                    onChange={handleChange}
+                    min="0"
+                    className="bg-zinc-800/50 border-zinc-700"
+                  />
+                </div>
+              </div>
+
+              {/* Category Image */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">
+                  Category Image
+                </label>
+                <div className="bg-zinc-800/30 border border-zinc-700 rounded-lg p-4">
+                  <ImageUpload
+                    images={formData.image ? [formData.image] : []}
+                    onImagesChange={(imgs) =>
+                      setFormData((prev) => ({ ...prev, image: imgs[0] || "" }))
+                    }
+                    pendingFiles={pendingFiles}
+                    onPendingFilesChange={setPendingFiles}
+                    maxFiles={1}
+                  />
+                </div>
+                <p className="text-xs text-zinc-500">
+                  Image for the category gallery display
+                </p>
+              </div>
+
+              {/* Active Toggle */}
+              <div className="flex items-center justify-between p-4 bg-zinc-800/30 rounded-lg">
+                <span className="text-zinc-300">Active</span>
+                <Switch
+                  checked={formData.active}
+                  onCheckedChange={(checked) =>
+                    setFormData((prev) => ({ ...prev, active: checked }))
                   }
-                  pendingFiles={pendingFiles}
-                  onPendingFilesChange={setPendingFiles}
-                  maxFiles={1}
                 />
               </div>
-              <p
-                style={{
-                  fontSize: "0.75rem",
-                  color: "rgba(255,255,255,0.4)",
-                  marginTop: "0.5rem",
-                }}
-              >
-                Image for the category gallery display
-              </p>
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "1rem",
-                background: "rgba(0,0,0,0.2)",
-                borderRadius: "0.75rem",
-                marginBottom: "1.5rem",
-              }}
-            >
-              <span style={{ color: "rgba(255,255,255,0.7)" }}>Active</span>
-              <button
-                type="button"
-                onClick={handleToggleActive}
-                style={{
-                  width: "48px",
-                  height: "26px",
-                  borderRadius: "9999px",
-                  background: formData.active
-                    ? "#22c55e"
-                    : "rgba(255,255,255,0.15)",
-                  border: "none",
-                  cursor: "pointer",
-                  position: "relative",
-                  transition: "background 0.2s",
-                }}
-              >
-                <span
-                  style={{
-                    position: "absolute",
-                    top: "3px",
-                    left: formData.active ? "25px" : "3px",
-                    width: "20px",
-                    height: "20px",
-                    borderRadius: "50%",
-                    background: "white",
-                    transition: "left 0.2s",
-                  }}
-                />
-              </button>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                gap: "1rem",
-                justifyContent: "flex-end",
-              }}
-            >
-              <Link
-                href="/categories"
-                style={{
-                  padding: "0.75rem 1.5rem",
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: "0.75rem",
-                  color: "rgba(255,255,255,0.7)",
-                  textDecoration: "none",
-                }}
-              >
-                Cancel
-              </Link>
-              <button
+            {/* Actions */}
+            <div className="flex gap-4 justify-end mt-8 pt-6 border-t border-zinc-800">
+              <Button variant="outline" asChild className="border-zinc-700">
+                <Link href="/categories">Cancel</Link>
+              </Button>
+              <Button
                 type="submit"
                 disabled={isLoading}
-                style={{
-                  padding: "0.75rem 2rem",
-                  background: "linear-gradient(135deg, #ec4899, #8b5cf6)",
-                  border: "none",
-                  borderRadius: "0.75rem",
-                  color: "white",
-                  fontWeight: 600,
-                  cursor: isLoading ? "not-allowed" : "pointer",
-                  opacity: isLoading ? 0.7 : 1,
-                }}
+                className="bg-pink-600 hover:bg-pink-700 gap-2"
               >
+                {isLoading && <Spinner className="w-4 h-4 animate-spin" />}
                 {isLoading ? "Saving..." : "Save Changes"}
-              </button>
+              </Button>
             </div>
           </div>
         </form>

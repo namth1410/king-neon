@@ -64,16 +64,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       const response = await api.post("/auth/login", { email, password });
-      const { access_token, user } = response.data;
+      const { accessToken, user } = response.data;
 
-      localStorage.setItem(AUTH_TOKEN_KEY, access_token);
-      api.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
+      localStorage.setItem(AUTH_TOKEN_KEY, accessToken);
+      api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
 
       setState({
         isAuthenticated: true,
         isLoading: false,
         user,
-        token: access_token,
+        token: accessToken,
       });
 
       return true;
@@ -86,6 +86,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     localStorage.removeItem(AUTH_TOKEN_KEY);
     delete api.defaults.headers.common["Authorization"];
+
+    // Call logout API to clear server-side cookie
+    api.post("/auth/logout").catch(() => {
+      // Ignore errors, cookie might not exist
+    });
+
     setState({
       isAuthenticated: false,
       isLoading: false,

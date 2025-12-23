@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Spinner } from "@king-neon/ui";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -15,7 +16,7 @@ import {
   Check,
 } from "lucide-react";
 import { useDispatch } from "react-redux";
-import { addToCart } from "@/store/cartSlice";
+import { addItemToCart } from "@/store/cartSlice";
 import api from "@/utils/api";
 import RelatedProducts from "@/components/RelatedProducts/RelatedProducts";
 import styles from "./ProductDetail.module.scss";
@@ -83,14 +84,16 @@ export default function ProductDetailPage({
     if (!product) return;
 
     dispatch(
-      addToCart({
+      addItemToCart({
         id: product.id,
+        productId: product.id,
         type: "product",
         name: product.name,
         price: product.basePrice,
         quantity,
         image: product.images[0] || product.featuredImage || "",
-      })
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      }) as any
     );
 
     setAddedToCart(true);
@@ -101,24 +104,44 @@ export default function ProductDetailPage({
     setQuantity((prev) => Math.max(1, prev + delta));
   };
 
-  const nextImage = () => {
-    if (product?.images) {
-      setSelectedImage((prev) => (prev + 1) % product.images.length);
+  const isValidImageSrc = (src: string | null | undefined): boolean => {
+    if (!src || typeof src !== "string") return false;
+    if (src.startsWith("/")) return true; // Relative path
+    if (src.startsWith("http://") || src.startsWith("https://")) {
+      try {
+        new URL(src);
+        return true;
+      } catch {
+        return false;
+      }
     }
+    return false; // Treat other strings as invalid
+  };
+
+  const validImages =
+    product?.images?.filter((img) => isValidImageSrc(img)) || [];
+
+  const images =
+    validImages.length > 0
+      ? validImages
+      : [
+          isValidImageSrc(product?.featuredImage)
+            ? product!.featuredImage!
+            : "/placeholder.jpg",
+        ];
+
+  const nextImage = () => {
+    setSelectedImage((prev) => (prev + 1) % images.length);
   };
 
   const prevImage = () => {
-    if (product?.images) {
-      setSelectedImage(
-        (prev) => (prev - 1 + product.images.length) % product.images.length
-      );
-    }
+    setSelectedImage((prev) => (prev - 1 + images.length) % images.length);
   };
 
   if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
-        <div className={styles.loadingSpinner}></div>
+        <Spinner size="xl" color="#ff3366" />
         <p>Loading product...</p>
       </div>
     );
@@ -139,10 +162,8 @@ export default function ProductDetailPage({
     );
   }
 
-  const images =
-    product.images.length > 0
-      ? product.images
-      : [product.featuredImage || "/placeholder.jpg"];
+  // Ensure selectedImage is within bounds (cleanup from prev render/remount if needed)
+  const currentImageSrc = images[selectedImage] || images[0];
 
   return (
     <div className={styles.productPage}>
@@ -160,7 +181,7 @@ export default function ProductDetailPage({
         <div className={styles.gallery}>
           <div className={styles.mainImage}>
             <Image
-              src={images[selectedImage]}
+              src={currentImageSrc}
               alt={product.name}
               fill
               sizes="(max-width: 768px) 100vw, 50vw"

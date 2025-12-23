@@ -10,7 +10,8 @@ import {
   ArrowUpRight,
   ChevronRight,
 } from "lucide-react";
-import toast from "react-hot-toast";
+import { Spinner } from "@king-neon/ui";
+import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import api from "@/utils/api";
 
@@ -21,6 +22,15 @@ interface DashboardStats {
   totalRevenue: number;
 }
 
+interface RecentOrder {
+  id: string;
+  orderNumber: string;
+  customerName: string;
+  total: string;
+  status: string;
+  createdAt: string;
+}
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats>({
     totalProducts: 0,
@@ -28,6 +38,7 @@ export default function AdminDashboard() {
     pendingOrders: 0,
     totalRevenue: 0,
   });
+  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,12 +50,16 @@ export default function AdminDashboard() {
           : productsRes.data.data || [];
 
         interface OrderData {
+          id: string;
+          orderNumber: string;
+          customerName: string;
           status: string;
           total?: string | number;
+          createdAt: string;
         }
         let orders: OrderData[] = [];
         try {
-          const ordersRes = await api.get("/orders");
+          const ordersRes = await api.get("/orders", { params: { limit: 10 } });
           orders = Array.isArray(ordersRes.data)
             ? ordersRes.data
             : ordersRes.data.data || [];
@@ -61,6 +76,18 @@ export default function AdminDashboard() {
             0
           ),
         });
+
+        // Set recent orders (top 5)
+        setRecentOrders(
+          orders.slice(0, 5).map((o) => ({
+            id: o.id,
+            orderNumber: o.orderNumber,
+            customerName: o.customerName || "Guest",
+            total: String(o.total || "0"),
+            status: o.status,
+            createdAt: o.createdAt,
+          }))
+        );
       } catch (error) {
         console.error("Failed to fetch stats:", error);
         toast.error("Failed to load dashboard statistics");
@@ -135,7 +162,6 @@ export default function AdminDashboard() {
           <StatCard
             title="Total Revenue"
             value={`$${stats.totalRevenue.toFixed(2)}`}
-            trend="+12.5%"
             icon={<TrendingUp size={20} />}
             color="#22c55e"
             loading={loading}
@@ -143,7 +169,6 @@ export default function AdminDashboard() {
           <StatCard
             title="Total Orders"
             value={stats.totalOrders.toString()}
-            trend="+8.2%"
             icon={<ShoppingCart size={20} />}
             color="#3b82f6"
             loading={loading}
@@ -151,7 +176,6 @@ export default function AdminDashboard() {
           <StatCard
             title="Products"
             value={stats.totalProducts.toString()}
-            trend="+3%"
             icon={<Package size={20} />}
             color="#a855f7"
             loading={loading}
@@ -159,7 +183,6 @@ export default function AdminDashboard() {
           <StatCard
             title="Pending Orders"
             value={stats.pendingOrders.toString()}
-            trend="-2%"
             icon={<Users size={20} />}
             color="#f97316"
             loading={loading}
@@ -238,22 +261,107 @@ export default function AdminDashboard() {
                 View all <ArrowUpRight size={14} />
               </Link>
             </div>
-            <div
-              style={{
-                textAlign: "center",
-                padding: "40px 0",
-                color: "rgba(255,255,255,0.4)",
-              }}
-            >
-              <ShoppingCart
-                size={48}
-                style={{ margin: "0 auto 16px", opacity: 0.4 }}
-              />
-              <p>No orders yet</p>
-              <p style={{ fontSize: "14px", marginTop: "8px" }}>
-                Orders will appear here when customers make purchases
-              </p>
-            </div>
+            {loading ? (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  padding: "40px 0",
+                }}
+              >
+                <Spinner size="lg" color="#ff3366" />
+              </div>
+            ) : recentOrders.length > 0 ? (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                }}
+              >
+                {recentOrders.map((order) => (
+                  <Link
+                    key={order.id}
+                    href={`/orders/${order.id}`}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "12px 16px",
+                      background: "rgba(255,255,255,0.03)",
+                      borderRadius: "10px",
+                      border: "1px solid rgba(255,255,255,0.05)",
+                      textDecoration: "none",
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    <div>
+                      <p
+                        style={{
+                          color: "white",
+                          fontWeight: 500,
+                          marginBottom: "2px",
+                        }}
+                      >
+                        {order.orderNumber}
+                      </p>
+                      <p
+                        style={{
+                          fontSize: "13px",
+                          color: "rgba(255,255,255,0.5)",
+                        }}
+                      >
+                        {order.customerName}
+                      </p>
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <p style={{ color: "white", fontWeight: 600 }}>
+                        ${Number(order.total).toFixed(2)}
+                      </p>
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          padding: "2px 8px",
+                          borderRadius: "12px",
+                          background:
+                            order.status === "delivered"
+                              ? "rgba(34,197,94,0.15)"
+                              : order.status === "pending"
+                                ? "rgba(249,115,22,0.15)"
+                                : "rgba(59,130,246,0.15)",
+                          color:
+                            order.status === "delivered"
+                              ? "#22c55e"
+                              : order.status === "pending"
+                                ? "#f97316"
+                                : "#3b82f6",
+                        }}
+                      >
+                        {order.status.charAt(0).toUpperCase() +
+                          order.status.slice(1)}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "40px 0",
+                  color: "rgba(255,255,255,0.4)",
+                }}
+              >
+                <ShoppingCart
+                  size={48}
+                  style={{ margin: "0 auto 16px", opacity: 0.4 }}
+                />
+                <p>No orders yet</p>
+                <p style={{ fontSize: "14px", marginTop: "8px" }}>
+                  Orders will appear here when customers make purchases
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Store Overview */}
@@ -299,20 +407,16 @@ export default function AdminDashboard() {
 function StatCard({
   title,
   value,
-  trend,
   icon,
   color,
   loading,
 }: {
   title: string;
   value: string;
-  trend: string;
   icon: React.ReactNode;
   color: string;
   loading: boolean;
 }) {
-  const isPositive = trend.startsWith("+");
-
   return (
     <div
       style={{
@@ -345,12 +449,12 @@ function StatCard({
             <div
               style={{
                 height: "32px",
-                width: "80px",
-                background: "rgba(255,255,255,0.1)",
-                borderRadius: "8px",
-                animation: "pulse 1.5s ease-in-out infinite",
+                display: "flex",
+                alignItems: "center",
               }}
-            />
+            >
+              <Spinner size="md" color={color} />
+            </div>
           ) : (
             <p style={{ fontSize: "28px", fontWeight: 700, color: "white" }}>
               {value}
@@ -367,26 +471,6 @@ function StatCard({
         >
           {icon}
         </div>
-      </div>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "4px",
-          marginTop: "12px",
-        }}
-      >
-        <span
-          style={{
-            fontSize: "13px",
-            color: isPositive ? "#22c55e" : "#ef4444",
-          }}
-        >
-          {trend}
-        </span>
-        <span style={{ fontSize: "13px", color: "rgba(255,255,255,0.4)" }}>
-          vs last month
-        </span>
       </div>
       <div
         style={{

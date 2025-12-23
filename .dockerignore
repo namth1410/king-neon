@@ -1,0 +1,37 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Next.js build output
+.next
+out
+dist
+build
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Git
+.git
+!.gitignore
+
+
+# Turbo
+.turbo
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Editor directories
+.idea
+.vscode
+*.swp
+*.swo
+
+# Docker
+Dockerfile
+docker-compose.*
+DEPLOYMENT.md

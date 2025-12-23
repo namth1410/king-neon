@@ -8,10 +8,12 @@ import {
   selectCartTotal,
   selectIsCartOpen,
   closeCart,
-  removeFromCart,
-  updateQuantity,
+  removeItemFromCart,
+  updateCartItemQuantity,
+  selectIsCartLoading,
   CartItem,
 } from "@/store";
+import { LoadingOverlay } from "@/components/ui/Loading";
 import styles from "./CartSidebar.module.scss";
 
 export default function CartSidebar() {
@@ -19,6 +21,7 @@ export default function CartSidebar() {
   const items = useSelector(selectCartItems);
   const total = useSelector(selectCartTotal);
   const isOpen = useSelector(selectIsCartOpen);
+  const isLoading = useSelector(selectIsCartLoading);
 
   const handleClose = () => dispatch(closeCart());
   const shipping = total > 200 ? 0 : 15;
@@ -60,6 +63,7 @@ export default function CartSidebar() {
 
         {/* Content */}
         <div className={styles["cart-sidebar__content"]}>
+          {isLoading && <LoadingOverlay message="Updating cart..." />}
           {items.length === 0 ? (
             <div className={styles["cart-sidebar__empty"]}>
               <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -82,9 +86,18 @@ export default function CartSidebar() {
                   <CartItemCard
                     key={item.id}
                     item={item}
-                    onRemove={() => dispatch(removeFromCart(item.id))}
+                    onRemove={() =>
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      dispatch(removeItemFromCart(item.id) as any)
+                    }
                     onUpdateQuantity={(qty) =>
-                      dispatch(updateQuantity({ id: item.id, quantity: qty }))
+                      dispatch(
+                        updateCartItemQuantity({
+                          id: item.id,
+                          quantity: qty,
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        }) as any
+                      )
                     }
                   />
                 ))}

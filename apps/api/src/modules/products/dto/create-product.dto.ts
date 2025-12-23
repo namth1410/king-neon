@@ -5,6 +5,7 @@ import {
   IsBoolean,
   IsArray,
   IsUUID,
+  Min,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -22,8 +23,9 @@ export class CreateProductDto {
   @IsString()
   description: string;
 
-  @ApiProperty({ example: 195.5 })
+  @ApiProperty({ example: 195.5, minimum: 0 })
   @IsNumber()
+  @Min(0, { message: 'Base price cannot be negative' })
   basePrice: number;
 
   @ApiPropertyOptional({ example: 'uuid-of-category' })

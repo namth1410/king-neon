@@ -26,10 +26,22 @@ export default tseslint.config(
   },
   {
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
+      // TypeScript strict rules
+      '@typescript-eslint/no-explicit-any': 'error', // Cấm dùng any
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ], // Cấm biến không sử dụng (trừ biến bắt đầu bằng _)
       '@typescript-eslint/no-floating-promises': 'warn',
       '@typescript-eslint/no-unsafe-argument': 'warn',
-      "prettier/prettier": ["error", { endOfLine: "auto" }],
+
+      // General JavaScript rules
+      'no-var': 'error', // Cấm dùng var, phải dùng let/const
+      eqeqeq: ['error', 'always'], // Bắt buộc dùng === thay vì ==
+      'no-duplicate-imports': 'error', // Cấm import cùng một module nhiều lần
+
+      // Prettier
+      'prettier/prettier': ['error', { endOfLine: 'auto' }],
     },
   },
 );

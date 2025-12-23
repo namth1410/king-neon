@@ -1,0 +1,157 @@
+<html>
+  <head>
+    <meta charset='utf-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Order Confirmation</title>
+    <style>
+      body {
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .header {
+        background: linear-gradient(135deg, #ff3366, #ff6699);
+        padding: 30px;
+        text-align: center;
+        border-radius: 10px 10px 0 0;
+      }
+      .header h1 {
+        color: white;
+        margin: 0;
+        font-size: 28px;
+      }
+      .content {
+        background: #f9f9f9;
+        padding: 30px;
+        border-radius: 0 0 10px 10px;
+      }
+      .order-info {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
+      .order-number {
+        font-size: 24px;
+        font-weight: bold;
+        color: #ff3366;
+      }
+      .items-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+      }
+      .items-table th,
+      .items-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+      }
+      .items-table th {
+        background: #f5f5f5;
+        font-weight: 600;
+      }
+      .total-row {
+        font-weight: bold;
+        font-size: 18px;
+      }
+      .address-box {
+        background: #f5f5f5;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+      }
+      .footer {
+        text-align: center;
+        padding: 20px;
+        color: #888;
+        font-size: 12px;
+      }
+      .btn {
+        display: inline-block;
+        padding: 12px 30px;
+        background: #ff3366;
+        color: white;
+        text-decoration: none;
+        border-radius: 25px;
+        margin: 20px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class='header'>
+      <h1>🎉 Order Confirmed!</h1>
+    </div>
+
+    <div class='content'>
+      <p>Hi {{customerName}},</p>
+      <p>Thank you for your order! We're excited to create your custom neon
+        sign.</p>
+
+      <div class='order-info'>
+        <p>Order Number:</p>
+        <p class='order-number'>{{orderNumber}}</p>
+      </div>
+
+      <h3>Order Details</h3>
+      <table class='items-table'>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Qty</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each items}}
+            <tr>
+              <td>{{this.productName}}</td>
+              <td>{{this.quantity}}</td>
+              <td>${{this.unitPrice}}</td>
+            </tr>
+          {{/each}}
+          <tr>
+            <td colspan='2'>Subtotal</td>
+            <td>${{subtotal}}</td>
+          </tr>
+          <tr>
+            <td colspan='2'>Shipping</td>
+            <td>{{#if shipping}}${{shipping}}{{else}}Free{{/if}}</td>
+          </tr>
+          <tr>
+            <td colspan='2'>Tax</td>
+            <td>${{tax}}</td>
+          </tr>
+          <tr class='total-row'>
+            <td colspan='2'>Total</td>
+            <td>${{total}}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Shipping Address</h3>
+      <div class='address-box'>
+        {{shippingAddress.address}}<br />
+        {{shippingAddress.city}},
+        {{shippingAddress.state}}
+        {{shippingAddress.zipCode}}<br />
+        {{shippingAddress.country}}
+      </div>
+
+      <p>We'll send you another email when your order ships.</p>
+
+      <center>
+        <a href='{{baseUrl}}/account/orders/{{orderNumber}}' class='btn'>View
+          Order</a>
+      </center>
+    </div>
+
+    <div class='footer'>
+      <p>© {{year}} King Neon. All rights reserved.</p>
+      <p>Questions? Contact us at support@kingneon.com</p>
+    </div>
+  </body>
+</html>

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import { selectCartCount, openCart } from "@/store";
+import { useAuth } from "@/hooks/useAuth";
 import styles from "./Header.module.scss";
 
 const navLinks = [
@@ -23,13 +24,18 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Use useAuth hook for proper authentication state
+  const { isAuthenticated } = useAuth();
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
 
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   const handleCartClick = (e: React.MouseEvent) => {
@@ -72,6 +78,31 @@ export default function Header() {
 
           {/* Actions */}
           <div className={styles.header__actions}>
+            {/* User Account */}
+            <Link
+              href={isAuthenticated ? "/account" : "/login"}
+              className={styles.header__user}
+              aria-label={isAuthenticated ? "Account" : "Login"}
+            >
+              <svg
+                className={styles["header__user-icon"]}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+              {isAuthenticated && (
+                <span className={styles["header__user-indicator"]} />
+              )}
+            </Link>
+
+            {/* Cart */}
             <button
               className={styles.header__cart}
               onClick={handleCartClick}

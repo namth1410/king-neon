@@ -5,7 +5,8 @@ import api from "@/utils/api";
 const CART_STORAGE_KEY = "king_neon_cart";
 
 export interface CartItem {
-  id: string;
+  id: string; // Database Row ID (User) OR Product ID/Random (Guest)
+  productId: string; // Reference to product
   type: "product" | "custom";
   name: string;
   price: number;
@@ -27,6 +28,31 @@ interface CartState {
   isLoading: boolean;
   isAuthenticated: boolean;
 }
+
+interface ApiCartItem {
+  id: string; // Added ID from DB
+  productId: string;
+  productName: string;
+  price: number;
+  quantity: number;
+  type: "product" | "custom";
+  image?: string;
+  options?: CartItem["options"];
+}
+
+// Helper to map API items to CartItems
+const mapApiItemsToCartItems = (apiItems: ApiCartItem[]): CartItem[] => {
+  return apiItems.map((item) => ({
+    id: item.id, // Use Database ID
+    productId: item.productId,
+    name: item.productName,
+    price: item.price,
+    quantity: item.quantity,
+    image: item.image,
+    type: item.type,
+    options: item.options,
+  }));
+};
 
 // Load cart from localStorage
 const loadCartFromStorage = (): CartItem[] => {
@@ -66,7 +92,7 @@ export const fetchCartFromAPI = createAsyncThunk(
     try {
       const response = await api.get("/cart");
       return response.data.items || [];
-    } catch (error) {
+    } catch {
       return rejectWithValue("Failed to fetch cart");
     }
   }
@@ -85,8 +111,8 @@ export const syncCartToAPI = createAsyncThunk(
         type: item.type,
         options: item.options,
       });
-      return response.data;
-    } catch (error) {
+      return response.data.items || [];
+    } catch {
       return rejectWithValue("Failed to sync cart");
     }
   }
@@ -94,8 +120,7 @@ export const syncCartToAPI = createAsyncThunk(
 
 export const mergeCartOnLogin = createAsyncThunk(
   "cart/mergeOnLogin",
-  async (_, { getState, rejectWithValue }) => {
-    const state = getState() as { cart: CartState };
+  async (_, { rejectWithValue }) => {
     const guestItems = loadCartFromStorage();
 
     if (guestItems.length === 0) {
@@ -103,7 +128,7 @@ export const mergeCartOnLogin = createAsyncThunk(
       try {
         const response = await api.get("/cart");
         return response.data.items || [];
-      } catch (error) {
+      } catch {
         return rejectWithValue("Failed to fetch cart");
       }
     }
@@ -124,7 +149,7 @@ export const mergeCartOnLogin = createAsyncThunk(
       // Clear localStorage after merge
       clearCartStorage();
       return response.data.items || [];
-    } catch (error) {
+    } catch {
       return rejectWithValue("Failed to merge cart");
     }
   }
@@ -134,10 +159,25 @@ export const removeItemFromAPI = createAsyncThunk(
   "cart/removeFromAPI",
   async (itemId: string, { rejectWithValue }) => {
     try {
-      await api.delete(`/cart/items/${itemId}`);
-      return itemId;
-    } catch (error) {
+      const response = await api.delete(`/cart/items/${itemId}`);
+      return response.data.items || [];
+    } catch {
       return rejectWithValue("Failed to remove item");
+    }
+  }
+);
+
+export const updateItemQuantityAPI = createAsyncThunk(
+  "cart/updateItemQuantityAPI",
+  async (
+    { itemId, quantity }: { itemId: string; quantity: number },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await api.patch(`/cart/items/${itemId}`, { quantity });
+      return response.data.items || [];
+    } catch {
+      return rejectWithValue("Failed to update item quantity");
     }
   }
 );
@@ -148,8 +188,82 @@ export const clearCartAPI = createAsyncThunk(
     try {
       await api.delete("/cart");
       return true;
-    } catch (error) {
+    } catch {
       return rejectWithValue("Failed to clear cart");
+    }
+  }
+);
+
+// Wrapper thunks that handle both guest and user logic
+export const addItemToCart = createAsyncThunk(
+  "cart/addItem",
+  async (item: CartItem, { dispatch, getState, rejectWithValue }) => {
+    const state = getState() as { cart: CartState };
+    if (state.cart.isAuthenticated) {
+      try {
+        return await dispatch(syncCartToAPI(item)).unwrap();
+      } catch (error) {
+        return rejectWithValue(error);
+      }
+    } else {
+      dispatch(cartSlice.actions.addToCart(item));
+      return null;
+    }
+  }
+);
+
+export const removeItemFromCart = createAsyncThunk(
+  "cart/removeItem",
+  async (itemId: string, { dispatch, getState, rejectWithValue }) => {
+    const state = getState() as { cart: CartState };
+    if (state.cart.isAuthenticated) {
+      try {
+        return await dispatch(removeItemFromAPI(itemId)).unwrap();
+      } catch (error) {
+        return rejectWithValue(error);
+      }
+    } else {
+      dispatch(cartSlice.actions.removeFromCart(itemId));
+      return null;
+    }
+  }
+);
+
+export const updateCartItemQuantity = createAsyncThunk(
+  "cart/updateQuantity",
+  async (
+    { id, quantity }: { id: string; quantity: number },
+    { dispatch, getState, rejectWithValue }
+  ) => {
+    const state = getState() as { cart: CartState };
+    if (state.cart.isAuthenticated) {
+      try {
+        return await dispatch(
+          updateItemQuantityAPI({ itemId: id, quantity })
+        ).unwrap();
+      } catch (error) {
+        return rejectWithValue(error);
+      }
+    } else {
+      dispatch(cartSlice.actions.updateQuantity({ id, quantity }));
+      return null;
+    }
+  }
+);
+
+export const clearAllCart = createAsyncThunk(
+  "cart/clearAll",
+  async (_, { dispatch, getState, rejectWithValue }) => {
+    const state = getState() as { cart: CartState };
+    if (state.cart.isAuthenticated) {
+      try {
+        return await dispatch(clearCartAPI()).unwrap();
+      } catch (error) {
+        return rejectWithValue(error);
+      }
+    } else {
+      dispatch(cartSlice.actions.clearCart());
+      return null;
     }
   }
 );
@@ -175,15 +289,21 @@ const cartSlice = createSlice({
     },
 
     addToCart: (state, action: PayloadAction<CartItem>) => {
+      // Ensure productId is present (for legacy/guest items)
+      const newItem = {
+        ...action.payload,
+        productId: action.payload.productId || action.payload.id,
+      };
+
       const existingItem = state.items.find(
         (item) =>
-          item.id === action.payload.id && item.type === action.payload.type
+          item.productId === newItem.productId && item.type === newItem.type
       );
 
       if (existingItem) {
-        existingItem.quantity += action.payload.quantity;
+        existingItem.quantity += newItem.quantity;
       } else {
-        state.items.push(action.payload);
+        state.items.push(newItem);
       }
 
       // Save to localStorage for guests
@@ -250,25 +370,7 @@ const cartSlice = createSlice({
       })
       .addCase(fetchCartFromAPI.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.items = action.payload.map(
-          (item: {
-            productId: string;
-            productName: string;
-            price: number;
-            quantity: number;
-            image?: string;
-            type: "product" | "custom";
-            options?: CartItem["options"];
-          }) => ({
-            id: item.productId,
-            name: item.productName,
-            price: item.price,
-            quantity: item.quantity,
-            image: item.image,
-            type: item.type,
-            options: item.options,
-          })
-        );
+        state.items = mapApiItemsToCartItems(action.payload);
       })
       .addCase(fetchCartFromAPI.rejected, (state) => {
         state.isLoading = false;
@@ -280,28 +382,26 @@ const cartSlice = createSlice({
       .addCase(mergeCartOnLogin.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = true;
-        state.items = action.payload.map(
-          (item: {
-            productId: string;
-            productName: string;
-            price: number;
-            quantity: number;
-            image?: string;
-            type: "product" | "custom";
-            options?: CartItem["options"];
-          }) => ({
-            id: item.productId,
-            name: item.productName,
-            price: item.price,
-            quantity: item.quantity,
-            image: item.image,
-            type: item.type,
-            options: item.options,
-          })
-        );
+        state.items = mapApiItemsToCartItems(action.payload);
       })
       .addCase(mergeCartOnLogin.rejected, (state) => {
         state.isLoading = false;
+      })
+      // Sync to API (Add to cart)
+      .addCase(syncCartToAPI.fulfilled, (state, action) => {
+        state.items = mapApiItemsToCartItems(action.payload);
+      })
+      // Remove from API
+      .addCase(removeItemFromAPI.fulfilled, (state, action) => {
+        state.items = mapApiItemsToCartItems(action.payload);
+      })
+      // Update Quantity API
+      .addCase(updateItemQuantityAPI.fulfilled, (state, action) => {
+        state.items = mapApiItemsToCartItems(action.payload);
+      })
+      // Clear Cart API
+      .addCase(clearCartAPI.fulfilled, (state) => {
+        state.items = [];
       });
   },
 });

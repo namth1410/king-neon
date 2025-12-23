@@ -14,6 +14,10 @@ import { CreateCustomDesignDto } from './dto/create-custom-design.dto';
 import { CalculatePriceDto } from './dto/calculate-price.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
+interface AuthRequest extends Request {
+  user: { userId: string };
+}
+
 @ApiTags('neon-designs')
 @Controller('neon/designs')
 export class CustomDesignsController {
@@ -23,8 +27,11 @@ export class CustomDesignsController {
   @ApiOperation({ summary: 'Create a custom design' })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  create(@Body() createDesignDto: CreateCustomDesignDto, @Request() req: any) {
-    return this.customDesignsService.create(createDesignDto, req.user?.userId);
+  create(
+    @Body() createDesignDto: CreateCustomDesignDto,
+    @Request() req: AuthRequest,
+  ) {
+    return this.customDesignsService.create(createDesignDto, req.user.userId);
   }
 
   @Post('calculate-price')
@@ -37,7 +44,7 @@ export class CustomDesignsController {
   @ApiOperation({ summary: 'Get current user designs' })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  getMyDesigns(@Request() req: any) {
+  getMyDesigns(@Request() req: AuthRequest) {
     return this.customDesignsService.findByUser(req.user.userId);
   }
 

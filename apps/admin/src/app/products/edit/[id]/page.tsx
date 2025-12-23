@@ -2,11 +2,22 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
-import toast from "react-hot-toast";
+import Link from "next/link";
+import { ArrowLeft, Save } from "lucide-react";
+import { Spinner } from "@king-neon/ui";
+import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import ImageUpload, { PendingFile } from "@/components/ImageUpload";
 import api from "@/utils/api";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Category {
   id: string;
@@ -36,7 +47,6 @@ export default function ProductEditPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
 
@@ -51,7 +61,6 @@ export default function ProductEditPage() {
     images: [] as string[],
   });
 
-  // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -65,7 +74,6 @@ export default function ProductEditPage() {
     fetchCategories();
   }, []);
 
-  // Fetch product
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -84,7 +92,6 @@ export default function ProductEditPage() {
       } catch (err) {
         console.error("Failed to fetch product:", err);
         toast.error("Failed to load product");
-        setError("Failed to load product");
       } finally {
         setLoading(false);
       }
@@ -96,15 +103,20 @@ export default function ProductEditPage() {
   }, [productId]);
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value, type } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]:
         type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+    }));
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      categoryId: value === "none" ? "" : value,
     }));
   };
 
@@ -144,16 +156,11 @@ export default function ProductEditPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setError(null);
 
     try {
-      // First upload any pending files
       const newImageUrls = await uploadPendingFiles();
-
-      // Combine existing images with newly uploaded ones
       const allImages = [...formData.images, ...newImageUrls];
 
-      // Update product
       await api.patch(`/products/${productId}`, {
         name: formData.name,
         slug: formData.slug,
@@ -166,7 +173,6 @@ export default function ProductEditPage() {
         featuredImage: allImages[0] || null,
       });
 
-      // Clear pending files
       pendingFiles.forEach((f) => URL.revokeObjectURL(f.preview));
       setPendingFiles([]);
 
@@ -175,7 +181,6 @@ export default function ProductEditPage() {
     } catch (err) {
       console.error("Failed to update product:", err);
       toast.error("Failed to update product");
-      setError("Failed to update product. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -184,41 +189,8 @@ export default function ProductEditPage() {
   if (loading) {
     return (
       <DashboardLayout title="Edit Product">
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "400px",
-          }}
-        >
-          <Loader2
-            size={40}
-            style={{ animation: "spin 1s linear infinite", color: "#ff3366" }}
-          />
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  if (error && !formData.name) {
-    return (
-      <DashboardLayout title="Edit Product">
-        <div style={{ textAlign: "center", padding: "60px" }}>
-          <p style={{ color: "#ef4444", marginBottom: "16px" }}>{error}</p>
-          <button
-            onClick={() => router.push("/products")}
-            style={{
-              padding: "12px 24px",
-              background: "#ff3366",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-            }}
-          >
-            Back to Products
-          </button>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Spinner className="w-10 h-10 animate-spin text-pink-500" />
         </div>
       </DashboardLayout>
     );
@@ -226,372 +198,201 @@ export default function ProductEditPage() {
 
   return (
     <DashboardLayout title="Edit Product">
-      <div style={{ maxWidth: "800px" }}>
+      <div className="max-w-3xl">
         {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "16px",
-            marginBottom: "32px",
-          }}
-        >
-          <button
+        <div className="flex items-center gap-4 mb-8">
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => router.push("/products")}
-            style={{
-              padding: "10px",
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: "10px",
-              color: "rgba(255,255,255,0.6)",
-              cursor: "pointer",
-            }}
+            className="border border-zinc-800"
           >
             <ArrowLeft size={20} />
-          </button>
+          </Button>
           <div>
-            <h1
-              style={{
-                fontSize: "24px",
-                fontWeight: 700,
-                color: "white",
-                marginBottom: "4px",
-              }}
-            >
-              Edit Product
-            </h1>
-            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "14px" }}>
-              Update product information
-            </p>
+            <h1 className="text-2xl font-bold text-white">Edit Product</h1>
+            <p className="text-zinc-500 text-sm">Update product information</p>
           </div>
         </div>
 
-        {error && (
-          <div
-            style={{
-              padding: "16px",
-              background: "rgba(239,68,68,0.1)",
-              border: "1px solid rgba(239,68,68,0.3)",
-              borderRadius: "12px",
-              color: "#ef4444",
-              marginBottom: "24px",
-            }}
-          >
-            {error}
-          </div>
-        )}
-
         {/* Form */}
         <form onSubmit={handleSubmit}>
-          <div
-            style={{
-              background: "rgba(255,255,255,0.03)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: "16px",
-              padding: "32px",
-            }}
-          >
-            {/* Name */}
-            <div style={{ marginBottom: "24px" }}>
-              <label style={labelStyle}>Product Name *</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                style={inputStyle}
-                placeholder="e.g. Good Vibes Only"
-              />
-            </div>
-
-            {/* Slug */}
-            <div style={{ marginBottom: "24px" }}>
-              <label style={labelStyle}>URL Slug *</label>
-              <div style={{ display: "flex", gap: "12px" }}>
-                <input
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8">
+            <div className="space-y-6">
+              {/* Name */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-zinc-400">
+                  Product Name *
+                </label>
+                <Input
                   type="text"
-                  name="slug"
-                  value={formData.slug}
+                  name="name"
+                  value={formData.name}
                   onChange={handleChange}
                   required
-                  style={{ ...inputStyle, flex: 1 }}
-                  placeholder="good-vibes-only"
-                />
-                <button
-                  type="button"
-                  onClick={generateSlug}
-                  style={{
-                    padding: "12px 20px",
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: "10px",
-                    color: "rgba(255,255,255,0.7)",
-                    cursor: "pointer",
-                    fontSize: "14px",
-                  }}
-                >
-                  Generate
-                </button>
-              </div>
-            </div>
-
-            {/* Description */}
-            <div style={{ marginBottom: "24px" }}>
-              <label style={labelStyle}>Description</label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                rows={4}
-                style={{ ...inputStyle, resize: "vertical" }}
-                placeholder="Product description..."
-              />
-            </div>
-
-            {/* Price & Category */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "24px",
-                marginBottom: "24px",
-              }}
-            >
-              <div>
-                <label style={labelStyle}>Base Price ($) *</label>
-                <input
-                  type="number"
-                  name="basePrice"
-                  value={formData.basePrice}
-                  onChange={handleChange}
-                  required
-                  min="0"
-                  step="0.01"
-                  style={inputStyle}
-                  placeholder="199.00"
+                  placeholder="e.g. Good Vibes Only"
+                  className="bg-zinc-800/50 border-zinc-700"
                 />
               </div>
-              <div>
-                <label style={labelStyle}>Category</label>
-                <div style={{ position: "relative" }}>
-                  <select
-                    name="categoryId"
-                    value={formData.categoryId}
+
+              {/* Slug */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-zinc-400">
+                  URL Slug *
+                </label>
+                <div className="flex gap-3">
+                  <Input
+                    type="text"
+                    name="slug"
+                    value={formData.slug}
                     onChange={handleChange}
-                    style={{
-                      ...inputStyle,
-                      appearance: "none",
-                      WebkitAppearance: "none",
-                      MozAppearance: "none",
-                      paddingRight: "40px",
-                      cursor: "pointer",
-                    }}
+                    required
+                    placeholder="good-vibes-only"
+                    className="bg-zinc-800/50 border-zinc-700 flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={generateSlug}
+                    className="border-zinc-700"
                   >
-                    <option
-                      value=""
-                      style={{
-                        background: "#1a1a1a",
-                        color: "rgba(255,255,255,0.5)",
-                      }}
-                    >
-                      Select category...
-                    </option>
-                    {categories.map((cat) => (
-                      <option
-                        key={cat.id}
-                        value={cat.id}
-                        style={{
-                          background: "#1a1a1a",
-                          color: "white",
-                          padding: "10px",
-                        }}
-                      >
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
-                  <div
-                    style={{
-                      position: "absolute",
-                      right: "16px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      pointerEvents: "none",
-                      color: "rgba(255,255,255,0.5)",
-                    }}
-                  >
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                      <path
-                        d="M2.5 4.5L6 8L9.5 4.5"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
+                    Generate
+                  </Button>
                 </div>
               </div>
-            </div>
 
-            {/* Toggles */}
-            <div style={{ display: "flex", gap: "32px", marginBottom: "24px" }}>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  cursor: "pointer",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  name="active"
-                  checked={formData.active}
+              {/* Description */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-zinc-400">
+                  Description
+                </label>
+                <textarea
+                  name="description"
+                  value={formData.description}
                   onChange={handleChange}
-                  style={{
-                    width: "20px",
-                    height: "20px",
-                    accentColor: "#ff3366",
-                  }}
+                  rows={4}
+                  placeholder="Product description..."
+                  className="w-full px-3 py-2 bg-zinc-800/50 border border-zinc-700 rounded-md text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-pink-500 resize-y"
                 />
-                <span style={{ color: "rgba(255,255,255,0.8)" }}>
-                  Active (visible in store)
-                </span>
-              </label>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  cursor: "pointer",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  name="isCustom"
-                  checked={formData.isCustom}
-                  onChange={handleChange}
-                  style={{
-                    width: "20px",
-                    height: "20px",
-                    accentColor: "#a855f7",
-                  }}
-                />
-                <span style={{ color: "rgba(255,255,255,0.8)" }}>
-                  Custom Product
-                </span>
-              </label>
-            </div>
+              </div>
 
-            {/* Images */}
-            <div style={{ marginBottom: "32px" }}>
-              <label style={labelStyle}>Product Images</label>
-              <ImageUpload
-                images={formData.images}
-                pendingFiles={pendingFiles}
-                onImagesChange={(images) =>
-                  setFormData((prev) => ({ ...prev, images }))
-                }
-                onPendingFilesChange={setPendingFiles}
-                maxFiles={5}
-              />
+              {/* Price & Category */}
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-zinc-400">
+                    Base Price ($) *
+                  </label>
+                  <Input
+                    type="number"
+                    name="basePrice"
+                    value={formData.basePrice}
+                    onChange={handleChange}
+                    required
+                    min="0"
+                    step="0.01"
+                    placeholder="199.00"
+                    className="bg-zinc-800/50 border-zinc-700"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-zinc-400">
+                    Category
+                  </label>
+                  <Select
+                    onValueChange={handleCategoryChange}
+                    value={formData.categoryId || "none"}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select category..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No Category</SelectItem>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Toggles */}
+              <div className="flex gap-8">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="active"
+                    checked={formData.active}
+                    onChange={handleChange}
+                    className="w-5 h-5 accent-pink-500 rounded"
+                  />
+                  <span className="text-zinc-300">
+                    Active (visible in store)
+                  </span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="isCustom"
+                    checked={formData.isCustom}
+                    onChange={handleChange}
+                    className="w-5 h-5 accent-purple-500 rounded"
+                  />
+                  <span className="text-zinc-300">Custom Product</span>
+                </label>
+              </div>
+
+              {/* Images */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-zinc-400">
+                  Product Images
+                </label>
+                <ImageUpload
+                  images={formData.images}
+                  pendingFiles={pendingFiles}
+                  onImagesChange={(images) =>
+                    setFormData((prev) => ({ ...prev, images }))
+                  }
+                  onPendingFilesChange={setPendingFiles}
+                  maxFiles={5}
+                />
+              </div>
             </div>
 
             {/* Submit */}
-            <div style={{ display: "flex", gap: "16px" }}>
-              <button
+            <div className="flex gap-4 mt-8 pt-6 border-t border-zinc-800">
+              <Button
                 type="button"
+                variant="outline"
                 onClick={() => router.push("/products")}
-                style={{
-                  padding: "14px 28px",
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: "12px",
-                  color: "rgba(255,255,255,0.7)",
-                  cursor: "pointer",
-                  fontSize: "16px",
-                  fontWeight: 500,
-                }}
+                className="border-zinc-700"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
                 disabled={saving}
-                style={{
-                  flex: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "10px",
-                  padding: "14px 28px",
-                  background: saving
-                    ? "rgba(255,51,102,0.5)"
-                    : "linear-gradient(135deg, #ff3366 0%, rgba(255,51,102,0.8) 100%)",
-                  border: "none",
-                  borderRadius: "12px",
-                  color: "white",
-                  cursor: saving ? "not-allowed" : "pointer",
-                  fontSize: "16px",
-                  fontWeight: 600,
-                  boxShadow: saving
-                    ? "none"
-                    : "0 4px 20px rgba(255,51,102,0.3)",
-                }}
+                className="flex-1 bg-pink-600 hover:bg-pink-700 gap-2"
               >
                 {saving ? (
                   <>
-                    <Loader2
-                      size={20}
-                      style={{ animation: "spin 1s linear infinite" }}
-                    />
+                    <Spinner className="w-4 h-4 animate-spin" />
                     {pendingFiles.length > 0
                       ? "Uploading & Saving..."
                       : "Saving..."}
                   </>
                 ) : (
                   <>
-                    <Save size={20} />
+                    <Save size={18} />
                     Save Changes
                   </>
                 )}
-              </button>
+              </Button>
             </div>
           </div>
         </form>
       </div>
-
-      <style jsx global>{`
-        @keyframes spin {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-      `}</style>
     </DashboardLayout>
   );
 }
-
-const labelStyle: React.CSSProperties = {
-  display: "block",
-  fontSize: "14px",
-  fontWeight: 500,
-  color: "rgba(255,255,255,0.7)",
-  marginBottom: "8px",
-};
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "14px 16px",
-  background: "rgba(255,255,255,0.05)",
-  border: "1px solid rgba(255,255,255,0.1)",
-  borderRadius: "10px",
-  color: "white",
-  fontSize: "15px",
-  outline: "none",
-};

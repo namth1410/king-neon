@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "@/components/ui/sonner";
 import Sidebar from "./Sidebar";
 
 export default function DashboardLayout({
@@ -70,22 +70,7 @@ export default function DashboardLayout({
         color: "white",
       }}
     >
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          style: {
-            background: "#1a1a1a",
-            color: "#fff",
-            border: "1px solid rgba(255,255,255,0.1)",
-          },
-          success: {
-            iconTheme: { primary: "#22c55e", secondary: "#fff" },
-          },
-          error: {
-            iconTheme: { primary: "#ef4444", secondary: "#fff" },
-          },
-        }}
-      />
+      <Toaster position="top-right" richColors />
       <Sidebar />
 
       {/* Main Content - offset by sidebar width */}

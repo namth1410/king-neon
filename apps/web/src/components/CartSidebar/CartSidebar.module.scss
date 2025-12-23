@@ -72,6 +72,8 @@
     flex: 1;
     overflow-y: auto;
     padding: $spacing-4;
+    position: relative;
+    min-height: 200px;
   }
 
   &__empty {

@@ -5,3 +5,8 @@ export { Button } from "./components/Button";
 export { Input } from "./components/Input";
 export { Card } from "./components/Card";
 export { LoadingSpinner } from "./components/LoadingSpinner";
+export {
+  Spinner,
+  type SpinnerProps,
+  type SpinnerSize,
+} from "./components/Spinner";

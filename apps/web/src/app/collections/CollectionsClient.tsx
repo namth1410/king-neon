@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import api from "@/utils/api";
+import { useToast } from "@/components/Toast";
 import styles from "./collections.module.scss";
 
 interface Category {
@@ -44,13 +45,14 @@ const itemVariants = {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { duration: 0.5, ease: "easeOut" },
+    transition: { duration: 0.5, ease: "easeOut" as const },
   },
 };
 
 export default function CollectionsClient() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const toast = useToast();
 
   // Fetch categories
   useEffect(() => {
@@ -60,12 +62,13 @@ export default function CollectionsClient() {
         setCategories(response.data);
       } catch (error) {
         console.error("Failed to fetch categories:", error);
+        toast.error("Failed to load collections. Please try again.");
       } finally {
         setIsLoading(false);
       }
     };
     fetchCategories();
-  }, []);
+  }, [toast]);
 
   // Limit to 8 categories for gallery display
   const displayCategories = categories.slice(0, 8);

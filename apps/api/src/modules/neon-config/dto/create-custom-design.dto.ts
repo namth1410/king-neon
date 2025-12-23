@@ -1,9 +1,16 @@
-import { IsString, IsArray, IsUUID, IsOptional } from 'class-validator';
+import {
+  IsString,
+  IsArray,
+  IsUUID,
+  IsOptional,
+  ArrayMinSize,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateCustomDesignDto {
-  @ApiProperty({ type: [String], example: ['Hello', 'World'] })
+  @ApiProperty({ type: [String], example: ['Hello', 'World'], minItems: 1 })
   @IsArray()
+  @ArrayMinSize(1, { message: 'At least one text line is required' })
   @IsString({ each: true })
   textLines: string[];
 
