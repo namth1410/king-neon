@@ -1,0 +1,217 @@
+{
+  "common": {
+    "loading": "Đang tải...",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "create": "Tạo mới",
+    "add": "Thêm",
+    "search": "Tìm kiếm",
+    "filter": "Lọc",
+    "actions": "Thao tác",
+    "status": "Trạng thái",
+    "noData": "Không có dữ liệu",
+    "confirm": "Xác nhận",
+    "close": "Đóng",
+    "view": "Xem",
+    "viewAll": "Xem tất cả",
+    "refresh": "Làm mới",
+    "back": "Quay lại",
+    "next": "Tiếp",
+    "previous": "Trước",
+    "prev": "Trước",
+    "showing": "Hiển thị",
+    "to": "đến",
+    "of": "trong",
+    "page": "Trang",
+    "items": "mục",
+    "active": "Hoạt động",
+    "inactive": "Không hoạt động",
+    "noCategory": "Chưa phân loại",
+    "guest": "Khách",
+    "gotIt": "Đã hiểu"
+  },
+  "sidebar": {
+    "adminPanel": "Bảng Quản Trị",
+    "dashboard": "Tổng Quan",
+    "products": "Sản Phẩm",
+    "categories": "Danh Mục",
+    "orders": "Đơn Hàng",
+    "customers": "Khách Hàng",
+    "neonConfig": "Cấu Hình Neon",
+    "previewBackgrounds": "Hình Nền Xem Trước",
+    "settings": "Cài Đặt",
+    "logout": "Đăng Xuất"
+  },
+  "dashboard": {
+    "title": "Tổng Quan",
+    "welcome": "Chào mừng trở lại! 👋",
+    "welcomeDescription": "Đây là những gì đang xảy ra với cửa hàng của bạn hôm nay. Quản lý sản phẩm, xử lý đơn hàng và phát triển doanh nghiệp.",
+    "totalRevenue": "Tổng Doanh Thu",
+    "totalOrders": "Tổng Đơn Hàng",
+    "totalProducts": "Sản Phẩm",
+    "pendingOrders": "Đơn Chờ Xử Lý",
+    "recentOrders": "Đơn Hàng Gần Đây",
+    "noOrders": "Chưa có đơn hàng",
+    "noOrdersDescription": "Đơn hàng sẽ xuất hiện ở đây khi khách mua hàng",
+    "storeOverview": "Tổng Quan Cửa Hàng",
+    "productsActive": "Sản Phẩm Đang Bán",
+    "ordersProcessing": "Đơn Đang Xử Lý",
+    "neonColors": "Màu Neon",
+    "fontStyles": "Kiểu Chữ",
+    "quickActions": {
+      "manageProducts": "Quản Lý Sản Phẩm",
+      "manageProductsDesc": "Thêm, sửa hoặc xóa sản phẩm",
+      "viewOrders": "Xem Đơn Hàng",
+      "viewOrdersDesc": "Xử lý đơn hàng khách",
+      "neonConfig": "Cấu Hình Neon",
+      "neonConfigDesc": "Quản lý font và màu sắc"
+    }
+  },
+  "products": {
+    "title": "Sản Phẩm",
+    "management": "Quản Lý Sản Phẩm",
+    "inCatalog": "sản phẩm trong danh mục",
+    "addProduct": "Thêm Sản Phẩm",
+    "editProduct": "Sửa Sản Phẩm",
+    "deleteConfirm": "Bạn có chắc muốn xóa sản phẩm này?",
+    "loadingProducts": "Đang tải sản phẩm...",
+    "noProducts": "Không tìm thấy sản phẩm",
+    "searchPlaceholder": "Tìm kiếm sản phẩm...",
+    "allCategories": "Tất Cả Danh Mục",
+    "sortBy": "Sắp xếp",
+    "newestFirst": "Mới Nhất",
+    "nameAZ": "Tên A-Z",
+    "nameZA": "Tên Z-A",
+    "priceLowHigh": "Giá: Thấp đến Cao",
+    "priceHighLow": "Giá: Cao đến Thấp",
+    "table": {
+      "product": "Sản Phẩm",
+      "category": "Danh Mục",
+      "price": "Giá",
+      "status": "Trạng Thái",
+      "type": "Loại",
+      "actions": "Thao Tác"
+    },
+    "type": {
+      "custom": "Tùy Chỉnh",
+      "standard": "Tiêu Chuẩn"
+    },
+    "success": {
+      "deleted": "Đã xóa sản phẩm thành công",
+      "created": "Đã tạo sản phẩm thành công",
+      "updated": "Đã cập nhật sản phẩm thành công"
+    },
+    "error": {
+      "loadFailed": "Không thể tải sản phẩm",
+      "deleteFailed": "Không thể xóa sản phẩm"
+    }
+  },
+  "categories": {
+    "title": "Danh Mục",
+    "description": "Quản lý danh mục sản phẩm",
+    "addCategory": "Thêm Danh Mục",
+    "editCategory": "Sửa Danh Mục",
+    "loading": "Đang tải danh mục...",
+    "noCategories": "Chưa có danh mục",
+    "createFirst": "Tạo danh mục đầu tiên",
+    "deleteCategory": "Xóa Danh Mục?",
+    "cannotDelete": "Không Thể Xóa Danh Mục",
+    "deleteConfirm": "Bạn có chắc muốn xóa \"{{name}}\"? Hành động này không thể hoàn tác.",
+    "usedByProducts": "Danh mục \"{{name}}\" đang được sử dụng bởi {{count}} sản phẩm. Vui lòng chuyển các sản phẩm này sang danh mục khác trước khi xóa.",
+    "success": {
+      "deleted": "Đã xóa danh mục thành công"
+    },
+    "error": {
+      "loadFailed": "Không thể tải danh mục",
+      "deleteFailed": "Không thể xóa danh mục",
+      "checkProductCount": "Không thể kiểm tra số lượng sản phẩm"
+    }
+  },
+  "orders": {
+    "title": "Đơn Hàng",
+    "management": "Quản Lý Đơn Hàng",
+    "description": "Quản lý và theo dõi tất cả đơn hàng",
+    "searchPlaceholder": "Tìm theo mã đơn, khách hàng...",
+    "allStatus": "Tất Cả Trạng Thái",
+    "loadingOrders": "Đang tải đơn hàng...",
+    "noOrders": "Không tìm thấy đơn hàng",
+    "table": {
+      "order": "Đơn Hàng",
+      "customer": "Khách Hàng",
+      "status": "Trạng Thái",
+      "total": "Tổng Tiền",
+      "date": "Ngày",
+      "actions": "Thao Tác"
+    },
+    "statuses": {
+      "pending": "Chờ Xử Lý",
+      "confirmed": "Đã Xác Nhận",
+      "processing": "Đang Xử Lý",
+      "shipped": "Đã Giao",
+      "delivered": "Đã Nhận",
+      "cancelled": "Đã Hủy"
+    },
+    "error": {
+      "loadFailed": "Không thể tải đơn hàng"
+    }
+  },
+  "customers": {
+    "title": "Khách Hàng",
+    "management": "Quản Lý Khách Hàng",
+    "registered": "khách hàng đã đăng ký",
+    "searchPlaceholder": "Tìm theo tên hoặc email...",
+    "allRoles": "Tất Cả Vai Trò",
+    "allStatus": "Tất Cả Trạng Thái",
+    "loading": "Đang tải khách hàng...",
+    "noCustomers": "Không tìm thấy khách hàng",
+    "table": {
+      "customer": "Khách Hàng",
+      "contact": "Liên Hệ",
+      "role": "Vai Trò",
+      "status": "Trạng Thái",
+      "joined": "Ngày Tham Gia",
+      "actions": "Thao Tác"
+    },
+    "roles": {
+      "customer": "Khách Hàng",
+      "admin": "Quản Trị"
+    },
+    "activate": "Kích Hoạt",
+    "deactivate": "Vô Hiệu Hóa",
+    "success": {
+      "activated": "Đã kích hoạt khách hàng",
+      "deactivated": "Đã vô hiệu hóa khách hàng"
+    },
+    "error": {
+      "loadFailed": "Không thể tải khách hàng",
+      "updateFailed": "Không thể cập nhật trạng thái khách hàng"
+    }
+  },
+  "pagination": {
+    "showing": "Hiển thị {{start}} đến {{end}} trong {{total}} {{items}}",
+    "page": "Trang {{current}} / {{total}}"
+  },
+  "language": {
+    "en": "English",
+    "vi": "Tiếng Việt",
+    "switchLanguage": "Chuyển ngôn ngữ"
+  },
+  "errors": {
+    "generic": "Đã có lỗi xảy ra. Vui lòng thử lại.",
+    "notFound": "Không tìm thấy tài nguyên.",
+    "unauthorized": "Bạn không có quyền thực hiện hành động này.",
+    "validation": "Vui lòng kiểm tra lại thông tin nhập.",
+    "loadStats": "Không thể tải thống kê"
+  },
+  "toast": {
+    "success": "Thành công",
+    "error": "Lỗi",
+    "warning": "Cảnh báo",
+    "info": "Thông báo",
+    "saved": "Đã lưu thay đổi thành công",
+    "deleted": "Đã xóa thành công",
+    "created": "Đã tạo thành công"
+  }
+}

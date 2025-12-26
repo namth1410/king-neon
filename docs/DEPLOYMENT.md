@@ -27,8 +27,7 @@ king-neon/
 ├── apps/
 │   ├── web/       # Next.js Frontend (port 3000)
 │   ├── admin/     # Next.js Admin Panel (port 3001)
-│   ├── api/       # NestJS Backend (port 4000)
-│   └── cms/       # Strapi CMS (port 1338)
+│   └── api/       # NestJS Backend (port 4000)
 ├── packages/      # Shared packages
 └── docker-compose.yml  # Infrastructure services
 ```
@@ -126,8 +125,8 @@ REDIS_URL=redis://localhost:6380
 # MinIO
 MINIO_ENDPOINT=your-domain.com
 MINIO_PORT=9002
-MINIO_ACCESS_KEY=king_neon_minio
-MINIO_SECRET_KEY=STRONG_MINIO_SECRET_HERE
+MINIO_ROOT_USER=king_neon_minio
+MINIO_ROOT_PASSWORD=STRONG_MINIO_SECRET_HERE
 MINIO_BUCKET=king-neon
 MINIO_USE_SSL=true
 
@@ -141,11 +140,6 @@ API_PORT=4000
 
 # Web
 NEXT_PUBLIC_API_URL=https://api.your-domain.com
-NEXT_PUBLIC_CMS_URL=https://cms.your-domain.com
-
-# Strapi CMS
-STRAPI_URL=http://localhost:1338
-STRAPI_API_TOKEN=your-strapi-api-token
 ```
 
 > ⚠️ **Quan trọng**: Thay đổi tất cả passwords và secrets trong production!
@@ -231,16 +225,6 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 4000,
-      },
-    },
-    {
-      name: "king-neon-cms",
-      cwd: "./apps/cms",
-      script: "npm",
-      args: "start",
-      env: {
-        NODE_ENV: "production",
-        PORT: 1338,
       },
     },
   ],
@@ -803,16 +787,6 @@ module.exports = {
         PORT: 4100,
       },
     },
-    {
-      name: "king-neon-cms-dev",
-      cwd: "./apps/cms",
-      script: "npm",
-      args: "start",
-      env: {
-        NODE_ENV: "development",
-        PORT: 1438,
-      },
-    },
   ],
 };
 ```
@@ -831,8 +805,8 @@ REDIS_URL=redis://localhost:6381
 # MinIO
 MINIO_ENDPOINT=localhost
 MINIO_PORT=9004
-MINIO_ACCESS_KEY=dev_minio
-MINIO_SECRET_KEY=dev_minio_secret
+MINIO_ROOT_USER=dev_minio
+MINIO_ROOT_PASSWORD=dev_minio_secret
 MINIO_BUCKET=king-neon-dev
 
 # JWT
@@ -845,7 +819,6 @@ API_PORT=4100
 
 # Web
 NEXT_PUBLIC_API_URL=https://dev-api.your-domain.com
-NEXT_PUBLIC_CMS_URL=https://dev-cms.your-domain.com
 ```
 
 ### 10.5 Nginx cho Development
@@ -905,11 +878,9 @@ server {
 | **Production**  | Web     | your-domain.com           | 3000 |
 |                 | Admin   | admin.your-domain.com     | 3001 |
 |                 | API     | api.your-domain.com       | 4000 |
-|                 | CMS     | cms.your-domain.com       | 1338 |
 | **Development** | Web     | dev.your-domain.com       | 3100 |
 |                 | Admin   | dev-admin.your-domain.com | 3101 |
 |                 | API     | dev-api.your-domain.com   | 4100 |
-|                 | CMS     | dev-cms.your-domain.com   | 1438 |
 
 ---
 
@@ -1227,5 +1198,4 @@ fi
 | Web           | your-domain.com         | 3000 |
 | Admin         | admin.your-domain.com   | 3001 |
 | API           | api.your-domain.com     | 4000 |
-| CMS           | cms.your-domain.com     | 1338 |
 | MinIO Console | storage.your-domain.com | 9003 |

@@ -53,11 +53,13 @@ import { MailModule } from './modules/mail/mail.module';
         type: 'postgres',
         host: configService.get('DATABASE_HOST', 'localhost'),
         port: configService.get<number>('DATABASE_PORT', 5434),
-        username: configService.get('DATABASE_USER', 'king_neon'),
-        password: configService.get('DATABASE_PASSWORD', 'king_neon_secret'),
-        database: configService.get('DATABASE_NAME', 'king_neon_db'),
+        username: configService.get('POSTGRES_USER', 'king_neon'),
+        password: configService.get('POSTGRES_PASSWORD', 'king_neon_secret'),
+        database: configService.get('POSTGRES_DB', 'king_neon_db'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: true, // Set to false in production
+        migrations: [__dirname + '/migrations/*{.ts,.js}'],
+        synchronize: false, // NEVER use true - use migrations instead
+        migrationsRun: true, // Auto-run pending migrations on app start
         logging: configService.get('NODE_ENV') === 'development',
       }),
       inject: [ConfigService],

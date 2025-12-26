@@ -1,0 +1,32 @@
+# ===========================================
+# Cloudflare Tunnel - Standalone
+# ===========================================
+# This runs separately from the app stacks
+# Deploy: docker compose -f docker-compose.tunnel.yml up -d
+#
+# Prerequisites:
+#   - ~/.cloudflared/config.yml (tunnel config)
+#   - ~/.cloudflared/<tunnel-id>.json (credentials)
+#   - ~/.cloudflared/cert.pem (certificate)
+#
+# Configure routes in config.yml:
+#
+# PRODUCTION:
+#   kingneon.namth.online       -> http://localhost:3000
+#   kingneon-api.namth.online   -> http://localhost:4000
+#   kingneon-admin.namth.online -> http://localhost:3001
+#
+# DEVELOPMENT (optional):
+#   dev-kingneon.namth.online       -> http://localhost:3010
+#   dev-kingneon-api.namth.online   -> http://localhost:4010
+#   dev-kingneon-admin.namth.online -> http://localhost:3011
+
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:2025.11.1
+    container_name: cloudflared
+    user: root  # Required to read ~/.cloudflared config files
+    command: tunnel --config /etc/cloudflared/config.yml run
+    volumes:
+      - ${HOME}/.cloudflared:/etc/cloudflared:ro
+    network_mode: host

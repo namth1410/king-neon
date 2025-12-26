@@ -1,4 +1,4 @@
-# King Neon - Custom Neon Sign E-commerce Platform
+# King Neon - Custom Neon Sign E-commerce
 
 A full-stack e-commerce platform for custom neon signs, inspired by [Kings Of Neon](https://kingsofneon.com).
 
@@ -9,7 +9,6 @@ A full-stack e-commerce platform for custom neon signs, inspired by [Kings Of Ne
 | Frontend    | Next.js 15.x + TypeScript |
 | Admin       | Next.js 15.x + TypeScript |
 | Backend API | NestJS + TypeScript       |
-| CMS         | Strapi v4                 |
 | Database    | PostgreSQL                |
 | Cache       | Redis                     |
 | Storage     | MinIO                     |
@@ -21,8 +20,7 @@ king-neon/
 ├── apps/
 │   ├── web/      # Public website (Next.js)
 │   ├── admin/    # Admin panel (Next.js)
-│   ├── api/      # Backend API (NestJS)
-│   └── cms/      # Content management (Strapi)
+│   └── api/      # Backend API (NestJS)
 ├── packages/
 │   ├── shared/   # Shared types & utilities
 │   └── ui/       # Shared UI components
@@ -61,9 +59,6 @@ pnpm dev:admin    # http://localhost:3001
 
 # API
 pnpm dev:api      # http://localhost:4000
-
-# CMS
-pnpm dev:cms      # http://localhost:1338
 ```
 
 ## Docker Services

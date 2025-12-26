@@ -1,0 +1,207 @@
+@use "../styles/variables" as *;
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $bg-dark;
+  position: relative;
+  overflow: hidden;
+  padding: $spacing-8;
+}
+
+.backgroundGlow {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba($neon-pink, 0.15) 0%,
+    rgba($neon-purple, 0.1) 40%,
+    transparent 70%
+  );
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: pulse 4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+.content {
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  max-width: 600px;
+}
+
+.errorCode {
+  font-size: clamp(8rem, 20vw, 14rem);
+  font-weight: $font-weight-bold;
+  line-height: 1;
+  margin-bottom: $spacing-4;
+  display: flex;
+  justify-content: center;
+  gap: $spacing-2;
+}
+
+.neonText {
+  color: $neon-pink;
+  text-shadow:
+    0 0 10px rgba($neon-pink, 0.8),
+    0 0 20px rgba($neon-pink, 0.6),
+    0 0 40px rgba($neon-pink, 0.4),
+    0 0 80px rgba($neon-pink, 0.2);
+  animation: flicker 3s infinite;
+}
+
+.neonTextAlt {
+  color: $neon-blue;
+  text-shadow:
+    0 0 10px rgba($neon-blue, 0.8),
+    0 0 20px rgba($neon-blue, 0.6),
+    0 0 40px rgba($neon-blue, 0.4),
+    0 0 80px rgba($neon-blue, 0.2);
+  animation: flicker 3s infinite 0.5s;
+}
+
+@keyframes flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  93% {
+    opacity: 0.8;
+  }
+  94% {
+    opacity: 1;
+  }
+  96% {
+    opacity: 0.9;
+  }
+  97% {
+    opacity: 1;
+  }
+}
+
+.title {
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-semibold;
+  color: $text-light;
+  margin-bottom: $spacing-4;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: $font-size-2xl;
+  }
+}
+
+.description {
+  font-size: $font-size-lg;
+  color: $text-light-secondary;
+  margin-bottom: $spacing-8;
+  line-height: 1.6;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: $font-size-base;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: $spacing-4;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: $spacing-10;
+}
+
+.backButton,
+.homeButton {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-2;
+  padding: $spacing-4 $spacing-6;
+  border-radius: $radius-lg;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+  transition: all $transition-base;
+  text-decoration: none;
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.backButton {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: $text-light;
+  backdrop-filter: blur(10px);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateX(-4px);
+  }
+}
+
+.homeButton {
+  background: $gradient-primary;
+  border: none;
+  color: $text-light;
+  box-shadow: 0 0 20px rgba($neon-pink, 0.3);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba($neon-pink, 0.5);
+  }
+}
+
+.suggestions {
+  padding-top: $spacing-8;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.suggestionsTitle {
+  font-size: $font-size-sm;
+  color: $text-light-secondary;
+  margin-bottom: $spacing-4;
+}
+
+.suggestionsLinks {
+  display: flex;
+  gap: $spacing-4;
+  justify-content: center;
+  flex-wrap: wrap;
+
+  a {
+    color: $text-light;
+    text-decoration: none;
+    font-size: $font-size-sm;
+    padding: $spacing-2 $spacing-4;
+    border-radius: $radius-md;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all $transition-fast;
+
+    &:hover {
+      background: rgba($neon-pink, 0.2);
+      color: $neon-pink;
+    }
+  }
+}

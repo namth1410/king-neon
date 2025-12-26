@@ -8,6 +8,70 @@
     "edit": "Edit",
     "close": "Close"
   },
+  "nav": {
+    "home": "Home",
+    "collections": "Collections",
+    "create": "Create Your Own",
+    "quote": "Get Quote",
+    "about": "About"
+  },
+  "hero": {
+    "badge": "Handcrafted LED Neon Signs",
+    "title": "Light Up Your Space With",
+    "titleHighlight": "Custom Neon",
+    "subtitle": "Create stunning custom LED neon signs for your home, business, or special event. Designed by you, crafted by experts.",
+    "scrollHint": "Scroll",
+    "stats": {
+      "customers": "Happy Customers",
+      "designs": "Designs",
+      "rating": "Rating",
+      "warranty": "Warranty"
+    }
+  },
+  "cta": {
+    "createYourOwn": "Create Your Own",
+    "browseCollections": "Browse Collections",
+    "getQuote": "Get a Quote",
+    "addToCart": "Add to Cart",
+    "buyNow": "Buy Now",
+    "learnMore": "Learn More"
+  },
+  "footer": {
+    "description": "Premium custom LED neon signs handcrafted with love. Transform your space with stunning illumination that lasts.",
+    "shop": "Shop",
+    "support": "Support",
+    "company": "Company",
+    "links": {
+      "allCollections": "All Collections",
+      "weddingSigns": "Wedding Signs",
+      "businessSigns": "Business Signs",
+      "homeDecor": "Home Decor",
+      "customNeon": "Custom Neon",
+      "faq": "FAQ",
+      "shippingInfo": "Shipping Info",
+      "returns": "Returns",
+      "contactUs": "Contact Us",
+      "getQuote": "Get a Quote",
+      "aboutUs": "About Us",
+      "blog": "Blog",
+      "reviews": "Reviews",
+      "privacyPolicy": "Privacy Policy",
+      "termsOfService": "Terms of Service"
+    },
+    "copyright": "© {{year}} King Neon. All rights reserved."
+  },
+  "header": {
+    "account": "Account",
+    "login": "Login",
+    "openCart": "Open cart",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "language": {
+    "en": "English",
+    "vi": "Tiếng Việt",
+    "switchLanguage": "Switch language"
+  },
   "errors": {
     "UNAUTHORIZED": "You must be logged in to perform this action.",
     "FORBIDDEN": "You do not have permission to perform this action.",

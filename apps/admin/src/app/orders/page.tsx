@@ -37,6 +37,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "@/i18n/client";
 
 interface Order {
   id: string;
@@ -64,40 +65,22 @@ type OrderStatus =
   | "delivered"
   | "cancelled";
 
-const statusConfig: Record<
-  OrderStatus,
-  { label: string; color: string; icon: React.ReactNode }
-> = {
-  pending: {
-    label: "Pending",
-    color: "bg-yellow-500/15 text-yellow-400 border-yellow-500/20",
-    icon: <Clock size={14} />,
-  },
-  confirmed: {
-    label: "Confirmed",
-    color: "bg-blue-500/15 text-blue-400 border-blue-500/20",
-    icon: <CheckCircle size={14} />,
-  },
-  processing: {
-    label: "Processing",
-    color: "bg-purple-500/15 text-purple-400 border-purple-500/20",
-    icon: <Settings size={14} />,
-  },
-  shipped: {
-    label: "Shipped",
-    color: "bg-cyan-500/15 text-cyan-400 border-cyan-500/20",
-    icon: <Truck size={14} />,
-  },
-  delivered: {
-    label: "Delivered",
-    color: "bg-green-500/15 text-green-400 border-green-500/20",
-    icon: <Package size={14} />,
-  },
-  cancelled: {
-    label: "Cancelled",
-    color: "bg-red-500/15 text-red-400 border-red-500/20",
-    icon: <XCircle size={14} />,
-  },
+const statusIcons: Record<OrderStatus, React.ReactNode> = {
+  pending: <Clock size={14} />,
+  confirmed: <CheckCircle size={14} />,
+  processing: <Settings size={14} />,
+  shipped: <Truck size={14} />,
+  delivered: <Package size={14} />,
+  cancelled: <XCircle size={14} />,
+};
+
+const statusColors: Record<OrderStatus, string> = {
+  pending: "bg-yellow-500/15 text-yellow-400 border-yellow-500/20",
+  confirmed: "bg-blue-500/15 text-blue-400 border-blue-500/20",
+  processing: "bg-purple-500/15 text-purple-400 border-purple-500/20",
+  shipped: "bg-cyan-500/15 text-cyan-400 border-cyan-500/20",
+  delivered: "bg-green-500/15 text-green-400 border-green-500/20",
+  cancelled: "bg-red-500/15 text-red-400 border-red-500/20",
 };
 
 export default function OrdersPage() {
@@ -122,6 +105,16 @@ export default function OrdersPage() {
   const limit = 10;
 
   const { request, abortAll } = useApiRequest();
+  const { t } = useTranslation("common");
+
+  const statusLabels: Record<OrderStatus, string> = {
+    pending: t("orders.statuses.pending"),
+    confirmed: t("orders.statuses.confirmed"),
+    processing: t("orders.statuses.processing"),
+    shipped: t("orders.statuses.shipped"),
+    delivered: t("orders.statuses.delivered"),
+    cancelled: t("orders.statuses.cancelled"),
+  };
 
   // Fetch status counts once on mount (independent of filter)
   useEffect(() => {
@@ -182,7 +175,7 @@ export default function OrdersPage() {
       }
     } catch (error) {
       console.error("Failed to fetch orders:", error);
-      toast.error("Failed to load orders");
+      toast.error(t("orders.error.loadFailed"));
       setOrders([]);
     } finally {
       setLoading(false);
@@ -217,14 +210,16 @@ export default function OrdersPage() {
   };
 
   return (
-    <DashboardLayout title="Orders">
+    <DashboardLayout title={t("orders.title")}>
       <div className="flex flex-col gap-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-white">Order Management</h1>
+            <h1 className="text-2xl font-bold text-white">
+              {t("orders.management")}
+            </h1>
             <p className="text-zinc-500 text-sm mt-1">
-              Manage and track all customer orders
+              {t("orders.description")}
             </p>
           </div>
           <Button
@@ -233,7 +228,7 @@ export default function OrdersPage() {
             className="gap-2 border-zinc-700"
           >
             <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
-            Refresh
+            {t("common.refresh")}
           </Button>
         </div>
 
@@ -246,7 +241,7 @@ export default function OrdersPage() {
             />
             <Input
               type="text"
-              placeholder="Search by order number, customer..."
+              placeholder={t("orders.searchPlaceholder")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 bg-zinc-800/50 border-zinc-700"
@@ -255,13 +250,13 @@ export default function OrdersPage() {
 
           <Select onValueChange={handleStatusChange} value={statusFilter}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="All Status" />
+              <SelectValue placeholder={t("orders.allStatus")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              {Object.entries(statusConfig).map(([key, { label }]) => (
+              <SelectItem value="all">{t("orders.allStatus")}</SelectItem>
+              {(Object.keys(statusLabels) as OrderStatus[]).map((key) => (
                 <SelectItem key={key} value={key}>
-                  {label}
+                  {statusLabels[key]}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -270,12 +265,12 @@ export default function OrdersPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {Object.entries(statusConfig).map(([status, config]) => {
-            const count = statusCounts[status as OrderStatus];
+          {(Object.keys(statusLabels) as OrderStatus[]).map((status) => {
+            const count = statusCounts[status];
             return (
               <button
                 key={status}
-                onClick={() => setStatusFilter(status as OrderStatus)}
+                onClick={() => setStatusFilter(status)}
                 className={`p-4 rounded-xl border transition-all text-left ${
                   statusFilter === status
                     ? "bg-zinc-800 border-pink-500/50"
@@ -283,12 +278,16 @@ export default function OrdersPage() {
                 }`}
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <span className={`p-1.5 rounded-lg border ${config.color}`}>
-                    {config.icon}
+                  <span
+                    className={`p-1.5 rounded-lg border ${statusColors[status]}`}
+                  >
+                    {statusIcons[status]}
                   </span>
                 </div>
                 <div className="text-xl font-bold text-white">{count}</div>
-                <div className="text-xs text-zinc-500">{config.label}</div>
+                <div className="text-xs text-zinc-500">
+                  {statusLabels[status]}
+                </div>
               </button>
             );
           })}
@@ -299,28 +298,29 @@ export default function OrdersPage() {
           {loading ? (
             <div className="p-16 text-center text-zinc-500">
               <Spinner className="w-10 h-10 animate-spin mx-auto mb-4 text-pink-500" />
-              Loading orders...
+              {t("orders.loadingOrders")}
             </div>
           ) : filteredOrders.length === 0 ? (
             <div className="p-16 text-center">
               <Package size={48} className="text-zinc-700 mx-auto mb-4" />
-              <p className="text-zinc-500">No orders found</p>
+              <p className="text-zinc-500">{t("orders.noOrders")}</p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow className="border-zinc-800 hover:bg-transparent">
-                  <TableHead>Order</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Total</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t("orders.table.order")}</TableHead>
+                  <TableHead>{t("orders.table.customer")}</TableHead>
+                  <TableHead>{t("orders.table.status")}</TableHead>
+                  <TableHead>{t("orders.table.total")}</TableHead>
+                  <TableHead>{t("orders.table.date")}</TableHead>
+                  <TableHead className="text-right">
+                    {t("orders.table.actions")}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredOrders.map((order) => {
-                  const statusInfo = statusConfig[order.status];
                   return (
                     <TableRow
                       key={order.id}
@@ -335,7 +335,7 @@ export default function OrdersPage() {
                       <TableCell>
                         <div>
                           <div className="text-white font-medium">
-                            {order.customerName || "Guest"}
+                            {order.customerName || t("common.guest")}
                           </div>
                           <div className="text-zinc-500 text-sm">
                             {order.customerEmail}
@@ -344,11 +344,11 @@ export default function OrdersPage() {
                       </TableCell>
                       <TableCell>
                         <Badge
-                          className={`gap-1.5 border ${statusInfo.color}`}
+                          className={`gap-1.5 border ${statusColors[order.status]}`}
                           variant="outline"
                         >
-                          {statusInfo.icon}
-                          {statusInfo.label}
+                          {statusIcons[order.status]}
+                          {statusLabels[order.status]}
                         </Badge>
                       </TableCell>
                       <TableCell>

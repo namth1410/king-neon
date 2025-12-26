@@ -26,9 +26,9 @@ export class UploadService implements OnModuleInit {
       endpoint: this.endpoint,
       region: 'us-east-1', // MinIO doesn't care about region
       credentials: {
-        accessKeyId: process.env.MINIO_ACCESS_KEY || 'king_neon_minio',
+        accessKeyId: process.env.MINIO_ROOT_USER || 'king_neon_minio',
         secretAccessKey:
-          process.env.MINIO_SECRET_KEY || 'king_neon_minio_secret',
+          process.env.MINIO_ROOT_PASSWORD || 'king_neon_minio_secret',
       },
       forcePathStyle: true, // Required for MinIO
     });

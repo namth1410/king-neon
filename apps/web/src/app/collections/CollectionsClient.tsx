@@ -1,11 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import api from "@/utils/api";
-import { useToast } from "@/components/Toast";
 import styles from "./collections.module.scss";
 
 interface Category {
@@ -15,6 +12,10 @@ interface Category {
   description: string | null;
   image: string | null;
   icon: string | null;
+}
+
+interface CollectionsClientProps {
+  initialCategories: Category[];
 }
 
 // Gradient fallbacks for categories without images
@@ -49,29 +50,11 @@ const itemVariants = {
   },
 };
 
-export default function CollectionsClient() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const toast = useToast();
-
-  // Fetch categories
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await api.get("/categories/active");
-        setCategories(response.data);
-      } catch (error) {
-        console.error("Failed to fetch categories:", error);
-        toast.error("Failed to load collections. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchCategories();
-  }, [toast]);
-
+export default function CollectionsClient({
+  initialCategories,
+}: CollectionsClientProps) {
   // Limit to 8 categories for gallery display
-  const displayCategories = categories.slice(0, 8);
+  const displayCategories = initialCategories.slice(0, 8);
 
   return (
     <div className={styles.collections}>
@@ -91,18 +74,7 @@ export default function CollectionsClient() {
         </motion.div>
 
         {/* Category Gallery Grid */}
-        {isLoading ? (
-          <div className={styles.collections__gallery}>
-            {Array.from({ length: 6 }).map((_, index) => (
-              <div
-                key={index}
-                className={`${styles.collections__card} ${styles["collections__card--skeleton"]}`}
-              >
-                <div className={styles["collections__card-skeleton"]} />
-              </div>
-            ))}
-          </div>
-        ) : displayCategories.length > 0 ? (
+        {displayCategories.length > 0 ? (
           <motion.div
             className={styles.collections__gallery}
             variants={containerVariants}

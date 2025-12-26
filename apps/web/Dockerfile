@@ -22,6 +22,10 @@ RUN pnpm install
 COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
 
+# Build args for Next.js public env vars (baked at build time)
+ARG NEXT_PUBLIC_API_URL=http://localhost:4000/api
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 RUN pnpm turbo run build --filter=@king-neon/web...
 
 FROM base AS runner

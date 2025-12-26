@@ -25,7 +25,6 @@
 | Frontend    | Next.js 15 + TypeScript | 3000                       |
 | Admin       | Next.js 15 + TypeScript | 3001                       |
 | Backend API | NestJS + TypeScript     | 4000                       |
-| CMS         | Strapi v4               | 1338                       |
 | Database    | PostgreSQL 16           | 5434                       |
 | Cache       | Redis 7                 | 6380                       |
 | Storage     | MinIO (S3-compatible)   | 9002 (API), 9003 (Console) |
@@ -37,8 +36,7 @@ king-neon/
 ├── apps/
 │   ├── web/        # Public customer-facing website
 │   ├── admin/      # Admin management panel
-│   ├── api/        # Backend API (NestJS)
-│   └── cms/        # Content management (Strapi)
+│   └── api/        # Backend API (NestJS)
 ├── packages/
 │   ├── shared/     # Shared types & utilities
 │   └── ui/         # Shared UI components

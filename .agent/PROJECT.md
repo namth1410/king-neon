@@ -290,7 +290,6 @@ MINIO_PORT=9002
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:4000/api
-NEXT_PUBLIC_CMS_URL=http://localhost:1337
 ```
 
 ### Admin (`apps/admin/.env.local`)

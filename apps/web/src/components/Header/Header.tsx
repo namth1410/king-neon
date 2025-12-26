@@ -7,14 +7,16 @@ import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import { selectCartCount, openCart } from "@/store";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "@/i18n/client";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import styles from "./Header.module.scss";
 
 const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/collections", label: "Collections" },
-  { href: "/create", label: "Create Your Own" },
-  { href: "/quote", label: "Get Quote" },
-  { href: "/about", label: "About" },
+  { href: "/", labelKey: "nav.home" },
+  { href: "/collections", labelKey: "nav.collections" },
+  { href: "/create", labelKey: "nav.create" },
+  { href: "/quote", labelKey: "nav.quote" },
+  { href: "/about", labelKey: "nav.about" },
 ];
 
 export default function Header() {
@@ -23,6 +25,7 @@ export default function Header() {
   const cartCount = useSelector(selectCartCount);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { t } = useTranslation("common");
 
   // Use useAuth hook for proper authentication state
   const { isAuthenticated } = useAuth();
@@ -70,7 +73,7 @@ export default function Header() {
                     isActive ? styles.active : ""
                   }`}
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                 </Link>
               );
             })}
@@ -78,11 +81,16 @@ export default function Header() {
 
           {/* Actions */}
           <div className={styles.header__actions}>
+            {/* Language Switcher */}
+            <LanguageSwitcher />
+
             {/* User Account */}
             <Link
               href={isAuthenticated ? "/account" : "/login"}
               className={styles.header__user}
-              aria-label={isAuthenticated ? "Account" : "Login"}
+              aria-label={
+                isAuthenticated ? t("header.account") : t("header.login")
+              }
             >
               <svg
                 className={styles["header__user-icon"]}
@@ -106,7 +114,7 @@ export default function Header() {
             <button
               className={styles.header__cart}
               onClick={handleCartClick}
-              aria-label="Open cart"
+              aria-label={t("header.openCart")}
             >
               <svg
                 className={styles["header__cart-icon"]}
@@ -131,7 +139,7 @@ export default function Header() {
             <button
               className={styles["header__menu-btn"]}
               onClick={() => setIsMobileMenuOpen(true)}
-              aria-label="Open menu"
+              aria-label={t("header.openMenu")}
             >
               <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
@@ -159,7 +167,7 @@ export default function Header() {
             <button
               className={styles["mobile-menu__close"]}
               onClick={() => setIsMobileMenuOpen(false)}
-              aria-label="Close menu"
+              aria-label={t("header.closeMenu")}
             >
               <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
@@ -192,7 +200,7 @@ export default function Header() {
                       }`}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      {link.label}
+                      {t(link.labelKey)}
                     </Link>
                   </motion.div>
                 );

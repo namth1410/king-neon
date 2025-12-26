@@ -3,7 +3,6 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: king-neon-postgres
-    restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-king_neon}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-king_neon_secret}
@@ -21,7 +20,6 @@ services:
   redis:
     image: redis:7-alpine
     container_name: king-neon-redis
-    restart: unless-stopped
     ports:
       - "6380:6379"
     volumes:
@@ -33,9 +31,8 @@ services:
       retries: 5
 
   minio:
-    image: minio/minio:latest
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
     container_name: king-neon-minio
-    restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-king_neon_minio}
@@ -57,7 +54,6 @@ services:
       context: .
       dockerfile: apps/api/Dockerfile
     container_name: king-neon-api
-    restart: unless-stopped
     ports:
       - "4000:4000"
     env_file: .env
@@ -69,27 +65,11 @@ services:
       minio:
         condition: service_healthy
 
-  cms:
-    build:
-      context: .
-      dockerfile: apps/cms/Dockerfile
-    container_name: king-neon-cms
-    restart: unless-stopped
-    ports:
-      - "1337:1337"
-    env_file: .env
-    depends_on:
-      postgres:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-
   web:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
     container_name: king-neon-web
-    restart: unless-stopped
     ports:
       - "3000:3000"
     env_file: .env
@@ -98,15 +78,12 @@ services:
     depends_on:
       api:
         condition: service_started
-      cms:
-        condition: service_started
 
   admin:
     build:
       context: .
       dockerfile: apps/admin/Dockerfile
     container_name: king-neon-admin
-    restart: unless-stopped
     ports:
       - "3001:3000"
     env_file: .env

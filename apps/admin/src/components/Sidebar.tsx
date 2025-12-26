@@ -13,21 +13,28 @@ import {
   Image,
   FolderTree,
 } from "lucide-react";
+import { useTranslation } from "@/i18n/client";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const menuItems = [
-  { href: "/", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/products", icon: ShoppingBag, label: "Products" },
-  { href: "/categories", icon: FolderTree, label: "Categories" },
-  { href: "/orders", icon: FileText, label: "Orders" },
-  { href: "/customers", icon: Users, label: "Customers" },
-  { href: "/neon-config", icon: Palette, label: "Neon Config" },
-  { href: "/preview-backgrounds", icon: Image, label: "Preview Backgrounds" },
-  { href: "/settings", icon: Settings, label: "Settings" },
+  { href: "/", icon: LayoutDashboard, labelKey: "sidebar.dashboard" },
+  { href: "/products", icon: ShoppingBag, labelKey: "sidebar.products" },
+  { href: "/categories", icon: FolderTree, labelKey: "sidebar.categories" },
+  { href: "/orders", icon: FileText, labelKey: "sidebar.orders" },
+  { href: "/customers", icon: Users, labelKey: "sidebar.customers" },
+  { href: "/neon-config", icon: Palette, labelKey: "sidebar.neonConfig" },
+  {
+    href: "/preview-backgrounds",
+    icon: Image,
+    labelKey: "sidebar.previewBackgrounds",
+  },
+  { href: "/settings", icon: Settings, labelKey: "sidebar.settings" },
 ];
 
 export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
+  const { t } = useTranslation("common");
 
   const handleLogout = () => {
     localStorage.removeItem("admin_token");
@@ -90,7 +97,7 @@ export default function Sidebar() {
             letterSpacing: "1px",
           }}
         >
-          Admin Panel
+          {t("sidebar.adminPanel")}
         </span>
       </div>
 
@@ -137,19 +144,24 @@ export default function Sidebar() {
                 />
               )}
               <Icon size={20} />
-              <span style={{ fontWeight: 500 }}>{item.label}</span>
+              <span style={{ fontWeight: 500 }}>{t(item.labelKey)}</span>
             </Link>
           );
         })}
       </nav>
 
-      {/* Logout */}
+      {/* Language Switcher & Logout */}
       <div
         style={{
           padding: "16px",
           borderTop: "1px solid rgba(255,255,255,0.08)",
+          display: "flex",
+          flexDirection: "column",
+          gap: "12px",
         }}
       >
+        <LanguageSwitcher />
+
         <button
           onClick={handleLogout}
           style={{
@@ -168,7 +180,7 @@ export default function Sidebar() {
           }}
         >
           <LogOut size={20} />
-          Logout
+          {t("sidebar.logout")}
         </button>
       </div>
     </aside>

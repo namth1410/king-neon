@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "@/i18n/client";
 
 interface Category {
   id: string;
@@ -60,6 +61,7 @@ export default function ProductsPage() {
   const limit = 3;
 
   const { request, abort, abortAll } = useApiRequest();
+  const { t } = useTranslation("common");
 
   // Debounce search - abort pending request immediately when typing
   useEffect(() => {
@@ -116,7 +118,7 @@ export default function ProductsPage() {
       }
     } catch (error) {
       console.error("Failed to fetch products", error);
-      toast.error("Failed to load products");
+      toast.error(t("products.error.loadFailed"));
       setProducts([]);
     } finally {
       setIsLoading(false);
@@ -129,14 +131,14 @@ export default function ProductsPage() {
   }, [fetchProducts, abortAll]);
 
   const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this product?")) {
+    if (confirm(t("products.deleteConfirm"))) {
       try {
         await api.delete(`/products/${id}`);
-        toast.success("Product deleted successfully");
+        toast.success(t("products.success.deleted"));
         fetchProducts();
       } catch (error) {
         console.error("Failed to delete product", error);
-        toast.error("Failed to delete product");
+        toast.error(t("products.error.deleteFailed"));
       }
     }
   };
@@ -152,22 +154,22 @@ export default function ProductsPage() {
   };
 
   return (
-    <DashboardLayout title="Products">
+    <DashboardLayout title={t("products.title")}>
       <div className="flex flex-col gap-6">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-white mb-1">
-              Product Management
+              {t("products.management")}
             </h1>
             <p className="text-zinc-500 text-sm">
-              {totalProducts} products in catalog
+              {totalProducts} {t("products.inCatalog")}
             </p>
           </div>
           <Button asChild className="bg-pink-600 hover:bg-pink-700 gap-2">
             <Link href="/products/create">
               <Plus size={20} />
-              Add Product
+              {t("products.addProduct")}
             </Link>
           </Button>
         </div>
@@ -182,7 +184,7 @@ export default function ProductsPage() {
             />
             <Input
               type="text"
-              placeholder="Search products..."
+              placeholder={t("products.searchPlaceholder")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 bg-zinc-800/50 border-zinc-700"
@@ -195,10 +197,10 @@ export default function ProductsPage() {
             value={categoryFilter || "all"}
           >
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="All Categories" />
+              <SelectValue placeholder={t("products.allCategories")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="all">{t("products.allCategories")}</SelectItem>
               {categories.map((cat) => (
                 <SelectItem key={cat.id} value={cat.id}>
                   {cat.name}
@@ -210,14 +212,20 @@ export default function ProductsPage() {
           {/* Sort */}
           <Select onValueChange={handleSortChange} value={sortBy}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Sort by" />
+              <SelectValue placeholder={t("products.sortBy")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="newest">Newest First</SelectItem>
-              <SelectItem value="name-asc">Name A-Z</SelectItem>
-              <SelectItem value="name-desc">Name Z-A</SelectItem>
-              <SelectItem value="price-asc">Price: Low to High</SelectItem>
-              <SelectItem value="price-desc">Price: High to Low</SelectItem>
+              <SelectItem value="newest">
+                {t("products.newestFirst")}
+              </SelectItem>
+              <SelectItem value="name-asc">{t("products.nameAZ")}</SelectItem>
+              <SelectItem value="name-desc">{t("products.nameZA")}</SelectItem>
+              <SelectItem value="price-asc">
+                {t("products.priceLowHigh")}
+              </SelectItem>
+              <SelectItem value="price-desc">
+                {t("products.priceHighLow")}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -227,23 +235,25 @@ export default function ProductsPage() {
           {isLoading ? (
             <div className="p-16 text-center text-zinc-500">
               <Spinner className="w-10 h-10 animate-spin mx-auto mb-4 text-pink-500" />
-              Loading products...
+              {t("products.loadingProducts")}
             </div>
           ) : products.length === 0 ? (
             <div className="p-16 text-center">
               <Package size={48} className="text-zinc-700 mx-auto mb-4" />
-              <p className="text-zinc-500">No products found</p>
+              <p className="text-zinc-500">{t("products.noProducts")}</p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow className="border-zinc-800 hover:bg-transparent">
-                  <TableHead>Product</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t("products.table.product")}</TableHead>
+                  <TableHead>{t("products.table.category")}</TableHead>
+                  <TableHead>{t("products.table.price")}</TableHead>
+                  <TableHead>{t("products.table.status")}</TableHead>
+                  <TableHead>{t("products.table.type")}</TableHead>
+                  <TableHead className="text-right">
+                    {t("products.table.actions")}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -269,7 +279,7 @@ export default function ProductsPage() {
                         variant="outline"
                         className="border-zinc-700 text-zinc-400"
                       >
-                        {product.category?.name || "No Category"}
+                        {product.category?.name || t("common.noCategory")}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -286,7 +296,9 @@ export default function ProductsPage() {
                             product.active ? "bg-green-400" : "bg-red-400"
                           }`}
                         />
-                        {product.active ? "Active" : "Inactive"}
+                        {product.active
+                          ? t("common.active")
+                          : t("common.inactive")}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -298,7 +310,9 @@ export default function ProductsPage() {
                             : ""
                         }
                       >
-                        {product.isCustom ? "Custom" : "Standard"}
+                        {product.isCustom
+                          ? t("products.type.custom")
+                          : t("products.type.standard")}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">

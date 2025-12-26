@@ -27,7 +27,7 @@ This guide explains how to deploy the King Neon project to a VPS using Docker.
     **Critical:** Update the values in `.env` for production, especially:
     - `POSTGRES_PASSWORD`
     - `MINIO_ROOT_PASSWORD`
-    - `JWT_SECRET`, `API_TOKEN_SALT`, `ADMIN_JWT_SECRET` etc. (for Strapi/NestJS)
+    - `JWT_SECRET` (for NestJS)
     - `NEXT_PUBLIC_API_URL` (should point to your VPS domain/IP)
 
 3.  **Build and Run**
@@ -53,7 +53,6 @@ By default, the services map to these ports:
 - **Web Storefront**: `http://<vps-ip>:3000`
 - **Admin Dashboard**: `http://<vps-ip>:3001`
 - **API**: `http://<vps-ip>:4000`
-- **CMS**: `http://<vps-ip>:1337`
 
 > **Note:** For a production environment, it is highly recommended to set up a reverse proxy like **Nginx** or **Traefik** to handle SSL (HTTPS) and route domains (e.g., `kingneon.com`, `admin.kingneon.com`) to these ports.
 

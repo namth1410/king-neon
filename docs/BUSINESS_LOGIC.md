@@ -25,7 +25,6 @@
 | Frontend    | Next.js 15 + TypeScript | 3000                       |
 | Admin       | Next.js 15 + TypeScript | 3001                       |
 | Backend API | NestJS + TypeScript     | 4000                       |
-| CMS         | Strapi v4               | 1338                       |
 | Database    | PostgreSQL 16           | 5434                       |
 | Cache       | Redis 7                 | 6380                       |
 | Storage     | MinIO                   | 9002 (API), 9003 (Console) |
@@ -37,8 +36,7 @@ king-neon/
 ├── apps/
 │   ├── web/        # Website công khai cho khách hàng
 │   ├── admin/      # Admin panel quản lý
-│   ├── api/        # Backend API (NestJS)
-│   └── cms/        # CMS quản lý nội dung (Strapi)
+│   └── api/        # Backend API (NestJS)
 ├── packages/
 │   ├── shared/     # Shared types & utilities
 │   └── ui/         # Shared UI components
@@ -431,13 +429,13 @@ Guards được sử dụng:
 
 ```bash
 # Database
-DATABASE_HOST, DATABASE_PORT, DATABASE_USER, DATABASE_PASSWORD, DATABASE_NAME
+DATABASE_HOST, DATABASE_PORT, DATABASE_USERNAME, DATABASE_PASSWORD, DATABASE_NAME
 
 # Redis Cache
 REDIS_HOST, REDIS_PORT
 
 # MinIO Storage
-MINIO_ENDPOINT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY, MINIO_BUCKET
+MINIO_ENDPOINT, MINIO_ROOT_USER, MINIO_ROOT_PASSWORD, MINIO_BUCKET
 
 # Stripe Payments
 STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET

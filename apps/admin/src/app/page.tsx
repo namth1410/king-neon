@@ -14,6 +14,8 @@ import { Spinner } from "@king-neon/ui";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 import api from "@/utils/api";
+import { useTranslation } from "@/i18n/client";
+import { OrderStatus, ORDER_STATUS_COLORS } from "@/lib/statusConfig";
 
 interface DashboardStats {
   totalProducts: number;
@@ -27,7 +29,7 @@ interface RecentOrder {
   orderNumber: string;
   customerName: string;
   total: string;
-  status: string;
+  status: OrderStatus;
   createdAt: string;
 }
 
@@ -40,6 +42,7 @@ export default function AdminDashboard() {
   });
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation("common");
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -84,13 +87,13 @@ export default function AdminDashboard() {
             orderNumber: o.orderNumber,
             customerName: o.customerName || "Guest",
             total: String(o.total || "0"),
-            status: o.status,
+            status: o.status as OrderStatus,
             createdAt: o.createdAt,
           }))
         );
       } catch (error) {
         console.error("Failed to fetch stats:", error);
-        toast.error("Failed to load dashboard statistics");
+        toast.error(t("errors.loadStats"));
       } finally {
         setLoading(false);
       }
@@ -100,7 +103,7 @@ export default function AdminDashboard() {
   }, []);
 
   return (
-    <DashboardLayout title="Dashboard">
+    <DashboardLayout title={t("dashboard.title")}>
       <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
         {/* Welcome Banner */}
         <div
@@ -123,7 +126,7 @@ export default function AdminDashboard() {
                 marginBottom: "8px",
               }}
             >
-              Welcome back! 👋
+              {t("dashboard.welcome")}
             </h1>
             <p
               style={{
@@ -132,8 +135,7 @@ export default function AdminDashboard() {
                 lineHeight: 1.6,
               }}
             >
-              Here&apos;s what&apos;s happening with your store today. Manage
-              products, process orders, and grow your business.
+              {t("dashboard.welcomeDescription")}
             </p>
           </div>
           <div
@@ -160,28 +162,28 @@ export default function AdminDashboard() {
           }}
         >
           <StatCard
-            title="Total Revenue"
+            title={t("dashboard.totalRevenue")}
             value={`$${stats.totalRevenue.toFixed(2)}`}
             icon={<TrendingUp size={20} />}
             color="#22c55e"
             loading={loading}
           />
           <StatCard
-            title="Total Orders"
+            title={t("dashboard.totalOrders")}
             value={stats.totalOrders.toString()}
             icon={<ShoppingCart size={20} />}
             color="#3b82f6"
             loading={loading}
           />
           <StatCard
-            title="Products"
+            title={t("dashboard.totalProducts")}
             value={stats.totalProducts.toString()}
             icon={<Package size={20} />}
             color="#a855f7"
             loading={loading}
           />
           <StatCard
-            title="Pending Orders"
+            title={t("dashboard.pendingOrders")}
             value={stats.pendingOrders.toString()}
             icon={<Users size={20} />}
             color="#f97316"
@@ -198,25 +200,28 @@ export default function AdminDashboard() {
           }}
         >
           <QuickActionCard
-            title="Manage Products"
-            description="Add, edit, or remove products"
+            title={t("dashboard.quickActions.manageProducts")}
+            description={t("dashboard.quickActions.manageProductsDesc")}
             href="/products"
             icon={<Package size={24} />}
             color="#ff3366"
+            viewLabel={t("common.view")}
           />
           <QuickActionCard
-            title="View Orders"
-            description="Process customer orders"
+            title={t("dashboard.quickActions.viewOrders")}
+            description={t("dashboard.quickActions.viewOrdersDesc")}
             href="/orders"
             icon={<ShoppingCart size={24} />}
             color="#3b82f6"
+            viewLabel={t("common.view")}
           />
           <QuickActionCard
-            title="Neon Config"
-            description="Manage fonts and colors"
+            title={t("dashboard.quickActions.neonConfig")}
+            description={t("dashboard.quickActions.neonConfigDesc")}
             href="/neon-config"
             icon={<span style={{ fontSize: "24px" }}>✨</span>}
             color="#a855f7"
+            viewLabel={t("common.view")}
           />
         </div>
 
@@ -246,7 +251,7 @@ export default function AdminDashboard() {
               }}
             >
               <h3 style={{ fontSize: "18px", fontWeight: 600, color: "white" }}>
-                Recent Orders
+                {t("dashboard.recentOrders")}
               </h3>
               <Link
                 href="/orders"
@@ -258,7 +263,7 @@ export default function AdminDashboard() {
                   gap: "4px",
                 }}
               >
-                View all <ArrowUpRight size={14} />
+                {t("common.viewAll")} <ArrowUpRight size={14} />
               </Link>
             </div>
             {loading ? (
@@ -319,26 +324,15 @@ export default function AdminDashboard() {
                         ${Number(order.total).toFixed(2)}
                       </p>
                       <span
+                        className={ORDER_STATUS_COLORS[order.status]}
                         style={{
                           fontSize: "11px",
                           padding: "2px 8px",
                           borderRadius: "12px",
-                          background:
-                            order.status === "delivered"
-                              ? "rgba(34,197,94,0.15)"
-                              : order.status === "pending"
-                                ? "rgba(249,115,22,0.15)"
-                                : "rgba(59,130,246,0.15)",
-                          color:
-                            order.status === "delivered"
-                              ? "#22c55e"
-                              : order.status === "pending"
-                                ? "#f97316"
-                                : "#3b82f6",
+                          display: "inline-block",
                         }}
                       >
-                        {order.status.charAt(0).toUpperCase() +
-                          order.status.slice(1)}
+                        {t(`orders.statuses.${order.status}`)}
                       </span>
                     </div>
                   </Link>
@@ -356,9 +350,9 @@ export default function AdminDashboard() {
                   size={48}
                   style={{ margin: "0 auto 16px", opacity: 0.4 }}
                 />
-                <p>No orders yet</p>
+                <p>{t("dashboard.noOrders")}</p>
                 <p style={{ fontSize: "14px", marginTop: "8px" }}>
-                  Orders will appear here when customers make purchases
+                  {t("dashboard.noOrdersDescription")}
                 </p>
               </div>
             )}
@@ -381,21 +375,21 @@ export default function AdminDashboard() {
                 marginBottom: "20px",
               }}
             >
-              Store Overview
+              {t("dashboard.storeOverview")}
             </h3>
             <div
               style={{ display: "flex", flexDirection: "column", gap: "12px" }}
             >
               <OverviewRow
-                label="Products Active"
+                label={t("dashboard.productsActive")}
                 value={stats.totalProducts}
               />
               <OverviewRow
-                label="Orders Processing"
+                label={t("dashboard.ordersProcessing")}
                 value={stats.pendingOrders}
               />
-              <OverviewRow label="Neon Colors" value={12} />
-              <OverviewRow label="Font Styles" value={8} />
+              <OverviewRow label={t("dashboard.neonColors")} value={12} />
+              <OverviewRow label={t("dashboard.fontStyles")} value={8} />
             </div>
           </div>
         </div>
@@ -493,12 +487,14 @@ function QuickActionCard({
   href,
   icon,
   color,
+  viewLabel = "View",
 }: {
   title: string;
   description: string;
   href: string;
   icon: React.ReactNode;
   color: string;
+  viewLabel?: string;
 }) {
   return (
     <Link
@@ -559,7 +555,7 @@ function QuickActionCard({
           fontSize: "14px",
         }}
       >
-        <span>View</span>
+        <span>{viewLabel}</span>
         <ChevronRight size={16} />
       </div>
     </Link>

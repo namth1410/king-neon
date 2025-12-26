@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
 import api from "@/utils/api";
 import { useApiRequest, withSignal } from "@/hooks/useApiRequest";
@@ -34,19 +33,21 @@ const sortOptions = [
 ];
 
 interface CollectionDetailClientProps {
-  slug: string;
+  initialCategory: Category;
+  initialProducts: Product[];
+  initialTotal: number;
 }
 
 export default function CollectionDetailClient({
-  slug,
+  initialCategory,
+  initialProducts,
+  initialTotal,
 }: CollectionDetailClientProps) {
-  const router = useRouter();
-  const [category, setCategory] = useState<Category | null>(null);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isCategoryLoading, setIsCategoryLoading] = useState(true);
+  const [category] = useState<Category>(initialCategory);
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const [totalProducts, setTotalProducts] = useState(0);
+  const [totalProducts, setTotalProducts] = useState(initialTotal);
   const [sortBy, setSortBy] = useState("featured");
   const [searchQuery, setSearchQuery] = useState("");
   const [availability, setAvailability] = useState<"all" | "in-stock">("all");
@@ -54,24 +55,7 @@ export default function CollectionDetailClient({
 
   const { request, abortAll } = useApiRequest();
 
-  // Fetch category by slug
-  useEffect(() => {
-    const fetchCategory = async () => {
-      setIsCategoryLoading(true);
-      try {
-        const response = await api.get(`/categories/slug/${slug}`);
-        setCategory(response.data);
-      } catch (error) {
-        console.error("Failed to fetch category:", error);
-        router.push("/collections");
-      } finally {
-        setIsCategoryLoading(false);
-      }
-    };
-    fetchCategory();
-  }, [slug, router]);
-
-  // Fetch products for this category
+  // Fetch products when filters/pagination change (not on initial load)
   const fetchProducts = useCallback(async () => {
     if (!category) return;
 
@@ -109,17 +93,38 @@ export default function CollectionDetailClient({
     }
   }, [category, page, searchQuery, request]);
 
+  // Only fetch when page or search changes (not on initial mount)
+  const [hasInteracted, setHasInteracted] = useState(false);
+
   useEffect(() => {
-    if (category) {
+    if (hasInteracted) {
       fetchProducts();
     }
     return () => abortAll();
-  }, [fetchProducts, category, abortAll]);
+  }, [fetchProducts, hasInteracted, abortAll]);
 
   // Reset page when filters change
   useEffect(() => {
-    setPage(1);
-  }, [searchQuery, availability]);
+    if (hasInteracted) {
+      setPage(1);
+    }
+  }, [searchQuery, availability, hasInteracted]);
+
+  // Handler for search/filter changes
+  const handleSearchChange = (value: string) => {
+    setHasInteracted(true);
+    setSearchQuery(value);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setHasInteracted(true);
+    setPage(newPage);
+  };
+
+  const handleAvailabilityChange = (value: "all" | "in-stock") => {
+    setHasInteracted(true);
+    setAvailability(value);
+  };
 
   // Sort products client-side
   const sortedProducts = useMemo(() => {
@@ -154,29 +159,10 @@ export default function CollectionDetailClient({
 
   const totalPages = Math.ceil(totalProducts / limit);
 
-  // Handle search
+  // Handle search form submit
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
   };
-
-  if (isCategoryLoading) {
-    return (
-      <div className={styles.collection}>
-        <div className={styles["collection__banner--skeleton"]} />
-        <div className={styles.collection__container}>
-          <div className={styles.collection__grid}>
-            {Array.from({ length: 8 }).map((_, index) => (
-              <div key={index} className={styles["collection__skeleton"]} />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!category) {
-    return null;
-  }
 
   return (
     <div className={styles.collection}>
@@ -222,7 +208,7 @@ export default function CollectionDetailClient({
                 type="text"
                 placeholder="Search products..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className={styles["collection__search-input"]}
               />
               <button
@@ -250,7 +236,7 @@ export default function CollectionDetailClient({
                   type="radio"
                   name="availability"
                   checked={availability === "all"}
-                  onChange={() => setAvailability("all")}
+                  onChange={() => handleAvailabilityChange("all")}
                 />
                 <span>All</span>
               </label>
@@ -259,7 +245,7 @@ export default function CollectionDetailClient({
                   type="radio"
                   name="availability"
                   checked={availability === "in-stock"}
-                  onChange={() => setAvailability("in-stock")}
+                  onChange={() => handleAvailabilityChange("in-stock")}
                 />
                 <span>In Stock</span>
               </label>
@@ -318,7 +304,7 @@ export default function CollectionDetailClient({
                   {searchQuery && (
                     <button
                       className={styles["collection__empty-reset"]}
-                      onClick={() => setSearchQuery("")}
+                      onClick={() => handleSearchChange("")}
                     >
                       Clear search
                     </button>
@@ -333,7 +319,7 @@ export default function CollectionDetailClient({
                 <button
                   className={styles["collection__pagination-btn"]}
                   disabled={page === 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  onClick={() => handlePageChange(Math.max(1, page - 1))}
                 >
                   ←
                 </button>
@@ -346,7 +332,7 @@ export default function CollectionDetailClient({
                     className={`${styles["collection__pagination-btn"]} ${
                       page === p ? styles.active : ""
                     }`}
-                    onClick={() => setPage(p)}
+                    onClick={() => handlePageChange(p)}
                   >
                     {p}
                   </button>
@@ -354,7 +340,9 @@ export default function CollectionDetailClient({
                 <button
                   className={styles["collection__pagination-btn"]}
                   disabled={page === totalPages}
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  onClick={() =>
+                    handlePageChange(Math.min(totalPages, page + 1))
+                  }
                 >
                   →
                 </button>

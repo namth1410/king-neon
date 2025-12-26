@@ -1,0 +1,217 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "add": "Add",
+    "search": "Search",
+    "filter": "Filter",
+    "actions": "Actions",
+    "status": "Status",
+    "noData": "No data available",
+    "confirm": "Confirm",
+    "close": "Close",
+    "view": "View",
+    "viewAll": "View all",
+    "refresh": "Refresh",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "prev": "Prev",
+    "showing": "Showing",
+    "to": "to",
+    "of": "of",
+    "page": "Page",
+    "items": "items",
+    "active": "Active",
+    "inactive": "Inactive",
+    "noCategory": "No Category",
+    "guest": "Guest",
+    "gotIt": "Got it"
+  },
+  "sidebar": {
+    "adminPanel": "Admin Panel",
+    "dashboard": "Dashboard",
+    "products": "Products",
+    "categories": "Categories",
+    "orders": "Orders",
+    "customers": "Customers",
+    "neonConfig": "Neon Config",
+    "previewBackgrounds": "Preview Backgrounds",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back! 👋",
+    "welcomeDescription": "Here's what's happening with your store today. Manage products, process orders, and grow your business.",
+    "totalRevenue": "Total Revenue",
+    "totalOrders": "Total Orders",
+    "totalProducts": "Products",
+    "pendingOrders": "Pending Orders",
+    "recentOrders": "Recent Orders",
+    "noOrders": "No orders yet",
+    "noOrdersDescription": "Orders will appear here when customers make purchases",
+    "storeOverview": "Store Overview",
+    "productsActive": "Products Active",
+    "ordersProcessing": "Orders Processing",
+    "neonColors": "Neon Colors",
+    "fontStyles": "Font Styles",
+    "quickActions": {
+      "manageProducts": "Manage Products",
+      "manageProductsDesc": "Add, edit, or remove products",
+      "viewOrders": "View Orders",
+      "viewOrdersDesc": "Process customer orders",
+      "neonConfig": "Neon Config",
+      "neonConfigDesc": "Manage fonts and colors"
+    }
+  },
+  "products": {
+    "title": "Products",
+    "management": "Product Management",
+    "inCatalog": "products in catalog",
+    "addProduct": "Add Product",
+    "editProduct": "Edit Product",
+    "deleteConfirm": "Are you sure you want to delete this product?",
+    "loadingProducts": "Loading products...",
+    "noProducts": "No products found",
+    "searchPlaceholder": "Search products...",
+    "allCategories": "All Categories",
+    "sortBy": "Sort by",
+    "newestFirst": "Newest First",
+    "nameAZ": "Name A-Z",
+    "nameZA": "Name Z-A",
+    "priceLowHigh": "Price: Low to High",
+    "priceHighLow": "Price: High to Low",
+    "table": {
+      "product": "Product",
+      "category": "Category",
+      "price": "Price",
+      "status": "Status",
+      "type": "Type",
+      "actions": "Actions"
+    },
+    "type": {
+      "custom": "Custom",
+      "standard": "Standard"
+    },
+    "success": {
+      "deleted": "Product deleted successfully",
+      "created": "Product created successfully",
+      "updated": "Product updated successfully"
+    },
+    "error": {
+      "loadFailed": "Failed to load products",
+      "deleteFailed": "Failed to delete product"
+    }
+  },
+  "categories": {
+    "title": "Categories",
+    "description": "Manage your product categories",
+    "addCategory": "Add Category",
+    "editCategory": "Edit Category",
+    "loading": "Loading categories...",
+    "noCategories": "No categories yet",
+    "createFirst": "Create your first category",
+    "deleteCategory": "Delete Category?",
+    "cannotDelete": "Cannot Delete Category",
+    "deleteConfirm": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+    "usedByProducts": "The category \"{{name}}\" is used by {{count}} product(s). Please reassign these products to another category before deleting.",
+    "success": {
+      "deleted": "Category deleted successfully"
+    },
+    "error": {
+      "loadFailed": "Failed to load categories",
+      "deleteFailed": "Failed to delete category",
+      "checkProductCount": "Failed to check product count"
+    }
+  },
+  "orders": {
+    "title": "Orders",
+    "management": "Order Management",
+    "description": "Manage and track all customer orders",
+    "searchPlaceholder": "Search by order number, customer...",
+    "allStatus": "All Status",
+    "loadingOrders": "Loading orders...",
+    "noOrders": "No orders found",
+    "table": {
+      "order": "Order",
+      "customer": "Customer",
+      "status": "Status",
+      "total": "Total",
+      "date": "Date",
+      "actions": "Actions"
+    },
+    "statuses": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "processing": "Processing",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled"
+    },
+    "error": {
+      "loadFailed": "Failed to load orders"
+    }
+  },
+  "customers": {
+    "title": "Customers",
+    "management": "Customer Management",
+    "registered": "customers registered",
+    "searchPlaceholder": "Search by name or email...",
+    "allRoles": "All Roles",
+    "allStatus": "All Status",
+    "loading": "Loading customers...",
+    "noCustomers": "No customers found",
+    "table": {
+      "customer": "Customer",
+      "contact": "Contact",
+      "role": "Role",
+      "status": "Status",
+      "joined": "Joined",
+      "actions": "Actions"
+    },
+    "roles": {
+      "customer": "Customer",
+      "admin": "Admin"
+    },
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "success": {
+      "activated": "Customer activated",
+      "deactivated": "Customer deactivated"
+    },
+    "error": {
+      "loadFailed": "Failed to load customers",
+      "updateFailed": "Failed to update customer status"
+    }
+  },
+  "pagination": {
+    "showing": "Showing {{start}} to {{end}} of {{total}} {{items}}",
+    "page": "Page {{current}} of {{total}}"
+  },
+  "language": {
+    "en": "English",
+    "vi": "Tiếng Việt",
+    "switchLanguage": "Switch language"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "notFound": "Resource not found.",
+    "unauthorized": "You are not authorized to perform this action.",
+    "validation": "Please check your input and try again.",
+    "loadStats": "Failed to load dashboard statistics"
+  },
+  "toast": {
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Info",
+    "saved": "Changes saved successfully",
+    "deleted": "Item deleted successfully",
+    "created": "Item created successfully"
+  }
+}

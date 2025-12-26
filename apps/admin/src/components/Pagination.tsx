@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslation } from "@/i18n/client";
 
 interface PaginationProps {
   page: number;
@@ -21,6 +22,8 @@ export default function Pagination({
   onPageChange,
   itemName = "items",
 }: PaginationProps) {
+  const { t } = useTranslation("common");
+
   if (totalPages <= 1) return null;
 
   const start = Math.min((page - 1) * limit + 1, totalItems);
@@ -37,7 +40,12 @@ export default function Pagination({
       }}
     >
       <span style={{ color: "rgba(255,255,255,0.5)", fontSize: "14px" }}>
-        Showing {start} to {end} of {totalItems} {itemName}
+        {t("pagination.showing", {
+          start,
+          end,
+          total: totalItems,
+          items: itemName,
+        })}
       </span>
       <div style={{ display: "flex", gap: "8px" }}>
         <button
@@ -57,7 +65,7 @@ export default function Pagination({
           }}
         >
           <ChevronLeft size={16} />
-          Prev
+          {t("common.prev")}
         </button>
         <span
           style={{
@@ -66,7 +74,7 @@ export default function Pagination({
             fontSize: "14px",
           }}
         >
-          Page {page} of {totalPages}
+          {t("pagination.page", { current: page, total: totalPages })}
         </span>
         <button
           onClick={() => onPageChange(Math.min(totalPages, page + 1))}
@@ -86,7 +94,7 @@ export default function Pagination({
             gap: "4px",
           }}
         >
-          Next
+          {t("common.next")}
           <ChevronRight size={16} />
         </button>
       </div>

@@ -1,31 +1,37 @@
+"use client";
+
 import Link from "next/link";
+import { useTranslation } from "@/i18n/client";
 import styles from "./Footer.module.scss";
 
 const footerLinks = {
   shop: [
-    { href: "/collections", label: "All Collections" },
-    { href: "/collections/wedding", label: "Wedding Signs" },
-    { href: "/collections/business", label: "Business Signs" },
-    { href: "/collections/home", label: "Home Decor" },
-    { href: "/create", label: "Custom Neon" },
+    { href: "/collections", labelKey: "footer.links.allCollections" },
+    { href: "/collections/wedding", labelKey: "footer.links.weddingSigns" },
+    { href: "/collections/business", labelKey: "footer.links.businessSigns" },
+    { href: "/collections/home", labelKey: "footer.links.homeDecor" },
+    { href: "/create", labelKey: "footer.links.customNeon" },
   ],
   support: [
-    { href: "/faq", label: "FAQ" },
-    { href: "/shipping", label: "Shipping Info" },
-    { href: "/returns", label: "Returns" },
-    { href: "/contact", label: "Contact Us" },
-    { href: "/quote", label: "Get a Quote" },
+    { href: "/faq", labelKey: "footer.links.faq" },
+    { href: "/shipping", labelKey: "footer.links.shippingInfo" },
+    { href: "/returns", labelKey: "footer.links.returns" },
+    { href: "/contact", labelKey: "footer.links.contactUs" },
+    { href: "/quote", labelKey: "footer.links.getQuote" },
   ],
   company: [
-    { href: "/about", label: "About Us" },
-    { href: "/blog", label: "Blog" },
-    { href: "/reviews", label: "Reviews" },
-    { href: "/privacy", label: "Privacy Policy" },
-    { href: "/terms", label: "Terms of Service" },
+    { href: "/about", labelKey: "footer.links.aboutUs" },
+    { href: "/blog", labelKey: "footer.links.blog" },
+    { href: "/reviews", labelKey: "footer.links.reviews" },
+    { href: "/privacy", labelKey: "footer.links.privacyPolicy" },
+    { href: "/terms", labelKey: "footer.links.termsOfService" },
   ],
 };
 
 export default function Footer() {
+  const { t } = useTranslation("common");
+  const currentYear = new Date().getFullYear();
+
   return (
     <footer className={styles.footer}>
       <div className={styles.footer__container}>
@@ -34,8 +40,7 @@ export default function Footer() {
           <div className={styles.footer__brand}>
             <div className={styles["footer__brand-logo"]}>KING NEON</div>
             <p className={styles["footer__brand-description"]}>
-              Premium custom LED neon signs handcrafted with love. Transform
-              your space with stunning illumination that lasts.
+              {t("footer.description")}
             </p>
             <div className={styles["footer__brand-social"]}>
               <a
@@ -70,7 +75,9 @@ export default function Footer() {
 
           {/* Shop Links */}
           <div className={styles.footer__column}>
-            <h3 className={styles["footer__column-title"]}>Shop</h3>
+            <h3 className={styles["footer__column-title"]}>
+              {t("footer.shop")}
+            </h3>
             <div className={styles["footer__column-links"]}>
               {footerLinks.shop.map((link) => (
                 <Link
@@ -78,7 +85,7 @@ export default function Footer() {
                   href={link.href}
                   className={styles["footer__column-link"]}
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                 </Link>
               ))}
             </div>
@@ -86,7 +93,9 @@ export default function Footer() {
 
           {/* Support Links */}
           <div className={styles.footer__column}>
-            <h3 className={styles["footer__column-title"]}>Support</h3>
+            <h3 className={styles["footer__column-title"]}>
+              {t("footer.support")}
+            </h3>
             <div className={styles["footer__column-links"]}>
               {footerLinks.support.map((link) => (
                 <Link
@@ -94,7 +103,7 @@ export default function Footer() {
                   href={link.href}
                   className={styles["footer__column-link"]}
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                 </Link>
               ))}
             </div>
@@ -102,7 +111,9 @@ export default function Footer() {
 
           {/* Company Links */}
           <div className={styles.footer__column}>
-            <h3 className={styles["footer__column-title"]}>Company</h3>
+            <h3 className={styles["footer__column-title"]}>
+              {t("footer.company")}
+            </h3>
             <div className={styles["footer__column-links"]}>
               {footerLinks.company.map((link) => (
                 <Link
@@ -110,7 +121,7 @@ export default function Footer() {
                   href={link.href}
                   className={styles["footer__column-link"]}
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                 </Link>
               ))}
             </div>
@@ -121,7 +132,7 @@ export default function Footer() {
 
         <div className={styles.footer__bottom}>
           <p className={styles.footer__copyright}>
-            © {new Date().getFullYear()} King Neon. All rights reserved.
+            {t("footer.copyright", { year: currentYear })}
           </p>
         </div>
       </div>

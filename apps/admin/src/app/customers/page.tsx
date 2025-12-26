@@ -34,6 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "@/i18n/client";
 
 interface User {
   id: string;
@@ -66,6 +67,7 @@ export default function CustomersPage() {
   const limit = 10;
 
   const { request, abort, abortAll } = useApiRequest();
+  const { t } = useTranslation("common");
 
   // Debounce search - abort pending request immediately when typing
   useEffect(() => {
@@ -105,7 +107,7 @@ export default function CustomersPage() {
       }
     } catch (error) {
       console.error("Failed to fetch users:", error);
-      toast.error("Failed to load customers");
+      toast.error(t("customers.error.loadFailed"));
       setUsers([]);
     } finally {
       setIsLoading(false);
@@ -120,11 +122,15 @@ export default function CustomersPage() {
   const handleToggleStatus = async (user: User) => {
     try {
       await api.patch(`/users/${user.id}`, { isActive: !user.isActive });
-      toast.success(`Customer ${user.isActive ? "deactivated" : "activated"}`);
+      toast.success(
+        user.isActive
+          ? t("customers.success.deactivated")
+          : t("customers.success.activated")
+      );
       fetchUsers();
     } catch (error) {
       console.error("Failed to update user:", error);
-      toast.error("Failed to update customer status");
+      toast.error(t("customers.error.updateFailed"));
     }
   };
 
@@ -147,16 +153,16 @@ export default function CustomersPage() {
   };
 
   return (
-    <DashboardLayout title="Customers">
+    <DashboardLayout title={t("customers.title")}>
       <div className="flex flex-col gap-6">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-white mb-1">
-              Customer Management
+              {t("customers.management")}
             </h1>
             <p className="text-zinc-500 text-sm">
-              {totalUsers} customers registered
+              {totalUsers} {t("customers.registered")}
             </p>
           </div>
         </div>
@@ -170,7 +176,7 @@ export default function CustomersPage() {
             />
             <Input
               type="text"
-              placeholder="Search by name or email..."
+              placeholder={t("customers.searchPlaceholder")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 bg-zinc-800/50 border-zinc-700"
@@ -179,23 +185,27 @@ export default function CustomersPage() {
 
           <Select onValueChange={handleRoleChange} value={roleFilter}>
             <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="All Roles" />
+              <SelectValue placeholder={t("customers.allRoles")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Roles</SelectItem>
-              <SelectItem value="customer">Customer</SelectItem>
-              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="all">{t("customers.allRoles")}</SelectItem>
+              <SelectItem value="customer">
+                {t("customers.roles.customer")}
+              </SelectItem>
+              <SelectItem value="admin">
+                {t("customers.roles.admin")}
+              </SelectItem>
             </SelectContent>
           </Select>
 
           <Select onValueChange={handleStatusChange} value={statusFilter}>
             <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="All Status" />
+              <SelectValue placeholder={t("customers.allStatus")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
+              <SelectItem value="all">{t("customers.allStatus")}</SelectItem>
+              <SelectItem value="active">{t("common.active")}</SelectItem>
+              <SelectItem value="inactive">{t("common.inactive")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -205,23 +215,25 @@ export default function CustomersPage() {
           {isLoading ? (
             <div className="p-16 text-center text-zinc-500">
               <Spinner className="w-10 h-10 animate-spin mx-auto mb-4 text-pink-500" />
-              Loading customers...
+              {t("customers.loading")}
             </div>
           ) : users.length === 0 ? (
             <div className="p-16 text-center">
               <Users size={48} className="text-zinc-700 mx-auto mb-4" />
-              <p className="text-zinc-500">No customers found</p>
+              <p className="text-zinc-500">{t("customers.noCustomers")}</p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow className="border-zinc-800 hover:bg-transparent">
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Joined</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t("customers.table.customer")}</TableHead>
+                  <TableHead>{t("customers.table.contact")}</TableHead>
+                  <TableHead>{t("customers.table.role")}</TableHead>
+                  <TableHead>{t("customers.table.status")}</TableHead>
+                  <TableHead>{t("customers.table.joined")}</TableHead>
+                  <TableHead className="text-right">
+                    {t("customers.table.actions")}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -265,7 +277,7 @@ export default function CustomersPage() {
                             : ""
                         }
                       >
-                        {user.role}
+                        {t(`customers.roles.${user.role}`)}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -277,7 +289,9 @@ export default function CustomersPage() {
                             user.isActive ? "bg-green-400" : "bg-red-400"
                           }`}
                         />
-                        {user.isActive ? "Active" : "Inactive"}
+                        {user.isActive
+                          ? t("common.active")
+                          : t("common.inactive")}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -296,7 +310,11 @@ export default function CustomersPage() {
                             : "text-green-400 hover:text-green-300 hover:bg-green-500/10"
                         }`}
                         onClick={() => handleToggleStatus(user)}
-                        title={user.isActive ? "Deactivate" : "Activate"}
+                        title={
+                          user.isActive
+                            ? t("customers.deactivate")
+                            : t("customers.activate")
+                        }
                       >
                         {user.isActive ? (
                           <UserX size={16} />

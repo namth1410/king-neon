@@ -10,6 +10,7 @@ import api from "@/utils/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTranslation } from "@/i18n/client";
 
 interface Category {
   id: string;
@@ -31,6 +32,7 @@ export default function CategoriesPage() {
     category: Category | null;
     productCount: number;
   }>({ open: false, category: null, productCount: 0 });
+  const { t } = useTranslation("common");
 
   useEffect(() => {
     fetchCategories();
@@ -43,8 +45,8 @@ export default function CategoriesPage() {
       setCategories(res.data);
     } catch (err) {
       console.error("Failed to fetch categories:", err);
-      toast.error("Failed to load categories");
-      setError("Failed to load categories");
+      toast.error(t("categories.error.loadFailed"));
+      setError(t("categories.error.loadFailed"));
     } finally {
       setLoading(false);
     }
@@ -60,7 +62,7 @@ export default function CategoriesPage() {
       });
     } catch (err) {
       console.error("Failed to check product count:", err);
-      toast.error("Failed to check product count");
+      toast.error(t("categories.error.checkProductCount"));
     }
   };
 
@@ -72,29 +74,33 @@ export default function CategoriesPage() {
       setCategories((prev) =>
         prev.filter((c) => c.id !== deleteModal.category?.id)
       );
-      toast.success("Category deleted successfully");
+      toast.success(t("categories.success.deleted"));
       setDeleteModal({ open: false, category: null, productCount: 0 });
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
-      toast.error(error.response?.data?.message || "Failed to delete category");
+      toast.error(
+        error.response?.data?.message || t("categories.error.deleteFailed")
+      );
     }
   };
 
   return (
-    <DashboardLayout title="Categories">
+    <DashboardLayout title={t("categories.title")}>
       <div className="max-w-6xl mx-auto flex flex-col gap-6">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-white mb-1">Categories</h1>
+            <h1 className="text-2xl font-bold text-white mb-1">
+              {t("categories.title")}
+            </h1>
             <p className="text-zinc-500 text-sm">
-              Manage your product categories
+              {t("categories.description")}
             </p>
           </div>
           <Button asChild className="bg-pink-600 hover:bg-pink-700 gap-2">
             <Link href="/categories/create">
               <Plus size={20} />
-              Add Category
+              {t("categories.addCategory")}
             </Link>
           </Button>
         </div>
@@ -110,17 +116,17 @@ export default function CategoriesPage() {
         {loading ? (
           <div className="p-16 text-center text-zinc-500">
             <Spinner className="w-10 h-10 animate-spin mx-auto mb-4 text-pink-500" />
-            Loading categories...
+            {t("categories.loading")}
           </div>
         ) : categories.length === 0 ? (
           <div className="text-center p-16 bg-zinc-900/50 rounded-xl border border-dashed border-zinc-800">
             <Package size={48} className="text-zinc-700 mx-auto mb-4" />
-            <p className="text-zinc-500">No categories yet</p>
+            <p className="text-zinc-500">{t("categories.noCategories")}</p>
             <Link
               href="/categories/create"
               className="text-pink-500 mt-2 inline-block"
             >
-              Create your first category
+              {t("categories.createFirst")}
             </Link>
           </div>
         ) : (
@@ -144,7 +150,9 @@ export default function CategoriesPage() {
                     <Badge
                       variant={category.active ? "success" : "destructive"}
                     >
-                      {category.active ? "Active" : "Inactive"}
+                      {category.active
+                        ? t("common.active")
+                        : t("common.inactive")}
                     </Badge>
                   </div>
                 </CardHeader>
@@ -163,7 +171,7 @@ export default function CategoriesPage() {
                     >
                       <Link href={`/categories/edit/${category.id}`}>
                         <Edit2 size={14} />
-                        Edit
+                        {t("common.edit")}
                       </Link>
                     </Button>
                     <Button
@@ -173,7 +181,7 @@ export default function CategoriesPage() {
                       onClick={() => handleDeleteClick(category)}
                     >
                       <Trash2 size={14} />
-                      Delete
+                      {t("common.delete")}
                     </Button>
                   </div>
                 </CardContent>
@@ -199,20 +207,14 @@ export default function CategoriesPage() {
                   <div className="flex items-center gap-3 mb-4">
                     <AlertCircle size={24} className="text-yellow-500" />
                     <h3 className="text-white font-semibold">
-                      Cannot Delete Category
+                      {t("categories.cannotDelete")}
                     </h3>
                   </div>
                   <p className="text-zinc-400 mb-6">
-                    The category{" "}
-                    <strong className="text-white">
-                      &quot;{deleteModal.category?.name}&quot;
-                    </strong>{" "}
-                    is used by{" "}
-                    <strong className="text-white">
-                      {deleteModal.productCount} product(s)
-                    </strong>
-                    . Please reassign these products to another category before
-                    deleting.
+                    {t("categories.usedByProducts", {
+                      name: deleteModal.category?.name,
+                      count: deleteModal.productCount,
+                    })}
                   </p>
                   <Button
                     variant="outline"
@@ -225,20 +227,18 @@ export default function CategoriesPage() {
                       })
                     }
                   >
-                    Got it
+                    {t("common.gotIt")}
                   </Button>
                 </>
               ) : (
                 <>
                   <h3 className="text-white font-semibold mb-2">
-                    Delete Category?
+                    {t("categories.deleteCategory")}
                   </h3>
                   <p className="text-zinc-400 mb-6">
-                    Are you sure you want to delete{" "}
-                    <strong className="text-white">
-                      &quot;{deleteModal.category?.name}&quot;
-                    </strong>
-                    ? This action cannot be undone.
+                    {t("categories.deleteConfirm", {
+                      name: deleteModal.category?.name,
+                    })}
                   </p>
                   <div className="flex gap-3">
                     <Button
@@ -252,14 +252,14 @@ export default function CategoriesPage() {
                         })
                       }
                     >
-                      Cancel
+                      {t("common.cancel")}
                     </Button>
                     <Button
                       variant="destructive"
                       className="flex-1"
                       onClick={confirmDelete}
                     >
-                      Delete
+                      {t("common.delete")}
                     </Button>
                   </div>
                 </>

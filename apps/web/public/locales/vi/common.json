@@ -8,6 +8,70 @@
     "edit": "Sửa",
     "close": "Đóng"
   },
+  "nav": {
+    "home": "Trang chủ",
+    "collections": "Bộ sưu tập",
+    "create": "Thiết kế riêng",
+    "quote": "Báo giá",
+    "about": "Giới thiệu"
+  },
+  "hero": {
+    "badge": "Đèn Neon LED Thủ Công",
+    "title": "Thắp Sáng Không Gian Với",
+    "titleHighlight": "Neon Tùy Chỉnh",
+    "subtitle": "Tạo đèn neon LED tùy chỉnh tuyệt đẹp cho nhà ở, doanh nghiệp hoặc sự kiện đặc biệt. Thiết kế bởi bạn, chế tác bởi chuyên gia.",
+    "scrollHint": "Cuộn",
+    "stats": {
+      "customers": "Khách Hàng Hài Lòng",
+      "designs": "Mẫu Thiết Kế",
+      "rating": "Đánh Giá",
+      "warranty": "Bảo Hành"
+    }
+  },
+  "cta": {
+    "createYourOwn": "Thiết Kế Riêng",
+    "browseCollections": "Xem Bộ Sưu Tập",
+    "getQuote": "Nhận Báo Giá",
+    "addToCart": "Thêm Vào Giỏ",
+    "buyNow": "Mua Ngay",
+    "learnMore": "Tìm Hiểu Thêm"
+  },
+  "footer": {
+    "description": "Đèn neon LED tùy chỉnh cao cấp, chế tác thủ công với tình yêu. Biến đổi không gian của bạn với ánh sáng tuyệt đẹp bền lâu.",
+    "shop": "Cửa Hàng",
+    "support": "Hỗ Trợ",
+    "company": "Công Ty",
+    "links": {
+      "allCollections": "Tất Cả Bộ Sưu Tập",
+      "weddingSigns": "Biển Cưới",
+      "businessSigns": "Biển Doanh Nghiệp",
+      "homeDecor": "Trang Trí Nhà",
+      "customNeon": "Neon Tùy Chỉnh",
+      "faq": "Câu Hỏi Thường Gặp",
+      "shippingInfo": "Thông Tin Vận Chuyển",
+      "returns": "Đổi Trả",
+      "contactUs": "Liên Hệ",
+      "getQuote": "Nhận Báo Giá",
+      "aboutUs": "Về Chúng Tôi",
+      "blog": "Blog",
+      "reviews": "Đánh Giá",
+      "privacyPolicy": "Chính Sách Bảo Mật",
+      "termsOfService": "Điều Khoản Dịch Vụ"
+    },
+    "copyright": "© {{year}} King Neon. Đã đăng ký bản quyền."
+  },
+  "header": {
+    "account": "Tài khoản",
+    "login": "Đăng nhập",
+    "openCart": "Mở giỏ hàng",
+    "openMenu": "Mở menu",
+    "closeMenu": "Đóng menu"
+  },
+  "language": {
+    "en": "English",
+    "vi": "Tiếng Việt",
+    "switchLanguage": "Chuyển ngôn ngữ"
+  },
   "errors": {
     "UNAUTHORIZED": "Bạn cần đăng nhập để thực hiện hành động này.",
     "FORBIDDEN": "Bạn không có quyền thực hiện hành động này.",
