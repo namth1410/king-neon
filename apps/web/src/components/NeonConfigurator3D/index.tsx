@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import dynamic from "next/dynamic";
 import {
   Upload,
   X,
@@ -9,7 +10,27 @@ import {
   AlignRight,
   RotateCcw,
 } from "lucide-react";
-import Scene from "./Scene";
+
+// Dynamic import Scene with SSR disabled to avoid @react-three/postprocessing issues
+const Scene = dynamic(() => import("./Scene"), {
+  ssr: false,
+  loading: () => (
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#0a0a0a",
+        color: "#666",
+      }}
+    >
+      Loading 3D Scene...
+    </div>
+  ),
+});
+import SelectionCanvas from "./SelectionCanvas";
 import { ProcessingMethod } from "./NeonLogo";
 import {
   useDraftStorage,
@@ -17,6 +38,14 @@ import {
   DRAFT_KEYS,
 } from "@/hooks/useDraftStorage";
 import DraftRecoveryModal from "@/components/DraftRecoveryModal";
+import {
+  StyledChar,
+  TextAlign,
+  stringToStyledChars,
+  applyStyleToAll,
+  applyStyleToIndices,
+  styledCharsToString,
+} from "./types";
 import styles from "./NeonConfigurator3D.module.scss";
 
 // Google Fonts available for 2D canvas
@@ -110,12 +139,27 @@ const presetColors = [
   { name: "Rainbow", value: "rainbow" }, // Special rainbow/gradient option
 ];
 
-type TextAlign = "left" | "center" | "right";
-
 export default function NeonConfigurator3D() {
-  const [text, setText] = useState("KING\nNEON");
-  const [color, setColor] = useState("#ff00ff");
-  const [fontFamily, setFontFamily] = useState(fonts[0].fontFamily);
+  // Default styling for new characters
+  const [defaultColor, setDefaultColor] = useState("#ff00ff");
+  const [defaultFontFamily, setDefaultFontFamily] = useState(
+    fonts[0].fontFamily
+  );
+
+  // Per-character styled text
+  const [styledChars, setStyledChars] = useState<StyledChar[]>(() =>
+    stringToStyledChars("KING\nNEON", "#ff00ff", fonts[0].fontFamily)
+  );
+
+  // Set-based selection for SelectionCanvas (indices of selected characters)
+  const [selectedIndices, setSelectedIndices] = useState<Set<number>>(
+    new Set()
+  );
+
+  // View vs Select mode toggle
+  const [isSelectMode, setIsSelectMode] = useState(false);
+
+  // Common text options
   const [size, setSize] = useState(1.5);
   const [backboard, setBackboard] = useState(backboards[0].value);
   const [borderWidth, setBorderWidth] = useState(0.5);
@@ -128,9 +172,17 @@ export default function NeonConfigurator3D() {
   const [logoOutlineWidth, setLogoOutlineWidth] = useState(0.5);
   const [logoProcessingMethod, setLogoProcessingMethod] =
     useState<ProcessingMethod>("original");
+  const [logoColor, setLogoColor] = useState("#ff00ff");
 
   // Mode: 'text' or 'logo'
   const [mode, setMode] = useState<"text" | "logo">("text");
+
+  // Reset select mode when switching away from text mode
+  useEffect(() => {
+    if (mode !== "text") {
+      setIsSelectMode(false);
+    }
+  }, [mode]);
 
   // Glow controls
   const [glowIntensity, setGlowIntensity] = useState(1.5);
@@ -167,11 +219,14 @@ export default function NeonConfigurator3D() {
     // Don't save if recovery modal is still showing
     if (showRecoveryModal) return;
 
+    // Convert styledChars back to legacy format for compatibility
+    const text = styledCharsToString(styledChars);
+
     saveDraftDebounced({
       mode,
       text,
-      color,
-      fontFamily,
+      color: defaultColor,
+      fontFamily: defaultFontFamily,
       size,
       backboard,
       borderWidth,
@@ -179,12 +234,14 @@ export default function NeonConfigurator3D() {
       logoSize,
       logoOutlineWidth,
       logoProcessingMethod,
+      // Save per-character styling as a new field
+      styledChars,
     });
   }, [
     mode,
-    text,
-    color,
-    fontFamily,
+    styledChars,
+    defaultColor,
+    defaultFontFamily,
     size,
     backboard,
     borderWidth,
@@ -200,9 +257,23 @@ export default function NeonConfigurator3D() {
   const handleContinueDraft = useCallback(() => {
     if (pendingDraft) {
       setMode(pendingDraft.mode);
-      setText(pendingDraft.text);
-      setColor(pendingDraft.color);
-      setFontFamily(pendingDraft.fontFamily);
+
+      // Check for new styledChars format first
+      if (pendingDraft.styledChars && pendingDraft.styledChars.length > 0) {
+        setStyledChars(pendingDraft.styledChars);
+      } else {
+        // Migrate from old format
+        setStyledChars(
+          stringToStyledChars(
+            pendingDraft.text,
+            pendingDraft.color,
+            pendingDraft.fontFamily
+          )
+        );
+      }
+
+      setDefaultColor(pendingDraft.color);
+      setDefaultFontFamily(pendingDraft.fontFamily);
       setSize(pendingDraft.size);
       setBackboard(pendingDraft.backboard);
       setBorderWidth(pendingDraft.borderWidth);
@@ -260,6 +331,76 @@ export default function NeonConfigurator3D() {
     }
   };
 
+  // Handle color change - applies to selection or all
+  const handleColorChange = useCallback(
+    (newColor: string) => {
+      if (mode === "logo") {
+        // In logo mode, just update the logo color
+        setLogoColor(newColor);
+        return;
+      }
+
+      // In text mode - check if we have a canvas selection (selectedIndices)
+      if (isSelectMode && selectedIndices.size > 0) {
+        // Apply to canvas-selected characters
+        setStyledChars((prev) =>
+          applyStyleToIndices(prev, selectedIndices, { color: newColor })
+        );
+      } else {
+        // Apply to all characters and update default
+        setDefaultColor(newColor);
+        setStyledChars((prev) => applyStyleToAll(prev, { color: newColor }));
+      }
+    },
+    [mode, isSelectMode, selectedIndices]
+  );
+
+  // Handle font change - applies to selection or all
+  const handleFontChange = useCallback(
+    (newFontFamily: string) => {
+      // Check canvas selection first (when in select mode)
+      if (isSelectMode && selectedIndices.size > 0) {
+        setStyledChars((prev) =>
+          applyStyleToIndices(prev, selectedIndices, {
+            fontFamily: newFontFamily,
+          })
+        );
+      } else {
+        // Apply to all characters and update default
+        setDefaultFontFamily(newFontFamily);
+        setStyledChars((prev) =>
+          applyStyleToAll(prev, { fontFamily: newFontFamily })
+        );
+      }
+    },
+    [isSelectMode, selectedIndices]
+  );
+
+  // Get current active color for color picker display
+  const getActiveColor = (): string => {
+    if (mode === "logo") return logoColor;
+
+    if (isSelectMode && selectedIndices.size > 0) {
+      // Return the color of the first selected character
+      const firstIndex = [...selectedIndices][0];
+      return styledChars[firstIndex]?.color || defaultColor;
+    }
+    return defaultColor;
+  };
+
+  // Get current active font for font selector display
+  const getActiveFont = (): string => {
+    if (isSelectMode && selectedIndices.size > 0) {
+      // Return the font of the first selected character
+      const firstIndex = [...selectedIndices][0];
+      return styledChars[firstIndex]?.fontFamily || defaultFontFamily;
+    }
+    return defaultFontFamily;
+  };
+
+  const activeColor = getActiveColor();
+  const activeFont = getActiveFont();
+
   return (
     <div className={styles.container}>
       {/* 3D Canvas Area with optional background image */}
@@ -276,10 +417,8 @@ export default function NeonConfigurator3D() {
         }
       >
         <Scene
-          text={text}
-          color={color}
+          styledChars={styledChars}
           size={size}
-          fontFamily={fontFamily}
           backboard={backboard}
           borderWidth={borderWidth}
           textAlign={textAlign}
@@ -288,13 +427,14 @@ export default function NeonConfigurator3D() {
           logoSize={logoSize}
           logoOutlineWidth={logoOutlineWidth}
           logoProcessingMethod={logoProcessingMethod}
+          logoColor={logoColor}
           onControlsReady={(resetFn) => setResetCameraFn(() => resetFn)}
           glowIntensity={glowIntensity}
           glowSpread={glowSpread}
         />
 
         {/* Reset View Button */}
-        {resetCameraFn && (
+        {resetCameraFn && !isSelectMode && (
           <button
             className={styles.resetViewBtn}
             onClick={resetCameraFn}
@@ -303,6 +443,81 @@ export default function NeonConfigurator3D() {
             <RotateCcw size={18} />
             Reset View
           </button>
+        )}
+
+        {/* View/Select Mode Toggle Button */}
+        {mode === "text" && (
+          <button
+            className={`${styles.selectModeBtn} ${isSelectMode ? styles.active : ""}`}
+            onClick={() => setIsSelectMode(!isSelectMode)}
+            title={
+              isSelectMode ? "Switch to View mode" : "Switch to Select mode"
+            }
+          >
+            {isSelectMode ? "🔍 Select Mode" : "👁️ View Mode"}
+          </button>
+        )}
+
+        {/* Character Selection Overlay - shows when in select mode */}
+        {mode === "text" && isSelectMode && (
+          <div className={styles.selectModeOverlay}>
+            <SelectionCanvas
+              styledChars={styledChars}
+              selectedIndices={selectedIndices}
+              onSelectionChange={setSelectedIndices}
+              textAlign={textAlign}
+            />
+
+            {/* Inline controls for select mode */}
+            <div className={styles.selectModeControls}>
+              {selectedIndices.size > 0 && (
+                <span className={styles.selectionBadge}>
+                  {selectedIndices.size} selected
+                </span>
+              )}
+
+              {/* Color swatches */}
+              <div className={styles.colorSwatches}>
+                {presetColors.slice(0, 6).map((color) => (
+                  <button
+                    key={color.value}
+                    className={styles.colorSwatch}
+                    style={{
+                      background:
+                        color.value === "rainbow"
+                          ? "linear-gradient(90deg, #ff0000, #ff8800, #ffff00, #00ff00, #00ffff, #0088ff, #8800ff)"
+                          : color.value,
+                    }}
+                    onClick={() => handleColorChange(color.value)}
+                    title={color.name}
+                    disabled={selectedIndices.size === 0}
+                  />
+                ))}
+              </div>
+
+              {/* Font selector */}
+              <select
+                className={styles.fontSelect}
+                value={defaultFontFamily}
+                onChange={(e) => handleFontChange(e.target.value)}
+                disabled={selectedIndices.size === 0}
+              >
+                {fonts.map((font) => (
+                  <option key={font.fontFamily} value={font.fontFamily}>
+                    {font.name}
+                  </option>
+                ))}
+              </select>
+
+              {/* Done button */}
+              <button
+                className={styles.selectModeDoneBtn}
+                onClick={() => setIsSelectMode(false)}
+              >
+                ✓ Done
+              </button>
+            </div>
+          </div>
         )}
       </div>
 
@@ -333,10 +548,20 @@ export default function NeonConfigurator3D() {
             <div className={styles.controlGroup}>
               <label>Text</label>
               <textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                rows={2}
+                className={styles.textInput}
+                value={styledCharsToString(styledChars)}
+                onChange={(e) => {
+                  // Convert plain text to styledChars with default styling
+                  setStyledChars(
+                    stringToStyledChars(
+                      e.target.value,
+                      defaultColor,
+                      defaultFontFamily
+                    )
+                  );
+                }}
                 placeholder="Enter your text..."
+                rows={2}
               />
             </div>
 
@@ -368,10 +593,13 @@ export default function NeonConfigurator3D() {
             </div>
 
             <div className={styles.controlGroup}>
-              <label>Font</label>
+              <label>
+                Font
+                {isSelectMode && selectedIndices.size > 0 ? " (sel)" : ""}
+              </label>
               <select
-                value={fontFamily}
-                onChange={(e) => setFontFamily(e.target.value)}
+                value={activeFont}
+                onChange={(e) => handleFontChange(e.target.value)}
               >
                 <optgroup label="✨ Script">
                   {fonts
@@ -544,13 +772,18 @@ export default function NeonConfigurator3D() {
 
         {/* Color Picker - shared between modes */}
         <div className={styles.controlGroup}>
-          <label>Color</label>
+          <label>
+            Color
+            {mode === "text" && isSelectMode && selectedIndices.size > 0
+              ? " (sel)"
+              : ""}
+          </label>
           <div className={styles.colorPicker}>
-            {color !== "rainbow" && (
+            {activeColor !== "rainbow" && (
               <input
                 type="color"
-                value={color}
-                onChange={(e) => setColor(e.target.value)}
+                value={activeColor}
+                onChange={(e) => handleColorChange(e.target.value)}
               />
             )}
             <div className={styles.colorPresets}>
@@ -566,8 +799,8 @@ export default function NeonConfigurator3D() {
                         }
                       : { backgroundColor: c.value }
                   }
-                  className={color === c.value ? styles.active : ""}
-                  onClick={() => setColor(c.value)}
+                  className={activeColor === c.value ? styles.active : ""}
+                  onClick={() => handleColorChange(c.value)}
                 />
               ))}
             </div>
@@ -641,7 +874,7 @@ export default function NeonConfigurator3D() {
         onContinue={handleContinueDraft}
         onStartFresh={handleStartFresh}
         onClose={handleStartFresh}
-        preview={pendingDraft?.text}
+        preview={styledCharsToString(styledChars)}
         lastModified={draftTimestamp ?? undefined}
       />
     </div>

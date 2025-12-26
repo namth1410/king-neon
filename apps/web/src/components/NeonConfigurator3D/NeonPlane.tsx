@@ -1,14 +1,11 @@
 import { useRef, useEffect, useMemo, useState } from "react";
 import { useFrame, ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
-
-type TextAlign = "left" | "center" | "right";
+import { StyledChar, TextAlign, splitStyledCharsIntoLines } from "./types";
 
 interface NeonPlaneProps {
-  text: string;
-  color: string;
+  styledChars: StyledChar[];
   size: number;
-  fontFamily: string;
   backboard: string;
   borderWidth: number;
   textAlign: TextAlign;
@@ -50,194 +47,266 @@ function getRainbowColor(time: number): string {
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
 }
 
-// Create neon text on canvas with glow effect - supports multiline and alignment
+// Create neon text on canvas with glow effect - supports per-character styling
 function createNeonCanvas(
-  text: string,
-  color: string,
+  styledChars: StyledChar[],
   fontSize: number,
-  fontFamily: string,
   backboard: string,
   borderWidth: number,
-  textAlign: TextAlign
+  textAlign: TextAlign,
+  rainbowColor: string
 ): HTMLCanvasElement {
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d")!;
 
-  // Split text into lines
-  const lines = text.split("\n");
+  // Split into lines
+  const lines = splitStyledCharsIntoLines(styledChars);
   const lineHeight = fontSize * 1.2;
 
-  // Set font for measurement
-  ctx.font = `bold ${fontSize}px ${fontFamily}`;
-
-  // Measure max line width
+  // Measure max line width (with each character's own font)
   let maxWidth = 0;
   for (const line of lines) {
-    const metrics = ctx.measureText(line);
-    maxWidth = Math.max(maxWidth, metrics.width);
+    let lineWidth = 0;
+    for (const styledChar of line) {
+      ctx.font = `bold ${fontSize}px ${styledChar.fontFamily}`;
+      lineWidth += ctx.measureText(styledChar.char).width;
+    }
+    maxWidth = Math.max(maxWidth, lineWidth);
   }
 
-  const totalHeight = lineHeight * lines.length;
+  const totalHeight = lineHeight * Math.max(lines.length, 1);
 
-  // Add padding for glow
+  // Add padding for glow - ensure minimum dimensions
   const padding = fontSize * 0.8;
-  canvas.width = maxWidth + padding * 2;
-  canvas.height = totalHeight + padding * 2;
+  canvas.width = Math.max(maxWidth + padding * 2, padding * 4);
+  canvas.height = Math.max(totalHeight + padding * 2, padding * 4);
 
   // Clear canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Reset font after resize
-  ctx.font = `bold ${fontSize}px ${fontFamily}`;
-  ctx.textBaseline = "middle";
-
-  // Set text alignment
-  let alignX: number;
-  if (textAlign === "left") {
-    ctx.textAlign = "left";
-    alignX = padding;
-  } else if (textAlign === "right") {
-    ctx.textAlign = "right";
-    alignX = canvas.width - padding;
-  } else {
-    ctx.textAlign = "center";
-    alignX = canvas.width / 2;
-  }
-
-  // Draw each line
-  const drawText = (
-    fillColor: string,
-    shadowColor: string,
-    shadowBlur: number,
-    alpha = 1
-  ) => {
-    ctx.globalAlpha = alpha;
-    ctx.shadowColor = shadowColor;
-    ctx.shadowBlur = shadowBlur;
-    ctx.fillStyle = fillColor;
-
-    for (let i = 0; i < lines.length; i++) {
-      const y = padding + lineHeight * 0.5 + i * lineHeight;
-      ctx.fillText(lines[i], alignX, y);
-    }
-    ctx.globalAlpha = 1;
-  };
-
-  // Draw backboard if cut-to-shape - creates realistic acrylic backing like the reference
+  // Draw backboard if cut-to-shape
   if (backboard === "cut-to-shape") {
-    // borderWidth controls the thickness of acrylic outline (scaled by fontSize)
-    const strokeWidth = borderWidth * fontSize * 0.5;
-
-    // Create offscreen canvas for merged acrylic shape
-    const offCanvas = document.createElement("canvas");
-    offCanvas.width = canvas.width;
-    offCanvas.height = canvas.height;
-    const offCtx = offCanvas.getContext("2d")!;
-
-    // Copy font settings
-    offCtx.font = ctx.font;
-    offCtx.textAlign = ctx.textAlign as CanvasTextAlign;
-    offCtx.textBaseline = ctx.textBaseline as CanvasTextBaseline;
-
-    // Set stroke properties for merged acrylic outline
-    offCtx.lineWidth = strokeWidth;
-    offCtx.lineJoin = "round";
-    offCtx.lineCap = "round";
-
-    // Draw all text strokes first (they will merge naturally)
-    // Layer 1: Outer stroke (main acrylic body)
-    offCtx.strokeStyle = "rgba(180, 180, 200, 1)";
-    offCtx.fillStyle = "rgba(200, 200, 220, 1)";
-    for (let i = 0; i < lines.length; i++) {
-      const y = padding + lineHeight * 0.5 + i * lineHeight;
-      offCtx.strokeText(lines[i], alignX, y);
-      offCtx.fillText(lines[i], alignX, y);
-    }
-
-    // Layer 2: Inner stroke
-    offCtx.lineWidth = strokeWidth * 0.7;
-    offCtx.strokeStyle = "rgba(220, 220, 240, 1)";
-    for (let i = 0; i < lines.length; i++) {
-      const y = padding + lineHeight * 0.5 + i * lineHeight;
-      offCtx.strokeText(lines[i], alignX, y);
-    }
-
-    // Layer 3: Inner highlight stroke
-    offCtx.lineWidth = strokeWidth * 0.35;
-    offCtx.strokeStyle = "rgba(255, 255, 255, 1)";
-    for (let i = 0; i < lines.length; i++) {
-      const y = padding + lineHeight * 0.5 + i * lineHeight;
-      offCtx.strokeText(lines[i], alignX, y);
-    }
-
-    // Draw the merged offscreen canvas onto main canvas with transparency
-    ctx.save();
-    ctx.globalAlpha = 0.35; // Make it semi-transparent like real acrylic
-    ctx.shadowColor = "rgba(255, 255, 255, 0.4)";
-    ctx.shadowBlur = strokeWidth * 0.2;
-    ctx.drawImage(offCanvas, 0, 0);
-    ctx.restore();
-    ctx.globalAlpha = 1;
+    drawCutToShapeBackboard(
+      ctx,
+      lines,
+      fontSize,
+      lineHeight,
+      borderWidth,
+      padding,
+      textAlign,
+      canvas.width
+    );
   }
 
-  // Draw main neon text with glow
-  // Outer glow layers
-  for (let i = 4; i >= 1; i--) {
-    drawText(color, color, fontSize * 0.08 * i);
+  // Draw each line of characters
+  for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+    const line = lines[lineIndex];
+    const y = padding + lineHeight * 0.5 + lineIndex * lineHeight;
+
+    // Calculate line width for alignment
+    let lineWidth = 0;
+    for (const styledChar of line) {
+      ctx.font = `bold ${fontSize}px ${styledChar.fontFamily}`;
+      lineWidth += ctx.measureText(styledChar.char).width;
+    }
+
+    // Calculate starting X based on alignment
+    let x: number;
+    if (textAlign === "left") {
+      x = padding;
+    } else if (textAlign === "right") {
+      x = canvas.width - padding - lineWidth;
+    } else {
+      x = (canvas.width - lineWidth) / 2;
+    }
+
+    // Draw each character
+    for (const styledChar of line) {
+      const color =
+        styledChar.color === "rainbow" ? rainbowColor : styledChar.color;
+      ctx.font = `bold ${fontSize}px ${styledChar.fontFamily}`;
+      const charWidth = ctx.measureText(styledChar.char).width;
+
+      // Draw neon glow layers
+      drawNeonCharacter(ctx, styledChar.char, x, y, color, fontSize);
+
+      x += charWidth;
+    }
   }
-
-  // Inner bright core
-  drawText("#ffffff", "#ffffff", fontSize * 0.05, 0.8);
-
-  // Final text layer
-  drawText(color, color, fontSize * 0.1);
 
   return canvas;
 }
 
+// Draw a single character with neon glow effect
+function drawNeonCharacter(
+  ctx: CanvasRenderingContext2D,
+  char: string,
+  x: number,
+  y: number,
+  color: string,
+  fontSize: number
+) {
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+
+  // Outer glow layers
+  for (let i = 4; i >= 1; i--) {
+    ctx.globalAlpha = 1;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = fontSize * 0.08 * i;
+    ctx.fillStyle = color;
+    ctx.fillText(char, x, y);
+  }
+
+  // Inner bright core
+  ctx.globalAlpha = 0.8;
+  ctx.shadowColor = "#ffffff";
+  ctx.shadowBlur = fontSize * 0.05;
+  ctx.fillStyle = "#ffffff";
+  ctx.fillText(char, x, y);
+
+  // Final text layer
+  ctx.globalAlpha = 1;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = fontSize * 0.1;
+  ctx.fillStyle = color;
+  ctx.fillText(char, x, y);
+
+  // Reset
+  ctx.globalAlpha = 1;
+}
+
+// Draw cut-to-shape backboard behind text
+function drawCutToShapeBackboard(
+  ctx: CanvasRenderingContext2D,
+  lines: StyledChar[][],
+  fontSize: number,
+  lineHeight: number,
+  borderWidth: number,
+  padding: number,
+  textAlign: TextAlign,
+  canvasWidth: number
+) {
+  const strokeWidth = borderWidth * fontSize * 0.5;
+
+  // Create offscreen canvas for merged acrylic shape
+  const offCanvas = document.createElement("canvas");
+  offCanvas.width = ctx.canvas.width;
+  offCanvas.height = ctx.canvas.height;
+  const offCtx = offCanvas.getContext("2d")!;
+
+  offCtx.lineWidth = strokeWidth;
+  offCtx.lineJoin = "round";
+  offCtx.lineCap = "round";
+
+  // Draw each line
+  for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+    const line = lines[lineIndex];
+    const y = padding + lineHeight * 0.5 + lineIndex * lineHeight;
+
+    // Calculate line width for alignment
+    let lineWidth = 0;
+    for (const styledChar of line) {
+      offCtx.font = `bold ${fontSize}px ${styledChar.fontFamily}`;
+      lineWidth += offCtx.measureText(styledChar.char).width;
+    }
+
+    // Calculate starting X based on alignment
+    let x: number;
+    if (textAlign === "left") {
+      x = padding;
+    } else if (textAlign === "right") {
+      x = canvasWidth - padding - lineWidth;
+    } else {
+      x = (canvasWidth - lineWidth) / 2;
+    }
+
+    // Draw backboard for each character
+    for (const styledChar of line) {
+      offCtx.font = `bold ${fontSize}px ${styledChar.fontFamily}`;
+      offCtx.textAlign = "left";
+      offCtx.textBaseline = "middle";
+      const charWidth = offCtx.measureText(styledChar.char).width;
+
+      // Layer 1: Outer stroke
+      offCtx.strokeStyle = "rgba(180, 180, 200, 1)";
+      offCtx.fillStyle = "rgba(200, 200, 220, 1)";
+      offCtx.lineWidth = strokeWidth;
+      offCtx.strokeText(styledChar.char, x, y);
+      offCtx.fillText(styledChar.char, x, y);
+
+      // Layer 2: Inner stroke
+      offCtx.lineWidth = strokeWidth * 0.7;
+      offCtx.strokeStyle = "rgba(220, 220, 240, 1)";
+      offCtx.strokeText(styledChar.char, x, y);
+
+      // Layer 3: Inner highlight
+      offCtx.lineWidth = strokeWidth * 0.35;
+      offCtx.strokeStyle = "rgba(255, 255, 255, 1)";
+      offCtx.strokeText(styledChar.char, x, y);
+
+      x += charWidth;
+    }
+  }
+
+  // Draw the merged offscreen canvas onto main canvas
+  ctx.save();
+  ctx.globalAlpha = 0.35;
+  ctx.shadowColor = "rgba(255, 255, 255, 0.4)";
+  ctx.shadowBlur = strokeWidth * 0.2;
+  ctx.drawImage(offCanvas, 0, 0);
+  ctx.restore();
+  ctx.globalAlpha = 1;
+}
+
 export default function NeonPlane({
-  text,
-  color,
+  styledChars,
   size,
-  fontFamily,
   backboard,
   borderWidth,
   textAlign,
 }: NeonPlaneProps) {
   const meshRef = useRef<THREE.Group>(null);
   const textureRef = useRef<THREE.CanvasTexture | null>(null);
-  const [currentColor, setCurrentColor] = useState(color);
-  const isRainbow = color === "rainbow";
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Handle rainbow color animation only
+  // Ensure we only create canvas on client side
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+  const [rainbowColor, setRainbowColor] = useState("#ff00ff");
+
+  // Check if any character uses rainbow color
+  const hasRainbow = useMemo(
+    () => styledChars.some((c) => c.color === "rainbow"),
+    [styledChars]
+  );
+
+  // Handle rainbow color animation
   useFrame((state) => {
-    // Update rainbow color
-    if (isRainbow) {
+    if (hasRainbow) {
       const newColor = getRainbowColor(state.clock.elapsedTime);
-      if (newColor !== currentColor) {
-        setCurrentColor(newColor);
+      if (newColor !== rainbowColor) {
+        setRainbowColor(newColor);
       }
     }
   });
 
-  // Update currentColor when color prop changes (non-rainbow)
-  useEffect(() => {
-    if (!isRainbow) {
-      setCurrentColor(color);
-    }
-  }, [color, isRainbow]);
-
-  // Create and update canvas texture
+  // Create and update canvas texture (only on client)
   const { texture, aspectRatio } = useMemo(() => {
+    // Return placeholder values during SSR
+    if (!isMounted || typeof document === "undefined") {
+      return { texture: null, aspectRatio: 1 };
+    }
+
     const fontSize = 200; // High resolution for quality
     const canvas = createNeonCanvas(
-      text,
-      currentColor,
+      styledChars,
       fontSize,
-      fontFamily,
       backboard,
       borderWidth,
-      textAlign
+      textAlign,
+      rainbowColor
     );
 
     const tex = new THREE.CanvasTexture(canvas);
@@ -251,14 +320,14 @@ export default function NeonPlane({
       texture: tex,
       aspectRatio: canvas.width / canvas.height,
     };
-  }, [text, currentColor, fontFamily, backboard, borderWidth, textAlign]);
+  }, [styledChars, backboard, borderWidth, textAlign, rainbowColor, isMounted]);
 
   // Update texture when props change
   useEffect(() => {
     if (textureRef.current) {
       textureRef.current.needsUpdate = true;
     }
-  }, [text, currentColor, fontFamily, backboard, textAlign]);
+  }, [styledChars, backboard, textAlign, rainbowColor]);
 
   // Calculate plane dimensions based on size and aspect ratio
   const planeWidth = size * aspectRatio * 2;
@@ -277,7 +346,6 @@ export default function NeonPlane({
   const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
     setIsDragging(true);
-    // Store offset from click point to current position
     if (e.point) {
       dragOffset.current = {
         x: e.point.x - position[0],
@@ -292,7 +360,6 @@ export default function NeonPlane({
 
   const handlePointerMove = (e: ThreeEvent<PointerEvent>) => {
     if (isDragging && e.point) {
-      // Apply offset to get smooth drag
       setPosition([
         e.point.x - dragOffset.current.x,
         e.point.y - dragOffset.current.y,
@@ -330,16 +397,18 @@ export default function NeonPlane({
         </mesh>
       )}
 
-      {/* Neon Text Plane */}
-      <mesh>
-        <planeGeometry args={[planeWidth, planeHeight]} />
-        <meshBasicMaterial
-          map={texture}
-          transparent
-          side={THREE.DoubleSide}
-          toneMapped={false}
-        />
-      </mesh>
+      {/* Neon Text Plane - only render when texture is ready */}
+      {texture && (
+        <mesh>
+          <planeGeometry args={[planeWidth, planeHeight]} />
+          <meshBasicMaterial
+            map={texture}
+            transparent
+            side={THREE.DoubleSide}
+            toneMapped={false}
+          />
+        </mesh>
+      )}
     </group>
   );
 }

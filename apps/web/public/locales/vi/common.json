@@ -91,5 +91,13 @@
     "error": "Lỗi",
     "warning": "Cảnh báo",
     "info": "Thông báo"
+  },
+  "draftRecovery": {
+    "title": "Tiếp tục thiết kế?",
+    "description": "Chúng tôi tìm thấy một bản thiết kế bạn đang làm.",
+    "lastEdited": "Chỉnh sửa lần cuối: {{time}}",
+    "preview": "Xem trước:",
+    "startFresh": "Bắt đầu mới",
+    "continue": "Tiếp tục thiết kế"
   }
 }

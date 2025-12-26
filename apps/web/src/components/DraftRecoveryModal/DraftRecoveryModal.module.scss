@@ -1,50 +1,17 @@
-.backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
-  z-index: 1000;
-}
-
-.modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1001;
-
-  width: 90%;
-  max-width: 420px;
-  padding: 1.75rem;
-
+// AlertDialog content customization
+.dialogContent {
   background: linear-gradient(
     135deg,
-    rgba(30, 30, 40, 0.95) 0%,
-    rgba(20, 20, 30, 0.98) 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
+    rgba(30, 30, 40, 0.98) 0%,
+    rgba(20, 20, 30, 1) 100%
+  ) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 20px !important;
   box-shadow:
     0 25px 50px rgba(0, 0, 0, 0.5),
-    0 0 100px rgba(255, 51, 102, 0.1);
-}
-
-.closeBtn {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  padding: 0.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  color: rgba(255, 255, 255, 0.5);
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-  }
+    0 0 100px rgba(255, 51, 102, 0.1) !important;
+  max-width: 420px !important;
+  padding: 1.75rem !important;
 }
 
 .header {
@@ -52,7 +19,7 @@
   flex-direction: column;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 1.25rem;
+  text-align: center;
 }
 
 .icon {
@@ -62,25 +29,16 @@
 }
 
 .title {
-  font-size: 1.35rem;
+  font-size: 1.35rem !important;
   font-weight: 600;
   color: #fff;
   text-align: center;
-  margin: 0;
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
 }
 
 .description {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.7) !important;
   text-align: center;
   font-size: 0.95rem;
-  margin: 0;
 }
 
 .timestamp {
@@ -127,6 +85,8 @@
 .actions {
   display: flex;
   gap: 0.75rem;
+  flex-direction: row !important;
+  justify-content: center !important;
 }
 
 .secondaryBtn,
@@ -174,15 +134,15 @@
 
 // Responsive
 @media (max-width: 480px) {
-  .modal {
-    padding: 1.25rem;
+  .dialogContent {
+    padding: 1.25rem !important;
   }
 
   .actions {
-    flex-direction: column-reverse;
+    flex-direction: column-reverse !important;
   }
 
   .title {
-    font-size: 1.2rem;
+    font-size: 1.2rem !important;
   }
 }

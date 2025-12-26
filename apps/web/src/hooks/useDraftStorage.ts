@@ -204,6 +204,12 @@ export interface NeonConfigurator3DDraft extends DraftMetadata {
   logoSize: number;
   logoOutlineWidth: number;
   logoProcessingMethod: string;
+  // Per-character styling (new v2 format)
+  styledChars?: Array<{
+    char: string;
+    color: string;
+    fontFamily: string;
+  }>;
   // Note: Not storing logoImage/backgroundImage to avoid quota issues
 }
 

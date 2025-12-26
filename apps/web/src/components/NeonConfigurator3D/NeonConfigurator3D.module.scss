@@ -20,7 +20,7 @@
 // Reset View Button - positioned in top-right of canvas
 .resetViewBtn {
   position: absolute;
-  top: 16px;
+  top: 80px;
   right: 16px;
   display: flex;
   align-items: center;
@@ -35,7 +35,7 @@
   font-weight: 500;
   backdrop-filter: blur(8px);
   transition: all 0.2s ease;
-  z-index: 10;
+  z-index: 100;
 
   &:hover {
     background: rgba(50, 50, 50, 0.9);
@@ -53,6 +53,185 @@
 
   &:hover svg {
     transform: rotate(-45deg);
+  }
+}
+
+// View/Select Mode Toggle Button - positioned in top-left
+.selectModeBtn {
+  position: absolute;
+  top: 80px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: rgba(30, 30, 30, 0.85);
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+  z-index: 100;
+
+  &:hover {
+    background: rgba(50, 50, 50, 0.9);
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+
+  &.active {
+    background: rgba(236, 72, 153, 0.3);
+    border-color: #ec4899;
+    color: #ec4899;
+  }
+}
+
+// Select Mode Overlay - covers canvas for character selection
+.selectModeOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 8;
+  backdrop-filter: blur(4px);
+}
+
+.selectModeHeader {
+  color: #ec4899;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+// Selection badge showing number of selected characters
+.selectionBadge {
+  padding: 6px 12px;
+  background: rgba(236, 72, 153, 0.2);
+  border: 1px solid #ec4899;
+  border-radius: 16px;
+  color: #ec4899;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+// 2D Selection Canvas for character selection
+.selectionCanvasContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.selectionCanvas {
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  cursor: crosshair;
+  box-shadow: 0 0 30px rgba(255, 51, 102, 0.2);
+}
+
+.selectionCanvasHint {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+}
+
+// Inline controls for select mode
+.selectModeControls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px;
+  background: rgba(20, 20, 20, 0.95);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+// Color swatches row
+.colorSwatches {
+  display: flex;
+  gap: 8px;
+}
+
+.colorSwatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    transform: scale(1.15);
+    border-color: #fff;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+// Done button for select mode
+.selectModeDoneBtn {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #ff3366 0%, #ff6b9d 100%);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 51, 102, 0.4);
+  }
+}
+
+// Font select in select mode
+.fontSelect {
+  padding: 8px 12px;
+  background: rgba(40, 40, 40, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+// Simple text input replacing CharacterEditor
+.textInput {
+  width: 200px;
+  min-height: 40px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+
+  &:focus {
+    outline: none;
+    border-color: #ec4899;
+  }
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.3);
   }
 }
 
@@ -277,4 +456,84 @@
       background: #ff6666;
     }
   }
+}
+
+// Character Editor Styles
+.characterEditor {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 10px 12px;
+  min-height: 50px;
+  width: 120px;
+  cursor: text;
+  position: relative;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  &.focused {
+    border-color: #ec4899;
+    box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.2);
+  }
+}
+
+.hiddenInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  padding: 0;
+  border: 0;
+  pointer-events: none;
+}
+
+.charsContainer {
+  line-height: 1.4;
+  font-size: 14px;
+  word-break: break-word;
+}
+
+.char {
+  display: inline;
+  cursor: text;
+  user-select: none;
+  padding: 1px 0;
+  border-radius: 2px;
+  transition: background-color 0.1s ease;
+
+  &.selected {
+    background: rgba(236, 72, 153, 0.4);
+  }
+
+  &:hover:not(.selected) {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.charWrapper {
+  display: inline;
+}
+
+.newlineChar {
+  opacity: 0.3;
+  font-size: 10px;
+  margin-right: 2px;
+}
+
+.placeholder {
+  color: rgba(255, 255, 255, 0.3);
+  font-style: italic;
+  font-size: 12px;
+}
+
+.selectionInfo {
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  font-size: 10px;
+  color: #ec4899;
+  white-space: nowrap;
 }

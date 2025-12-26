@@ -91,5 +91,13 @@
     "error": "Error",
     "warning": "Warning",
     "info": "Info"
+  },
+  "draftRecovery": {
+    "title": "Continue Your Design?",
+    "description": "We found a design you were working on.",
+    "lastEdited": "Last edited: {{time}}",
+    "preview": "Preview:",
+    "startFresh": "Start Fresh",
+    "continue": "Continue Designing"
   }
 }

@@ -8,14 +8,11 @@ import {
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import NeonPlane from "./NeonPlane";
 import NeonLogo, { ProcessingMethod } from "./NeonLogo";
-
-type TextAlign = "left" | "center" | "right";
+import { StyledChar, TextAlign } from "./types";
 
 interface SceneProps {
-  text: string;
-  color: string;
+  styledChars: StyledChar[];
   size: number;
-  fontFamily: string;
   backboard: string;
   borderWidth: number;
   textAlign: TextAlign;
@@ -25,6 +22,7 @@ interface SceneProps {
   logoSize?: number;
   logoOutlineWidth?: number;
   logoProcessingMethod?: ProcessingMethod;
+  logoColor?: string;
   // Camera control
   onControlsReady?: (resetFn: () => void) => void;
   // Glow controls
@@ -37,10 +35,8 @@ const DEFAULT_CAMERA_POSITION: [number, number, number] = [0, 0, 15];
 
 // Inner component to access Three.js context
 function SceneContent({
-  text,
-  color,
+  styledChars,
   size,
-  fontFamily,
   backboard,
   borderWidth,
   textAlign,
@@ -49,6 +45,7 @@ function SceneContent({
   logoSize = 2,
   logoOutlineWidth = 0.5,
   logoProcessingMethod = "original",
+  logoColor = "#ff00ff",
   onControlsReady,
   glowIntensity = 1.5,
   glowSpread = 1,
@@ -118,10 +115,8 @@ function SceneContent({
       {/* Neon Text - only in text mode */}
       {mode === "text" && (
         <NeonPlane
-          text={text}
-          color={color}
+          styledChars={styledChars}
           size={size}
-          fontFamily={fontFamily}
           backboard={backboard}
           borderWidth={borderWidth}
           textAlign={textAlign}
@@ -132,12 +127,18 @@ function SceneContent({
       {mode === "logo" && logoUrl && (
         <NeonLogo
           imageUrl={logoUrl}
-          color={color}
+          color={logoColor}
           size={logoSize}
           outlineWidth={logoOutlineWidth}
           processingMethod={logoProcessingMethod}
         />
       )}
+
+      {/* Invisible placeholder - ensures postprocessing has something to render */}
+      <mesh visible={false}>
+        <boxGeometry args={[0.001, 0.001, 0.001]} />
+        <meshBasicMaterial transparent opacity={0} />
+      </mesh>
 
       {/* Post Processing - Enhanced bloom for neon glow */}
       <EffectComposer enableNormalPass={false}>
@@ -163,7 +164,7 @@ export default function Scene(props: SceneProps) {
       gl={{
         preserveDrawingBuffer: true,
         antialias: true,
-        alpha: true,
+        alpha: true, // Restored: SSR disabled via dynamic import fixes the postprocessing issue
       }}
       style={{ background: "transparent" }}
     >
