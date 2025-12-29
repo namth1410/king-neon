@@ -7,6 +7,7 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
+import { useTranslation } from "@/i18n/client";
 import styles from "./PaymentForm.module.scss";
 
 interface PaymentFormProps {
@@ -18,6 +19,7 @@ interface PaymentFormProps {
 export function PaymentForm({ orderId, onSuccess, onError }: PaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
+  const { t } = useTranslation("common");
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -41,13 +43,14 @@ export function PaymentForm({ orderId, onSuccess, onError }: PaymentFormProps) {
       });
 
       if (error) {
-        setErrorMessage(error.message || "Payment failed");
-        onError(error.message || "Payment failed");
+        setErrorMessage(error.message || t("errors.PAYMENT_FAILED"));
+        onError(error.message || t("errors.PAYMENT_FAILED"));
       } else if (paymentIntent && paymentIntent.status === "succeeded") {
         onSuccess();
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Payment failed";
+      const message =
+        err instanceof Error ? err.message : t("errors.PAYMENT_FAILED");
       setErrorMessage(message);
       onError(message);
     } finally {
@@ -87,10 +90,10 @@ export function PaymentForm({ orderId, onSuccess, onError }: PaymentFormProps) {
         {isProcessing ? (
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <Spinner size="sm" />
-            <span>Processing...</span>
+            <span>{t("payment.processing")}</span>
           </div>
         ) : (
-          "Pay Now"
+          t("payment.payNow")
         )}
       </button>
 
@@ -103,7 +106,7 @@ export function PaymentForm({ orderId, onSuccess, onError }: PaymentFormProps) {
             d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
           />
         </svg>
-        <span>Secure payment powered by Stripe</span>
+        <span>{t("payment.secureMessage")}</span>
       </div>
     </form>
   );

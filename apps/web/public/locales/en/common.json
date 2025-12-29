@@ -6,7 +6,8 @@
     "cancel": "Cancel",
     "delete": "Delete",
     "edit": "Edit",
-    "close": "Close"
+    "close": "Close",
+    "viewAll": "View All"
   },
   "nav": {
     "home": "Home",
@@ -99,5 +100,187 @@
     "preview": "Preview:",
     "startFresh": "Start Fresh",
     "continue": "Continue Designing"
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "Sorry, the page you are looking for does not exist or has been moved.",
+    "back": "Go Back",
+    "home": "Go to Home",
+    "suggestionsTitle": "You might be looking for:",
+    "products": "Products",
+    "create": "Create Sign",
+    "collections": "Collections",
+    "about": "About Us"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to your account to continue",
+      "email": "Email",
+      "password": "Password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign In",
+      "submitting": "Signing in...",
+      "orContinueWith": "or continue with",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up",
+      "invalidCredentials": "Invalid email or password",
+      "failed": "Login failed"
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Sign up to get started",
+      "name": "Full Name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Create Account",
+      "submitting": "Creating account...",
+      "orContinueWith": "or continue with",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "passwordMismatch": "Passwords do not match",
+      "failed": "Registration failed"
+    }
+  },
+  "account": {
+    "title": "My Account",
+    "profile": "Profile",
+    "orders": "Orders",
+    "designs": "My Designs",
+    "addresses": "Addresses",
+    "logout": "Logout",
+    "loggingOut": "Logging out...",
+    "profileSettings": {
+      "title": "Profile Settings",
+      "subtitle": "Manage your personal information",
+      "personalInfo": "Personal Information",
+      "fullName": "Full Name",
+      "email": "Email",
+      "phone": "Phone",
+      "saveChanges": "Save Changes",
+      "updated": "Profile updated!"
+    },
+    "orderHistory": {
+      "title": "Order History",
+      "subtitle": "View and track your orders",
+      "loadingOrders": "Loading orders...",
+      "noOrders": "No orders yet",
+      "startShopping": "Start Shopping",
+      "viewDetails": "View Details"
+    },
+    "myDesigns": {
+      "title": "My Designs",
+      "subtitle": "Your saved custom neon designs",
+      "loading": "Loading your designs...",
+      "noDesigns": "No Saved Designs",
+      "noDesignsDesc": "You haven't saved any designs yet.",
+      "createFirst": "Create Your First Design",
+      "open": "Open",
+      "confirmDelete": "Are you sure you want to delete this design?",
+      "deleteFailed": "Failed to delete design. Please try again."
+    }
+  },
+  "checkout": {
+    "title": "Checkout",
+    "steps": {
+      "cart": "Cart",
+      "shipping": "Shipping",
+      "payment": "Payment",
+      "confirmation": "Confirmation"
+    },
+    "contact": {
+      "title": "Contact Information",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone"
+    },
+    "shipping": {
+      "title": "Shipping Address",
+      "address": "Street Address",
+      "city": "City",
+      "state": "State",
+      "zipCode": "ZIP Code",
+      "country": "Country"
+    },
+    "countries": {
+      "US": "United States",
+      "CA": "Canada",
+      "GB": "United Kingdom",
+      "AU": "Australia",
+      "VN": "Vietnam"
+    },
+    "payment": {
+      "title": "Payment Details",
+      "backToShipping": "Back to Shipping"
+    },
+    "summary": {
+      "title": "Order Summary",
+      "emptyCart": "Your cart is empty",
+      "qty": "Qty",
+      "subtotal": "Subtotal",
+      "shipping": "Shipping",
+      "free": "Free",
+      "tax": "Tax (10%)",
+      "total": "Total",
+      "secure": "Secure checkout powered by Stripe"
+    },
+    "processing": "Processing...",
+    "continueToPayment": "Continue to Payment",
+    "success": {
+      "title": "Thank You for Your Order!",
+      "orderNumber": "Order Number",
+      "processing": "Processing Time",
+      "processingDesc": "Your order will be processed within 2-3 business days.",
+      "email": "Email Confirmation",
+      "emailDesc": "A confirmation email has been sent to your email address.",
+      "continueShopping": "Continue Shopping",
+      "viewOrder": "View Order"
+    }
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "empty": "Your cart is empty",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "total": "Total",
+    "checkout": "Checkout",
+    "continueShopping": "Continue Shopping",
+    "remove": "Remove"
+  },
+  "payment": {
+    "processing": "Processing...",
+    "secureMessage": "Secure payment powered by Stripe",
+    "payNow": "Pay Now"
+  },
+  "product": {
+    "notFound": "Product Not Found",
+    "loading": "Loading product...",
+    "customizable": "Customizable",
+    "premiumQuality": "Premium Quality",
+    "freeShipping": "Free Shipping",
+    "easyInstallation": "Easy Installation",
+    "quantity": "Quantity",
+    "relatedProducts": "You May Also Like",
+    "featuredProducts": "Featured Products",
+    "noFeatured": "No featured products available"
+  },
+  "designer": {
+    "title": "Create Your Neon Sign",
+    "total": "Total",
+    "placeholder": "Enter your text..."
+  },
+  "configurator": {
+    "mode": "Mode",
+    "text": "Text",
+    "align": "Align",
+    "size": "Size",
+    "originalGlow": "Original + Glow"
+  },
+  "imageUpload": {
+    "clickToUpload": "Click to upload",
+    "uploaded": "Uploaded"
   }
 }

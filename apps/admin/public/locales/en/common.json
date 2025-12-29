@@ -213,5 +213,15 @@
     "saved": "Changes saved successfully",
     "deleted": "Item deleted successfully",
     "created": "Item created successfully"
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "The page you are looking for does not exist in the admin system.",
+    "back": "Go Back",
+    "dashboard": "Dashboard",
+    "quickAccess": "Quick access:",
+    "orders": "Orders",
+    "products": "Products",
+    "customers": "Customers"
   }
 }

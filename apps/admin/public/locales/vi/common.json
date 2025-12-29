@@ -213,5 +213,15 @@
     "saved": "Đã lưu thay đổi thành công",
     "deleted": "Đã xóa thành công",
     "created": "Đã tạo thành công"
+  },
+  "notFound": {
+    "title": "Trang không tìm thấy",
+    "description": "Trang bạn đang tìm kiếm không tồn tại trong hệ thống quản trị.",
+    "back": "Quay lại",
+    "dashboard": "Tổng quan",
+    "quickAccess": "Truy cập nhanh:",
+    "orders": "Đơn hàng",
+    "products": "Sản phẩm",
+    "customers": "Khách hàng"
   }
 }

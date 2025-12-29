@@ -6,12 +6,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import styles from "../auth.module.scss";
 import api from "@/utils/api";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "@/i18n/client";
 
 function RegisterContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/account";
   const { login } = useAuth();
+  const { t } = useTranslation("common");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -31,12 +33,12 @@ function RegisterContent() {
     setError("");
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
+      setError(t("auth.register.passwordMismatch"));
       return;
     }
 
     if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters");
+      setError(t("auth.register.passwordTooShort"));
       return;
     }
 
@@ -60,7 +62,7 @@ function RegisterContent() {
         router.push(`/login?redirect=${encodeURIComponent(redirectTo)}`);
       }
     } catch (err: unknown) {
-      let message = "Registration failed";
+      let message = t("auth.register.failed");
       if (typeof err === "object" && err !== null && "response" in err) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         message = (err as any).response?.data?.message || message;
@@ -84,9 +86,9 @@ function RegisterContent() {
 
           {/* Header */}
           <div className={styles.auth__header}>
-            <h1 className={styles.auth__title}>Create Account</h1>
+            <h1 className={styles.auth__title}>{t("auth.register.title")}</h1>
             <p className={styles.auth__subtitle}>
-              Join us and start creating your neon signs
+              {t("auth.register.subtitle")}
             </p>
           </div>
 
@@ -96,7 +98,7 @@ function RegisterContent() {
           {/* Form */}
           <form className={styles.auth__form} onSubmit={handleSubmit}>
             <div className={styles.auth__field}>
-              <label htmlFor="name">Full Name</label>
+              <label htmlFor="name">{t("auth.register.name")}</label>
               <input
                 type="text"
                 id="name"
@@ -109,7 +111,7 @@ function RegisterContent() {
             </div>
 
             <div className={styles.auth__field}>
-              <label htmlFor="email">Email</label>
+              <label htmlFor="email">{t("auth.register.email")}</label>
               <input
                 type="email"
                 id="email"
@@ -122,12 +124,12 @@ function RegisterContent() {
             </div>
 
             <div className={styles.auth__field}>
-              <label htmlFor="password">Password</label>
+              <label htmlFor="password">{t("auth.register.password")}</label>
               <input
                 type="password"
                 id="password"
                 name="password"
-                placeholder="At least 6 characters"
+                placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}
                 required
@@ -136,12 +138,14 @@ function RegisterContent() {
             </div>
 
             <div className={styles.auth__field}>
-              <label htmlFor="confirmPassword">Confirm Password</label>
+              <label htmlFor="confirmPassword">
+                {t("auth.register.confirmPassword")}
+              </label>
               <input
                 type="password"
                 id="confirmPassword"
                 name="confirmPassword"
-                placeholder="Confirm your password"
+                placeholder="••••••••"
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 required
@@ -153,13 +157,16 @@ function RegisterContent() {
               className={`btn btn--primary btn--lg ${styles.auth__submit}`}
               disabled={isLoading}
             >
-              {isLoading ? "Creating account..." : "Create Account"}
+              {isLoading
+                ? t("auth.register.submitting")
+                : t("auth.register.submit")}
             </button>
           </form>
 
           {/* Footer */}
           <div className={styles.auth__footer}>
-            Already have an account? <Link href="/login">Sign in</Link>
+            {t("auth.register.hasAccount")}{" "}
+            <Link href="/login">{t("auth.register.signIn")}</Link>
           </div>
         </div>
       </div>
@@ -168,8 +175,10 @@ function RegisterContent() {
 }
 
 export default function RegisterPage() {
+  const { t } = useTranslation("common");
+
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>{t("common.loading")}</div>}>
       <RegisterContent />
     </Suspense>
   );

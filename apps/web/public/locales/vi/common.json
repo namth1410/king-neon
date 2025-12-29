@@ -6,7 +6,8 @@
     "cancel": "Hủy",
     "delete": "Xóa",
     "edit": "Sửa",
-    "close": "Đóng"
+    "close": "Đóng",
+    "viewAll": "Xem tất cả"
   },
   "nav": {
     "home": "Trang chủ",
@@ -99,5 +100,187 @@
     "preview": "Xem trước:",
     "startFresh": "Bắt đầu mới",
     "continue": "Tiếp tục thiết kế"
+  },
+  "notFound": {
+    "title": "Trang không tồn tại",
+    "description": "Xin lỗi, trang bạn đang tìm kiếm không tồn tại hoặc đã được di chuyển.",
+    "back": "Quay lại",
+    "home": "Về trang chủ",
+    "suggestionsTitle": "Có thể bạn muốn tìm:",
+    "products": "Sản phẩm",
+    "create": "Tạo biển hiệu",
+    "collections": "Bộ sưu tập",
+    "about": "Về chúng tôi"
+  },
+  "auth": {
+    "login": {
+      "title": "Chào mừng trở lại",
+      "subtitle": "Đăng nhập để tiếp tục",
+      "email": "Email",
+      "password": "Mật khẩu",
+      "rememberMe": "Ghi nhớ đăng nhập",
+      "forgotPassword": "Quên mật khẩu?",
+      "submit": "Đăng nhập",
+      "submitting": "Đang đăng nhập...",
+      "orContinueWith": "hoặc tiếp tục với",
+      "noAccount": "Chưa có tài khoản?",
+      "signUp": "Đăng ký",
+      "invalidCredentials": "Email hoặc mật khẩu không đúng",
+      "failed": "Đăng nhập thất bại"
+    },
+    "register": {
+      "title": "Tạo tài khoản",
+      "subtitle": "Đăng ký để bắt đầu",
+      "name": "Họ và tên",
+      "email": "Email",
+      "password": "Mật khẩu",
+      "confirmPassword": "Xác nhận mật khẩu",
+      "submit": "Tạo tài khoản",
+      "submitting": "Đang tạo tài khoản...",
+      "orContinueWith": "hoặc tiếp tục với",
+      "hasAccount": "Đã có tài khoản?",
+      "signIn": "Đăng nhập",
+      "passwordMismatch": "Mật khẩu không khớp",
+      "failed": "Đăng ký thất bại"
+    }
+  },
+  "account": {
+    "title": "Tài khoản của tôi",
+    "profile": "Hồ sơ",
+    "orders": "Đơn hàng",
+    "designs": "Thiết kế của tôi",
+    "addresses": "Địa chỉ",
+    "logout": "Đăng xuất",
+    "loggingOut": "Đang đăng xuất...",
+    "profileSettings": {
+      "title": "Cài đặt hồ sơ",
+      "subtitle": "Quản lý thông tin cá nhân",
+      "personalInfo": "Thông tin cá nhân",
+      "fullName": "Họ và tên",
+      "email": "Email",
+      "phone": "Số điện thoại",
+      "saveChanges": "Lưu thay đổi",
+      "updated": "Đã cập nhật hồ sơ!"
+    },
+    "orderHistory": {
+      "title": "Lịch sử đơn hàng",
+      "subtitle": "Xem và theo dõi đơn hàng",
+      "loadingOrders": "Đang tải đơn hàng...",
+      "noOrders": "Chưa có đơn hàng",
+      "startShopping": "Bắt đầu mua sắm",
+      "viewDetails": "Xem chi tiết"
+    },
+    "myDesigns": {
+      "title": "Thiết kế của tôi",
+      "subtitle": "Các thiết kế neon tùy chỉnh đã lưu",
+      "loading": "Đang tải thiết kế...",
+      "noDesigns": "Chưa có thiết kế",
+      "noDesignsDesc": "Bạn chưa lưu thiết kế nào.",
+      "createFirst": "Tạo thiết kế đầu tiên",
+      "open": "Mở",
+      "confirmDelete": "Bạn có chắc muốn xóa thiết kế này?",
+      "deleteFailed": "Không thể xóa thiết kế. Vui lòng thử lại."
+    }
+  },
+  "checkout": {
+    "title": "Thanh toán",
+    "steps": {
+      "cart": "Giỏ hàng",
+      "shipping": "Giao hàng",
+      "payment": "Thanh toán",
+      "confirmation": "Xác nhận"
+    },
+    "contact": {
+      "title": "Thông tin liên hệ",
+      "firstName": "Tên",
+      "lastName": "Họ",
+      "email": "Email",
+      "phone": "Số điện thoại"
+    },
+    "shipping": {
+      "title": "Địa chỉ giao hàng",
+      "address": "Địa chỉ",
+      "city": "Thành phố",
+      "state": "Tỉnh/Thành",
+      "zipCode": "Mã bưu điện",
+      "country": "Quốc gia"
+    },
+    "countries": {
+      "US": "Hoa Kỳ",
+      "CA": "Canada",
+      "GB": "Vương quốc Anh",
+      "AU": "Úc",
+      "VN": "Việt Nam"
+    },
+    "payment": {
+      "title": "Thông tin thanh toán",
+      "backToShipping": "Quay lại giao hàng"
+    },
+    "summary": {
+      "title": "Tóm tắt đơn hàng",
+      "emptyCart": "Giỏ hàng trống",
+      "qty": "SL",
+      "subtotal": "Tạm tính",
+      "shipping": "Phí vận chuyển",
+      "free": "Miễn phí",
+      "tax": "Thuế (10%)",
+      "total": "Tổng cộng",
+      "secure": "Thanh toán an toàn qua Stripe"
+    },
+    "processing": "Đang xử lý...",
+    "continueToPayment": "Tiếp tục thanh toán",
+    "success": {
+      "title": "Cảm ơn bạn đã đặt hàng!",
+      "orderNumber": "Mã đơn hàng",
+      "processing": "Thời gian xử lý",
+      "processingDesc": "Đơn hàng sẽ được xử lý trong 2-3 ngày làm việc.",
+      "email": "Xác nhận qua email",
+      "emailDesc": "Email xác nhận đã được gửi đến địa chỉ email của bạn.",
+      "continueShopping": "Tiếp tục mua sắm",
+      "viewOrder": "Xem đơn hàng"
+    }
+  },
+  "cart": {
+    "title": "Giỏ hàng",
+    "empty": "Giỏ hàng trống",
+    "subtotal": "Tạm tính",
+    "shipping": "Phí vận chuyển",
+    "total": "Tổng cộng",
+    "checkout": "Thanh toán",
+    "continueShopping": "Tiếp tục mua sắm",
+    "remove": "Xóa"
+  },
+  "payment": {
+    "processing": "Đang xử lý...",
+    "secureMessage": "Thanh toán an toàn qua Stripe",
+    "payNow": "Thanh toán ngay"
+  },
+  "product": {
+    "notFound": "Không tìm thấy sản phẩm",
+    "loading": "Đang tải sản phẩm...",
+    "customizable": "Có thể tùy chỉnh",
+    "premiumQuality": "Chất lượng cao",
+    "freeShipping": "Giao hàng miễn phí",
+    "easyInstallation": "Lắp đặt dễ dàng",
+    "quantity": "Số lượng",
+    "relatedProducts": "Có thể bạn cũng thích",
+    "featuredProducts": "Sản phẩm nổi bật",
+    "noFeatured": "Không có sản phẩm nổi bật"
+  },
+  "designer": {
+    "title": "Tạo biển neon của bạn",
+    "total": "Tổng cộng",
+    "placeholder": "Nhập nội dung..."
+  },
+  "configurator": {
+    "mode": "Chế độ",
+    "text": "Văn bản",
+    "align": "Căn chỉnh",
+    "size": "Kích thước",
+    "originalGlow": "Gốc + Phát sáng"
+  },
+  "imageUpload": {
+    "clickToUpload": "Nhấp để tải lên",
+    "uploaded": "Đã tải lên"
   }
 }

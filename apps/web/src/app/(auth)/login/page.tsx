@@ -5,12 +5,14 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import styles from "../auth.module.scss";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "@/i18n/client";
 
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/account";
   const { login } = useAuth();
+  const { t } = useTranslation("common");
 
   const [formData, setFormData] = useState({
     email: "",
@@ -40,10 +42,10 @@ function LoginContent() {
         // Redirect to the original page or account
         router.push(redirectTo);
       } else {
-        setError("Invalid email or password");
+        setError(t("auth.login.invalidCredentials"));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      setError(err instanceof Error ? err.message : t("auth.login.failed"));
     } finally {
       setIsLoading(false);
     }
@@ -60,10 +62,8 @@ function LoginContent() {
 
           {/* Header */}
           <div className={styles.auth__header}>
-            <h1 className={styles.auth__title}>Welcome Back</h1>
-            <p className={styles.auth__subtitle}>
-              Sign in to your account to continue
-            </p>
+            <h1 className={styles.auth__title}>{t("auth.login.title")}</h1>
+            <p className={styles.auth__subtitle}>{t("auth.login.subtitle")}</p>
           </div>
 
           {/* Error */}
@@ -72,7 +72,7 @@ function LoginContent() {
           {/* Form */}
           <form className={styles.auth__form} onSubmit={handleSubmit}>
             <div className={styles.auth__field}>
-              <label htmlFor="email">Email</label>
+              <label htmlFor="email">{t("auth.login.email")}</label>
               <input
                 type="email"
                 id="email"
@@ -85,7 +85,7 @@ function LoginContent() {
             </div>
 
             <div className={styles.auth__field}>
-              <label htmlFor="password">Password</label>
+              <label htmlFor="password">{t("auth.login.password")}</label>
               <input
                 type="password"
                 id="password"
@@ -105,9 +105,11 @@ function LoginContent() {
                   checked={formData.rememberMe}
                   onChange={handleChange}
                 />
-                Remember me
+                {t("auth.login.rememberMe")}
               </label>
-              <Link href="/forgot-password">Forgot password?</Link>
+              <Link href="/forgot-password">
+                {t("auth.login.forgotPassword")}
+              </Link>
             </div>
 
             <button
@@ -115,13 +117,13 @@ function LoginContent() {
               className={`btn btn--primary btn--lg ${styles.auth__submit}`}
               disabled={isLoading}
             >
-              {isLoading ? "Signing in..." : "Sign In"}
+              {isLoading ? t("auth.login.submitting") : t("auth.login.submit")}
             </button>
           </form>
 
           {/* Divider */}
           <div className={styles.auth__divider}>
-            <span>or continue with</span>
+            <span>{t("auth.login.orContinueWith")}</span>
           </div>
 
           {/* Social Login */}
@@ -145,7 +147,8 @@ function LoginContent() {
 
           {/* Footer */}
           <div className={styles.auth__footer}>
-            Don&apos;t have an account? <Link href="/register">Sign up</Link>
+            {t("auth.login.noAccount")}{" "}
+            <Link href="/register">{t("auth.login.signUp")}</Link>
           </div>
         </div>
       </div>
@@ -154,8 +157,10 @@ function LoginContent() {
 }
 
 export default function LoginPage() {
+  const { t } = useTranslation("common");
+
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>{t("common.loading")}</div>}>
       <LoginContent />
     </Suspense>
   );

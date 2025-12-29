@@ -13,11 +13,13 @@ import {
   selectIsCartLoading,
   CartItem,
 } from "@/store";
+import { useTranslation } from "@/i18n/client";
 import { LoadingOverlay } from "@/components/ui/Loading";
 import styles from "./CartSidebar.module.scss";
 
 export default function CartSidebar() {
   const dispatch = useDispatch();
+  const { t } = useTranslation("common");
   const items = useSelector(selectCartItems);
   const total = useSelector(selectCartTotal);
   const isOpen = useSelector(selectIsCartOpen);
@@ -40,7 +42,7 @@ export default function CartSidebar() {
         {/* Header */}
         <div className={styles["cart-sidebar__header"]}>
           <h2 className={styles["cart-sidebar__title"]}>
-            Your Cart{" "}
+            {t("cart.title")}{" "}
             <span className={styles["cart-sidebar__count"]}>
               ({items.length})
             </span>
@@ -48,7 +50,7 @@ export default function CartSidebar() {
           <button
             className={styles["cart-sidebar__close"]}
             onClick={handleClose}
-            aria-label="Close cart"
+            aria-label={t("common.close")}
           >
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
@@ -63,7 +65,7 @@ export default function CartSidebar() {
 
         {/* Content */}
         <div className={styles["cart-sidebar__content"]}>
-          {isLoading && <LoadingOverlay message="Updating cart..." />}
+          {isLoading && <LoadingOverlay message={t("common.loading")} />}
           {items.length === 0 ? (
             <div className={styles["cart-sidebar__empty"]}>
               <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -74,9 +76,9 @@ export default function CartSidebar() {
                   d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
                 />
               </svg>
-              <p>Your cart is empty</p>
+              <p>{t("cart.empty")}</p>
               <button className="btn btn--primary" onClick={handleClose}>
-                Start Shopping
+                {t("cart.continueShopping")}
               </button>
             </div>
           ) : (
@@ -111,19 +113,21 @@ export default function CartSidebar() {
           <div className={styles["cart-sidebar__footer"]}>
             <div className={styles["cart-sidebar__summary"]}>
               <div className={styles["cart-sidebar__row"]}>
-                <span>Subtotal</span>
+                <span>{t("cart.subtotal")}</span>
                 <span>${total.toFixed(2)}</span>
               </div>
               <div className={styles["cart-sidebar__row"]}>
-                <span>Shipping</span>
+                <span>{t("cart.shipping")}</span>
                 <span>
-                  {shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}
+                  {shipping === 0
+                    ? t("checkout.summary.free")
+                    : `$${shipping.toFixed(2)}`}
                 </span>
               </div>
               <div
                 className={`${styles["cart-sidebar__row"]} ${styles["cart-sidebar__row--total"]}`}
               >
-                <span>Total</span>
+                <span>{t("cart.total")}</span>
                 <span>${finalTotal.toFixed(2)}</span>
               </div>
             </div>
@@ -133,7 +137,7 @@ export default function CartSidebar() {
               className={`btn btn--primary btn--lg ${styles["cart-sidebar__checkout-btn"]}`}
               onClick={handleClose}
             >
-              Checkout - ${finalTotal.toFixed(2)}
+              {t("cart.checkout")} - ${finalTotal.toFixed(2)}
             </Link>
           </div>
         )}
@@ -152,6 +156,7 @@ function CartItemCard({
   onRemove: () => void;
   onUpdateQuantity: (qty: number) => void;
 }) {
+  const { t } = useTranslation("common");
   const neonColors = ["#ff3366", "#00d4ff", "#9d4edd", "#00ff88"];
   const randomColor = neonColors[Math.floor(Math.random() * neonColors.length)];
 
@@ -198,7 +203,7 @@ function CartItemCard({
           </div>
 
           <button className={styles["cart-item__remove"]} onClick={onRemove}>
-            Remove
+            {t("cart.remove")}
           </button>
         </div>
       </div>

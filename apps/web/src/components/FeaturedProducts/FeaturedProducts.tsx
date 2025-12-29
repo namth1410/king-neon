@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import ProductCard from "@/components/ProductCard";
+import { useTranslation } from "@/i18n/client";
 import api from "@/utils/api";
 import styles from "./FeaturedProducts.module.scss";
 
@@ -20,6 +21,7 @@ interface Product {
 export default function FeaturedProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useTranslation("common");
 
   useEffect(() => {
     const fetchFeatured = async () => {
@@ -59,9 +61,11 @@ export default function FeaturedProducts() {
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <h2 className={styles.featured__title}>Featured Products</h2>
+          <h2 className={styles.featured__title}>
+            {t("product.featuredProducts")}
+          </h2>
           <Link href="/collections" className={styles.featured__link}>
-            View All
+            {t("common.viewAll")}
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
                 strokeLinecap="round"
@@ -90,7 +94,7 @@ export default function FeaturedProducts() {
             ))
           ) : (
             <div className={styles.featured__empty}>
-              <p>No featured products available</p>
+              <p>{t("product.noFeatured")}</p>
             </div>
           )}
         </div>

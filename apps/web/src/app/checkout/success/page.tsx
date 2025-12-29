@@ -3,12 +3,14 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useTranslation } from "@/i18n/client";
 import styles from "../checkout.module.scss";
 
 function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("order_id");
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
+  const { t } = useTranslation("common");
 
   useEffect(() => {
     // In production, fetch order details from API
@@ -30,16 +32,17 @@ function CheckoutSuccessContent() {
         </svg>
       </div>
 
-      <h1 className={styles.successPage__title}>Thank You for Your Order!</h1>
+      <h1 className={styles.successPage__title}>
+        {t("checkout.success.title")}
+      </h1>
 
       <p className={styles.successPage__message}>
-        Your payment was successful. We&apos;ve sent a confirmation email with
-        your order details.
+        {t("checkout.success.emailDesc")}
       </p>
 
       {orderNumber && (
         <div className={styles.successPage__orderNumber}>
-          <span>Order Number:</span>
+          <span>{t("checkout.success.orderNumber")}:</span>
           <strong>{orderNumber}</strong>
         </div>
       )}
@@ -55,8 +58,8 @@ function CheckoutSuccessContent() {
             />
           </svg>
           <div>
-            <strong>Email Confirmation</strong>
-            <p>Check your inbox for order confirmation</p>
+            <strong>{t("checkout.success.email")}</strong>
+            <p>{t("checkout.success.emailDesc")}</p>
           </div>
         </div>
 
@@ -70,36 +73,21 @@ function CheckoutSuccessContent() {
             />
           </svg>
           <div>
-            <strong>Processing Time</strong>
-            <p>Your custom neon sign will be ready in 5-7 business days</p>
-          </div>
-        </div>
-
-        <div className={styles.successPage__infoItem}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <div>
-            <strong>Questions?</strong>
-            <p>Contact us at support@kingneon.com</p>
+            <strong>{t("checkout.success.processing")}</strong>
+            <p>{t("checkout.success.processingDesc")}</p>
           </div>
         </div>
       </div>
 
       <div className={styles.successPage__actions}>
         <Link href="/account/orders" className={styles.successPage__btn}>
-          View My Orders
+          {t("checkout.success.viewOrder")}
         </Link>
         <Link
           href="/"
           className={`${styles.successPage__btn} ${styles.successPage__btnSecondary}`}
         >
-          Continue Shopping
+          {t("checkout.success.continueShopping")}
         </Link>
       </div>
     </div>
@@ -107,10 +95,12 @@ function CheckoutSuccessContent() {
 }
 
 export default function CheckoutSuccessPage() {
+  const { t } = useTranslation("common");
+
   return (
     <div className={styles.checkout}>
       <div className={styles.checkout__container}>
-        <Suspense fallback={<div>Loading order details...</div>}>
+        <Suspense fallback={<div>{t("common.loading")}</div>}>
           <CheckoutSuccessContent />
         </Suspense>
       </div>

@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "@/i18n/client";
 import styles from "./not-found.module.scss";
 
 export default function NotFound() {
   const router = useRouter();
+  const { t } = useTranslation("common");
 
   return (
     <div className={styles.container}>
@@ -17,10 +19,8 @@ export default function NotFound() {
         <h1 className={styles.errorCode}>404</h1>
 
         {/* Message */}
-        <h2 className={styles.title}>Trang không tìm thấy</h2>
-        <p className={styles.description}>
-          Trang bạn đang tìm kiếm không tồn tại trong hệ thống quản trị.
-        </p>
+        <h2 className={styles.title}>{t("notFound.title")}</h2>
+        <p className={styles.description}>{t("notFound.description")}</p>
 
         {/* Action buttons */}
         <div className={styles.actions}>
@@ -37,7 +37,7 @@ export default function NotFound() {
             >
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
-            Quay lại
+            {t("notFound.back")}
           </button>
 
           <Link href="/" className={styles.homeButton}>
@@ -56,16 +56,16 @@ export default function NotFound() {
               <rect x="14" y="14" width="7" height="7" />
               <rect x="3" y="14" width="7" height="7" />
             </svg>
-            Dashboard
+            {t("notFound.dashboard")}
           </Link>
         </div>
 
         {/* Quick links */}
         <div className={styles.quickLinks}>
-          <span>Truy cập nhanh:</span>
-          <Link href="/orders">Đơn hàng</Link>
-          <Link href="/products">Sản phẩm</Link>
-          <Link href="/customers">Khách hàng</Link>
+          <span>{t("notFound.quickAccess")}</span>
+          <Link href="/orders">{t("notFound.orders")}</Link>
+          <Link href="/products">{t("notFound.products")}</Link>
+          <Link href="/customers">{t("notFound.customers")}</Link>
         </div>
       </div>
     </div>

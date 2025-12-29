@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { selectCartItems, selectCartTotal, clearAllCart } from "@/store";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "@/i18n/client";
 import { StripeProvider } from "@/components/StripeProvider";
 import { PaymentForm } from "@/components/PaymentForm";
 import styles from "./checkout.module.scss";
@@ -26,6 +27,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 export default function CheckoutPage() {
   const dispatch = useDispatch();
   const router = useRouter();
+  const { t } = useTranslation("common");
   const { isAuthenticated, isLoading: authLoading, user } = useAuth();
   const items = useSelector(selectCartItems);
   const subtotal = useSelector(selectCartTotal);
@@ -162,21 +164,21 @@ export default function CheckoutPage() {
       <div className={styles.checkout__container}>
         {/* Header */}
         <div className={styles.checkout__header}>
-          <h1 className={styles.checkout__title}>Checkout</h1>
+          <h1 className={styles.checkout__title}>{t("checkout.title")}</h1>
           <div className={styles.checkout__steps}>
-            <span className={styles.active}>Cart</span>
+            <span className={styles.active}>{t("checkout.steps.cart")}</span>
             <span>→</span>
             <span
               className={step === "shipping" ? styles.active : styles.completed}
             >
-              Shipping
+              {t("checkout.steps.shipping")}
             </span>
             <span>→</span>
             <span className={step === "payment" ? styles.active : ""}>
-              Payment
+              {t("checkout.steps.payment")}
             </span>
             <span>→</span>
-            <span>Confirmation</span>
+            <span>{t("checkout.steps.confirmation")}</span>
           </div>
         </div>
 
@@ -210,12 +212,14 @@ export default function CheckoutPage() {
                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                       />
                     </svg>
-                    Contact Information
+                    {t("checkout.contact.title")}
                   </h2>
 
                   <div className={styles["checkout__form-grid"]}>
                     <div className={styles.checkout__field}>
-                      <label htmlFor="firstName">First Name</label>
+                      <label htmlFor="firstName">
+                        {t("checkout.contact.firstName")}
+                      </label>
                       <input
                         type="text"
                         id="firstName"
@@ -227,7 +231,9 @@ export default function CheckoutPage() {
                     </div>
 
                     <div className={styles.checkout__field}>
-                      <label htmlFor="lastName">Last Name</label>
+                      <label htmlFor="lastName">
+                        {t("checkout.contact.lastName")}
+                      </label>
                       <input
                         type="text"
                         id="lastName"
@@ -239,7 +245,9 @@ export default function CheckoutPage() {
                     </div>
 
                     <div className={styles.checkout__field}>
-                      <label htmlFor="email">Email</label>
+                      <label htmlFor="email">
+                        {t("checkout.contact.email")}
+                      </label>
                       <input
                         type="email"
                         id="email"
@@ -251,7 +259,9 @@ export default function CheckoutPage() {
                     </div>
 
                     <div className={styles.checkout__field}>
-                      <label htmlFor="phone">Phone</label>
+                      <label htmlFor="phone">
+                        {t("checkout.contact.phone")}
+                      </label>
                       <input
                         type="tel"
                         id="phone"
@@ -280,14 +290,16 @@ export default function CheckoutPage() {
                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                       />
                     </svg>
-                    Shipping Address
+                    {t("checkout.shipping.title")}
                   </h2>
 
                   <div className={styles["checkout__form-grid"]}>
                     <div
                       className={`${styles.checkout__field} ${styles["checkout__form-grid--full"]}`}
                     >
-                      <label htmlFor="address">Street Address</label>
+                      <label htmlFor="address">
+                        {t("checkout.shipping.address")}
+                      </label>
                       <input
                         type="text"
                         id="address"
@@ -299,7 +311,9 @@ export default function CheckoutPage() {
                     </div>
 
                     <div className={styles.checkout__field}>
-                      <label htmlFor="city">City</label>
+                      <label htmlFor="city">
+                        {t("checkout.shipping.city")}
+                      </label>
                       <input
                         type="text"
                         id="city"
@@ -311,7 +325,9 @@ export default function CheckoutPage() {
                     </div>
 
                     <div className={styles.checkout__field}>
-                      <label htmlFor="state">State</label>
+                      <label htmlFor="state">
+                        {t("checkout.shipping.state")}
+                      </label>
                       <input
                         type="text"
                         id="state"
@@ -323,7 +339,9 @@ export default function CheckoutPage() {
                     </div>
 
                     <div className={styles.checkout__field}>
-                      <label htmlFor="zipCode">ZIP Code</label>
+                      <label htmlFor="zipCode">
+                        {t("checkout.shipping.zipCode")}
+                      </label>
                       <input
                         type="text"
                         id="zipCode"
@@ -335,18 +353,20 @@ export default function CheckoutPage() {
                     </div>
 
                     <div className={styles.checkout__field}>
-                      <label htmlFor="country">Country</label>
+                      <label htmlFor="country">
+                        {t("checkout.shipping.country")}
+                      </label>
                       <select
                         id="country"
                         name="country"
                         value={formData.country}
                         onChange={handleChange}
                       >
-                        <option value="US">United States</option>
-                        <option value="CA">Canada</option>
-                        <option value="GB">United Kingdom</option>
-                        <option value="AU">Australia</option>
-                        <option value="VN">Vietnam</option>
+                        <option value="US">{t("checkout.countries.US")}</option>
+                        <option value="CA">{t("checkout.countries.CA")}</option>
+                        <option value="GB">{t("checkout.countries.GB")}</option>
+                        <option value="AU">{t("checkout.countries.AU")}</option>
+                        <option value="VN">{t("checkout.countries.VN")}</option>
                       </select>
                     </div>
                   </div>
@@ -357,7 +377,9 @@ export default function CheckoutPage() {
                   className={`btn btn--primary btn--lg ${styles.checkout__submit}`}
                   disabled={items.length === 0 || isCreatingOrder}
                 >
-                  {isCreatingOrder ? "Processing..." : "Continue to Payment"}
+                  {isCreatingOrder
+                    ? t("checkout.processing")
+                    : t("checkout.continueToPayment")}
                 </button>
               </form>
             )}
@@ -373,7 +395,7 @@ export default function CheckoutPage() {
                       d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
                     />
                   </svg>
-                  Payment Details
+                  {t("checkout.payment.title")}
                 </h2>
 
                 <StripeProvider clientSecret={clientSecret}>
@@ -389,7 +411,7 @@ export default function CheckoutPage() {
                   className={styles.checkout__backBtn}
                   onClick={() => setStep("shipping")}
                 >
-                  ← Back to Shipping
+                  ← {t("checkout.payment.backToShipping")}
                 </button>
               </section>
             )}
@@ -397,7 +419,9 @@ export default function CheckoutPage() {
 
           {/* Order Summary */}
           <aside className={styles.checkout__summary}>
-            <h2 className={styles["checkout__summary-title"]}>Order Summary</h2>
+            <h2 className={styles["checkout__summary-title"]}>
+              {t("checkout.summary.title")}
+            </h2>
 
             {/* Items */}
             <div className={styles.checkout__items}>
@@ -408,7 +432,7 @@ export default function CheckoutPage() {
                     textAlign: "center",
                   }}
                 >
-                  Your cart is empty
+                  {t("checkout.summary.emptyCart")}
                 </p>
               ) : (
                 items.map((item) => (
@@ -423,7 +447,7 @@ export default function CheckoutPage() {
                         {item.name}
                       </div>
                       <div className={styles["checkout__item-quantity"]}>
-                        Qty: {item.quantity}
+                        {t("checkout.summary.qty")}: {item.quantity}
                       </div>
                     </div>
                     <div className={styles["checkout__item-price"]}>
@@ -437,23 +461,25 @@ export default function CheckoutPage() {
             {/* Totals */}
             <div className={styles.checkout__totals}>
               <div className={styles.checkout__row}>
-                <span>Subtotal</span>
+                <span>{t("checkout.summary.subtotal")}</span>
                 <span>${subtotal.toFixed(2)}</span>
               </div>
               <div className={styles.checkout__row}>
-                <span>Shipping</span>
+                <span>{t("checkout.summary.shipping")}</span>
                 <span>
-                  {shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}
+                  {shipping === 0
+                    ? t("checkout.summary.free")
+                    : `$${shipping.toFixed(2)}`}
                 </span>
               </div>
               <div className={styles.checkout__row}>
-                <span>Tax (10%)</span>
+                <span>{t("checkout.summary.tax")}</span>
                 <span>${tax.toFixed(2)}</span>
               </div>
               <div
                 className={`${styles.checkout__row} ${styles["checkout__row--total"]}`}
               >
-                <span>Total</span>
+                <span>{t("checkout.summary.total")}</span>
                 <span>${total.toFixed(2)}</span>
               </div>
             </div>
@@ -467,7 +493,7 @@ export default function CheckoutPage() {
                   d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                 />
               </svg>
-              Secure checkout powered by Stripe
+              {t("checkout.summary.secure")}
             </div>
           </aside>
         </div>
