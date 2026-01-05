@@ -247,6 +247,66 @@
     }
   }
 
+  // Map Section
+  &__map {
+    @include container;
+    margin-bottom: $spacing-12;
+
+    &-wrapper {
+      height: 450px;
+      border-radius: $radius-2xl;
+      overflow: hidden;
+      border: 1px solid rgba($text-light, 0.1);
+      background: rgba($bg-dark, 0.5);
+
+      @include tablet {
+        height: 500px;
+      }
+    }
+
+    &-marker {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, $color-primary, $neon-pink);
+      border-radius: $radius-full;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: $text-light;
+      box-shadow: 0 0 20px rgba($color-primary, 0.5);
+      border: 2px solid rgba($text-light, 0.3);
+      transition:
+        transform $transition-base,
+        box-shadow $transition-base;
+      cursor: pointer;
+
+      &:hover {
+        transform: scale(1.15);
+        box-shadow: 0 0 30px rgba($color-primary, 0.7);
+      }
+    }
+
+    &-popup {
+      padding: $spacing-1;
+      min-width: 120px;
+      text-align: center;
+
+      h4 {
+        font-family: $font-display;
+        font-size: $font-size-base;
+        font-weight: 700;
+        margin-bottom: $spacing-1;
+        color: inherit;
+      }
+
+      p {
+        font-size: $font-size-xs;
+        opacity: 0.8;
+        margin: 0;
+      }
+    }
+  }
+
   // CTA Section
   &__cta {
     padding: $spacing-24 $spacing-4;

@@ -22,6 +22,11 @@ interface NeonCanvasProps {
   glowSpread?: number; // 0.5 to 3.0
   width?: number;
   height?: number;
+  // New props for position and scale
+  textPosition?: { x: number; y: number }; // 0-1 normalized position
+  textScale?: number; // 0.5 to 2.0 scaling factor
+  onPositionChange?: (pos: { x: number; y: number }) => void;
+  onScaleChange?: (scale: number) => void;
 }
 
 export interface NeonCanvasRef {
@@ -43,6 +48,10 @@ const NeonCanvas = forwardRef<NeonCanvasRef, NeonCanvasProps>(
       glowSpread = 1,
       width = 600,
       height = 300,
+      textPosition = { x: 0.5, y: 0.5 },
+      textScale = 1,
+      onPositionChange,
+      onScaleChange,
     },
     ref
   ) => {
@@ -50,6 +59,11 @@ const NeonCanvas = forwardRef<NeonCanvasRef, NeonCanvasProps>(
     const animationRef = useRef<number | undefined>(undefined);
     const glowPhaseRef = useRef(0);
     const [bgImage, setBgImage] = useState<HTMLImageElement | null>(null);
+
+    // Drag state
+    const [isDragging, setIsDragging] = useState(false);
+    const dragStartRef = useRef({ x: 0, y: 0 });
+    const positionStartRef = useRef({ x: 0.5, y: 0.5 });
 
     // Load background image when URL changes
     useEffect(() => {
@@ -74,6 +88,89 @@ const NeonCanvas = forwardRef<NeonCanvasRef, NeonCanvasProps>(
         b: parseInt(result[3], 16),
       };
     };
+
+    // Mouse event handlers for drag
+    const handleMouseDown = useCallback(
+      (e: React.MouseEvent<HTMLCanvasElement>) => {
+        e.preventDefault();
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const rect = canvas.getBoundingClientRect();
+        dragStartRef.current = {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+        };
+        positionStartRef.current = { ...textPosition };
+        setIsDragging(true);
+      },
+      [textPosition]
+    );
+
+    const handleMouseMove = useCallback(
+      (e: React.MouseEvent<HTMLCanvasElement>) => {
+        if (!isDragging) return;
+
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const currentX = e.clientX - rect.left;
+        const currentY = e.clientY - rect.top;
+
+        const deltaX = (currentX - dragStartRef.current.x) / rect.width;
+        const deltaY = (currentY - dragStartRef.current.y) / rect.height;
+
+        // Calculate new position with constraints (0.1 to 0.9 to keep text visible)
+        const newX = Math.max(
+          0.1,
+          Math.min(0.9, positionStartRef.current.x + deltaX)
+        );
+        const newY = Math.max(
+          0.1,
+          Math.min(0.9, positionStartRef.current.y + deltaY)
+        );
+
+        onPositionChange?.({ x: newX, y: newY });
+      },
+      [isDragging, onPositionChange]
+    );
+
+    const handleMouseUp = useCallback(() => {
+      setIsDragging(false);
+    }, []);
+
+    const handleMouseLeave = useCallback(() => {
+      if (isDragging) {
+        setIsDragging(false);
+      }
+    }, [isDragging]);
+
+    // Mouse wheel handler for zoom - using native listener to prevent page scroll
+    useEffect(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      const handleWheel = (e: WheelEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Determine zoom direction
+        const zoomDelta = e.deltaY > 0 ? -0.1 : 0.1;
+
+        // Calculate new scale with constraints (0.5 to 2.0)
+        const newScale = Math.max(0.5, Math.min(2.0, textScale + zoomDelta));
+
+        onScaleChange?.(newScale);
+      };
+
+      // Add listener with passive: false to allow preventDefault
+      canvas.addEventListener("wheel", handleWheel, { passive: false });
+
+      return () => {
+        canvas.removeEventListener("wheel", handleWheel);
+      };
+    }, [textScale, onScaleChange]);
 
     const drawNeon = useCallback(() => {
       const canvas = canvasRef.current;
@@ -132,13 +229,13 @@ const NeonCanvas = forwardRef<NeonCanvasRef, NeonCanvasProps>(
         lines.push("Your Text");
       }
 
-      // Calculate font size based on canvas and text length
+      // Calculate font size based on canvas and text length, then apply scale
       const maxLineLength = Math.max(...lines.map((l) => l.length), 1);
       const baseFontSize = Math.min(
         ((displayWidth * 0.8) / maxLineLength) * 1.5,
         displayHeight / (lines.length + 1)
       );
-      const fontSize = Math.max(24, Math.min(baseFontSize, 80));
+      const fontSize = Math.max(24, Math.min(baseFontSize, 80)) * textScale;
 
       ctx.font = `bold ${fontSize}px ${fontFamily}`;
       ctx.textAlign = "center";
@@ -151,8 +248,9 @@ const NeonCanvas = forwardRef<NeonCanvasRef, NeonCanvasProps>(
         ...lines.map((line) => ctx.measureText(line).width)
       );
 
-      const centerX = displayWidth / 2;
-      const centerY = displayHeight / 2;
+      // Use textPosition instead of fixed center
+      const textX = displayWidth * textPosition.x;
+      const textY = displayHeight * textPosition.y;
       const padding = 30;
 
       // Draw backboard
@@ -175,49 +273,34 @@ const NeonCanvas = forwardRef<NeonCanvasRef, NeonCanvasProps>(
           // Rounded rectangle
           const radius = 12;
           ctx.beginPath();
-          ctx.moveTo(
-            centerX - rectWidth / 2 + radius,
-            centerY - rectHeight / 2
-          );
-          ctx.lineTo(
-            centerX + rectWidth / 2 - radius,
-            centerY - rectHeight / 2
-          );
+          ctx.moveTo(textX - rectWidth / 2 + radius, textY - rectHeight / 2);
+          ctx.lineTo(textX + rectWidth / 2 - radius, textY - rectHeight / 2);
           ctx.quadraticCurveTo(
-            centerX + rectWidth / 2,
-            centerY - rectHeight / 2,
-            centerX + rectWidth / 2,
-            centerY - rectHeight / 2 + radius
+            textX + rectWidth / 2,
+            textY - rectHeight / 2,
+            textX + rectWidth / 2,
+            textY - rectHeight / 2 + radius
           );
-          ctx.lineTo(
-            centerX + rectWidth / 2,
-            centerY + rectHeight / 2 - radius
-          );
+          ctx.lineTo(textX + rectWidth / 2, textY + rectHeight / 2 - radius);
           ctx.quadraticCurveTo(
-            centerX + rectWidth / 2,
-            centerY + rectHeight / 2,
-            centerX + rectWidth / 2 - radius,
-            centerY + rectHeight / 2
+            textX + rectWidth / 2,
+            textY + rectHeight / 2,
+            textX + rectWidth / 2 - radius,
+            textY + rectHeight / 2
           );
-          ctx.lineTo(
-            centerX - rectWidth / 2 + radius,
-            centerY + rectHeight / 2
-          );
+          ctx.lineTo(textX - rectWidth / 2 + radius, textY + rectHeight / 2);
           ctx.quadraticCurveTo(
-            centerX - rectWidth / 2,
-            centerY + rectHeight / 2,
-            centerX - rectWidth / 2,
-            centerY + rectHeight / 2 - radius
+            textX - rectWidth / 2,
+            textY + rectHeight / 2,
+            textX - rectWidth / 2,
+            textY + rectHeight / 2 - radius
           );
-          ctx.lineTo(
-            centerX - rectWidth / 2,
-            centerY - rectHeight / 2 + radius
-          );
+          ctx.lineTo(textX - rectWidth / 2, textY - rectHeight / 2 + radius);
           ctx.quadraticCurveTo(
-            centerX - rectWidth / 2,
-            centerY - rectHeight / 2,
-            centerX - rectWidth / 2 + radius,
-            centerY - rectHeight / 2
+            textX - rectWidth / 2,
+            textY - rectHeight / 2,
+            textX - rectWidth / 2 + radius,
+            textY - rectHeight / 2
           );
           ctx.closePath();
           ctx.fill();
@@ -284,7 +367,7 @@ const NeonCanvas = forwardRef<NeonCanvasRef, NeonCanvasProps>(
 
       // Draw neon text with multiple glow layers
       lines.forEach((line, index) => {
-        const y = centerY - textHeight / 2 + (index + 0.5) * lineHeight;
+        const y = textY - textHeight / 2 + (index + 0.5) * lineHeight;
 
         // Enhanced glow when enabled (stronger effect for backgrounds)
         const glowLayers = enhancedGlow
@@ -339,15 +422,15 @@ const NeonCanvas = forwardRef<NeonCanvasRef, NeonCanvasProps>(
             ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`;
             ctx.lineWidth = 6;
             ctx.lineJoin = "round";
-            ctx.strokeText(line, centerX, y);
+            ctx.strokeText(line, textX, y);
           }
 
-          ctx.fillText(line, centerX, y);
+          ctx.fillText(line, textX, y);
 
           // Second pass for intensity
           if (enhancedGlow) {
-            ctx.fillText(line, centerX, y);
-            if (layer.blur > 60) ctx.fillText(line, centerX, y);
+            ctx.fillText(line, textX, y);
+            if (layer.blur > 60) ctx.fillText(line, textX, y);
           }
           ctx.restore();
         });
@@ -361,25 +444,29 @@ const NeonCanvas = forwardRef<NeonCanvasRef, NeonCanvasProps>(
         ctx.lineWidth = 4; // Thicker white core tube
         ctx.lineJoin = "round";
 
-        ctx.strokeText(line, centerX, y); // Solid tube stroke
-        ctx.fillText(line, centerX, y);
+        ctx.strokeText(line, textX, y); // Solid tube stroke
+        ctx.fillText(line, textX, y);
 
         // Second hot white core for extra brightness in enhanced mode
         if (enhancedGlow) {
           ctx.shadowBlur = 4;
-          ctx.fillText(line, centerX, y);
+          ctx.fillText(line, textX, y);
         }
         ctx.restore();
       });
 
-      // Draw dimension indicator
+      // Draw dimension indicator and scale info
       ctx.save();
       ctx.font = "12px Inter, sans-serif";
       ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
       ctx.textAlign = "right";
       ctx.textBaseline = "bottom";
-      const dimText = `${Math.round(maxWidth)}px × ${Math.round(textHeight)}px`;
+      const dimText = `${Math.round(maxWidth)}px × ${Math.round(textHeight)}px | Scale: ${textScale.toFixed(1)}x`;
       ctx.fillText(dimText, displayWidth - 10, displayHeight - 10);
+
+      // Draw drag hint
+      ctx.textAlign = "left";
+      ctx.fillText("Drag to move • Scroll to zoom", 10, displayHeight - 10);
       ctx.restore();
     }, [
       text,
@@ -394,6 +481,8 @@ const NeonCanvas = forwardRef<NeonCanvasRef, NeonCanvasProps>(
       glowSpread,
       width,
       height,
+      textPosition,
+      textScale,
     ]);
 
     // Animation loop
@@ -433,11 +522,16 @@ const NeonCanvas = forwardRef<NeonCanvasRef, NeonCanvasProps>(
     return (
       <canvas
         ref={canvasRef}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
         style={{
           width: "100%",
           height: "auto",
           aspectRatio: `${width} / ${height}`,
           borderRadius: "12px",
+          cursor: isDragging ? "grabbing" : "grab",
         }}
       />
     );

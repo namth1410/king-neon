@@ -3,6 +3,13 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Compass, MapPin, Globe, Award, Users, PenTool } from "lucide-react";
+import {
+  Map,
+  MapControls,
+  MapMarker,
+  MarkerContent,
+  MarkerPopup,
+} from "@/components/ui/map";
 import styles from "./about.module.scss";
 
 const stats = [
@@ -13,12 +20,42 @@ const stats = [
 ];
 
 const locations = [
-  { city: "Central Coast", role: "Global Headquarters", icon: Globe },
-  { city: "Las Vegas", role: "Sales & Support", icon: MapPin },
-  { city: "Dallas", role: "Manufacturing", icon: PenTool },
-  { city: "London", role: "Sales & Support", icon: Compass },
-  { city: "UAE", role: "Sales Hub", icon: Award },
-  { city: "Shenzhen", role: "International Mfg", icon: Users },
+  {
+    city: "Central Coast",
+    role: "Global Headquarters",
+    icon: Globe,
+    lat: -33.4269,
+    lng: 151.3418,
+  },
+  {
+    city: "Las Vegas",
+    role: "Sales & Support",
+    icon: MapPin,
+    lat: 36.1699,
+    lng: -115.1398,
+  },
+  {
+    city: "Dallas",
+    role: "Manufacturing",
+    icon: PenTool,
+    lat: 32.7767,
+    lng: -96.797,
+  },
+  {
+    city: "London",
+    role: "Sales & Support",
+    icon: Compass,
+    lat: 51.5074,
+    lng: -0.1278,
+  },
+  { city: "UAE", role: "Sales Hub", icon: Award, lat: 25.2048, lng: 55.2708 },
+  {
+    city: "Shenzhen",
+    role: "International Mfg",
+    icon: Users,
+    lat: 22.5431,
+    lng: 114.0579,
+  },
 ];
 
 export default function AboutClient() {
@@ -76,8 +113,8 @@ export default function AboutClient() {
           >
             <h2>Our Journey</h2>
             <p>
-              Kings of Neon started mid 2019 with founder Stephen Pastor’s dream
-              to inspire and create amazing neon signs and even better
+              Kings of Neon started mid 2019 with founder Stephen Pastor&apos;s
+              dream to inspire and create amazing neon signs and even better
               relationships throughout the world.
             </p>
             <p>
@@ -128,6 +165,35 @@ export default function AboutClient() {
           </motion.h2>
           <p>Global presence for local support</p>
         </div>
+
+        {/* Interactive Map */}
+        <motion.div
+          className={styles["about__map"]}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <div className={styles["about__map-wrapper"]}>
+            <Map center={[30, 20]} zoom={1.5}>
+              <MapControls showZoom showFullscreen />
+              {locations.map((loc, index) => (
+                <MapMarker key={index} longitude={loc.lng} latitude={loc.lat}>
+                  <MarkerContent>
+                    <div className={styles["about__map-marker"]}>
+                      <loc.icon size={16} />
+                    </div>
+                  </MarkerContent>
+                  <MarkerPopup>
+                    <div className={styles["about__map-popup"]}>
+                      <h4>{loc.city}</h4>
+                      <p>{loc.role}</p>
+                    </div>
+                  </MarkerPopup>
+                </MapMarker>
+              ))}
+            </Map>
+          </div>
+        </motion.div>
 
         <div className={styles["about__locations-grid"]}>
           {locations.map((loc, index) => (

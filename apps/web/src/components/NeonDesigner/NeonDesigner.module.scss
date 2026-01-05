@@ -152,6 +152,25 @@
       box-shadow: 0 0 10px rgba($color-primary, 0.4);
       transform: scale(1.05);
     }
+
+    // Upload button variant
+    &--upload {
+      background: linear-gradient(
+        135deg,
+        rgba($color-primary, 0.2) 0%,
+        rgba($color-secondary, 0.2) 100%
+      );
+      border-style: dashed;
+      font-size: 18px;
+
+      &:hover {
+        background: linear-gradient(
+          135deg,
+          rgba($color-primary, 0.3) 0%,
+          rgba($color-secondary, 0.3) 100%
+        );
+      }
+    }
   }
 
   // Tools

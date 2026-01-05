@@ -15,6 +15,7 @@ const navLinks = [
   { href: "/", labelKey: "nav.home" },
   { href: "/collections", labelKey: "nav.collections" },
   { href: "/create", labelKey: "nav.create" },
+  { href: "/create-v2", labelKey: "nav.createV2" },
   { href: "/quote", labelKey: "nav.quote" },
   { href: "/about", labelKey: "nav.about" },
 ];

@@ -352,6 +352,16 @@ export default function NeonDesigner() {
   const [neonGlowEnabled, setNeonGlowEnabled] = useState(false);
   const [glowOpacity, setGlowOpacity] = useState(1);
   const [glowSpread, setGlowSpread] = useState(1);
+  const [textPosition, setTextPosition] = useState({ x: 0.5, y: 0.5 });
+  const [textScale, setTextScale] = useState(1);
+
+  // Custom background upload state
+  const [customBgUrl, setCustomBgUrl] = useState<string | null>(null);
+  const [customBgDimensions, setCustomBgDimensions] = useState<{
+    w: number;
+    h: number;
+  } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [design, setDesign] = useState<DesignState>({
     text: "Your Text",
@@ -574,15 +584,64 @@ export default function NeonDesigner() {
     return completed;
   }, [design]);
 
-  // Compute background image URL
+  // Compute background image URL (custom or preset)
   const selectedBgUrl = useMemo(() => {
+    // Custom background takes priority
+    if (customBgUrl) return customBgUrl;
+
     if (!selectedBgId) return undefined;
     const bg = previewBackgrounds.find((b) => b.id === selectedBgId);
     if (!bg) return undefined;
     const minioUrl =
       process.env.NEXT_PUBLIC_MINIO_URL || "http://localhost:9002";
     return `${minioUrl}/king-neon/${bg.imageKey}`;
-  }, [selectedBgId, previewBackgrounds]);
+  }, [selectedBgId, previewBackgrounds, customBgUrl]);
+
+  // Calculate canvas dimensions based on custom background or default
+  const canvasDimensions = useMemo(() => {
+    if (customBgDimensions) {
+      const maxWidth = 600;
+      const aspectRatio = customBgDimensions.h / customBgDimensions.w;
+      return {
+        width: maxWidth,
+        height: Math.round(maxWidth * aspectRatio),
+      };
+    }
+    return { width: 600, height: 300 };
+  }, [customBgDimensions]);
+
+  // Handle custom background file upload
+  const handleFileUpload = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      // Revoke previous URL to avoid memory leaks
+      if (customBgUrl) {
+        URL.revokeObjectURL(customBgUrl);
+      }
+
+      const url = URL.createObjectURL(file);
+      const img = new window.Image();
+      img.onload = () => {
+        setCustomBgDimensions({ w: img.width, h: img.height });
+        setCustomBgUrl(url);
+        setSelectedBgId(null); // Deselect preset backgrounds
+        setNeonGlowEnabled(true); // Auto-enable glow
+      };
+      img.src = url;
+    },
+    [customBgUrl]
+  );
+
+  // Clear custom background
+  const handleClearCustomBg = useCallback(() => {
+    if (customBgUrl) {
+      URL.revokeObjectURL(customBgUrl);
+    }
+    setCustomBgUrl(null);
+    setCustomBgDimensions(null);
+  }, [customBgUrl]);
 
   // Download design as PNG
   const handleDownload = useCallback(() => {
@@ -690,6 +749,12 @@ export default function NeonDesigner() {
                 rainbowMode={selectedColor?.hexCode === "rainbow"}
                 glowOpacity={glowOpacity}
                 glowSpread={glowSpread}
+                width={canvasDimensions.width}
+                height={canvasDimensions.height}
+                textPosition={textPosition}
+                textScale={textScale}
+                onPositionChange={setTextPosition}
+                onScaleChange={setTextScale}
               />
             </div>
 
@@ -699,15 +764,46 @@ export default function NeonDesigner() {
                 {/* Left: Backgrounds */}
                 <div className={styles["designer__toolbar-section"]}>
                   <div className={styles["designer__bg-list"]}>
+                    {/* Hidden file input */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      style={{ display: "none" }}
+                    />
+
+                    {/* No background button */}
                     <button
                       className={`${styles["designer__bg-btn"]} ${
-                        !selectedBgId ? styles.active : ""
+                        !selectedBgId && !customBgUrl ? styles.active : ""
                       }`}
-                      onClick={() => setSelectedBgId(null)}
+                      onClick={() => {
+                        setSelectedBgId(null);
+                        handleClearCustomBg();
+                      }}
                       title="No background"
                     >
                       ✕
                     </button>
+
+                    {/* Upload button */}
+                    <button
+                      className={`${styles["designer__bg-btn"]} ${styles["designer__bg-btn--upload"]} ${
+                        customBgUrl ? styles.active : ""
+                      }`}
+                      onClick={() => fileInputRef.current?.click()}
+                      title="Upload your image"
+                      style={
+                        customBgUrl
+                          ? { backgroundImage: `url(${customBgUrl})` }
+                          : undefined
+                      }
+                    >
+                      {!customBgUrl && "📷"}
+                    </button>
+
+                    {/* Preset backgrounds */}
                     {previewBackgrounds.map((bg) => {
                       const minioUrl =
                         process.env.NEXT_PUBLIC_MINIO_URL ||
@@ -717,9 +813,14 @@ export default function NeonDesigner() {
                         <button
                           key={bg.id}
                           className={`${styles["designer__bg-btn"]} ${
-                            selectedBgId === bg.id ? styles.active : ""
+                            selectedBgId === bg.id && !customBgUrl
+                              ? styles.active
+                              : ""
                           }`}
-                          onClick={() => setSelectedBgId(bg.id)}
+                          onClick={() => {
+                            setSelectedBgId(bg.id);
+                            handleClearCustomBg(); // Clear custom when selecting preset
+                          }}
                           title={bg.name}
                           style={{ backgroundImage: `url(${imgUrl})` }}
                         />
